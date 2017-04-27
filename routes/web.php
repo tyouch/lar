@@ -11,15 +11,16 @@
 |
 */
 
-Route::get('/', function () {
+/*Route::get('/', function () {
     //return view('welcome');
     return view('index', [
         'title'=>'index'
     ]);
-});
+});*/
 
 Route::get('test', function () {
     return view('test');
 });
 
+Route::get('/', 'IndexController@index');
 Route::get('user', 'UserController@index');
