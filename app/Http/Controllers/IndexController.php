@@ -58,5 +58,9 @@ class IndexController extends Controller
         ]);
     }
 
+    public function test()
+    {
+        var_dump('index-test');
+    }
 
 }

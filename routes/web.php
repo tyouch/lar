@@ -18,9 +18,21 @@
     ]);
 });*/
 
-Route::get('test', function () {
-    return view('test');
-});
+Route::get('test/{age?}', function ($age = 0) {
+    return view('test', [
+        'age'   => $age
+    ]);
+})->middleware('mycheck');
 
 Route::get('/', 'IndexController@index');
+Route::resource('hosts', 'HostsController');
 Route::get('user', 'UserController@index');
+Route::resource('photo', 'PhotoController');
+/*, [
+    'only' => [
+        'index', 'show', 'create', 'update'
+    ],
+    'names' => [
+        'create' => 'photo.build'
+    ]
+]*/

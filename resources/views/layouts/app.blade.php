@@ -11,12 +11,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title')</title>
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="<?= url('css/style.css') ?>">
     <style>
-        body{margin-top: 60px;}
         .header-search{float: right; margin: 8px 0;}
         .header-search input{background: #eee;}
         a:hover {text-decoration: none; background-color: #eee;}
@@ -44,9 +45,9 @@
 
             <div id="tyouNavbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a class="" href="<?= url('user') ?>"> 资产监控</a></li>
+                    <li><a class="" href="<?= url('hosts') ?>"> 资产监控</a></li>
                     <li><a class="" href="<?= url('test') ?>"> 漏洞监控</a></li>
-                    <li><a class="" href="<?= url('/') ?>"> 入侵检测</a></li>
+                    <li><a class="" href="<?= url('photo') ?>"> 入侵检测</a></li>
 
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true"> 威胁智能</a>
@@ -63,7 +64,7 @@
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true"> 配置管理</a>
                         <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" style="left: -86%;">
                             <li><a class="" href="<?= url('/') ?>"> 操作审计</a></li>
-                            <li><a class="" href="<?= url('/') ?>"> 权限管理</a></li>
+                            <li><a class="" href="<?= url('user') ?>"> 权限管理</a></li>
                         </ul>
                     </li>
                 </ul>
