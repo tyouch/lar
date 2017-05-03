@@ -18,11 +18,16 @@
     ]);
 });*/
 
-Route::get('test/{age?}', function ($age = 0) {
+/*Route::get('test/{age?}', function ($age = 0) {
     return view('test', [
         'age'   => $age
     ]);
-})->middleware('mycheck');
+})->middleware('mycheck');*/
+
+
+Route::get('test/index2', 'TestController@index2');
+Route::resource('test', 'TestController');
+
 
 Route::get('/', 'IndexController@index');
 Route::resource('hosts', 'HostsController');
