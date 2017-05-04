@@ -18,6 +18,7 @@ class HttpRequest{
         return !(strpos($string, $find) === FALSE);
     }
 
+
     public function ihttp_response_parse($data, $chunked = false) {
 
         $rlt = array();
@@ -165,7 +166,7 @@ class HttpRequest{
             $error = curl_error($ch);
             curl_close($ch);
             if($errno || empty($data)) {
-                return error(1, $error);
+                return $this->error(1, $error);
             } else {
                 //var_dump($data);exit;
                 return $this->ihttp_response_parse($data);
@@ -205,7 +206,7 @@ class HttpRequest{
         stream_set_blocking($fp, true);
         stream_set_timeout($fp, $timeout);
         if (!$fp) {
-            return error(1, $error);
+            return $this->error(1, $error);
         } else {
             fwrite($fp, $fdata);
             $content = '';
@@ -214,5 +215,13 @@ class HttpRequest{
             fclose($fp);
             return ihttp_response_parse($content, true);
         }
+    }
+
+
+    public function error($code, $msg = '') {
+        return array(
+            'errno' => $code,
+            'message' => $msg,
+        );
     }
 }
