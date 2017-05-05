@@ -107,7 +107,7 @@ class HXBankConfig
      * 接收用户请求
      * @param array $data
      */
-    public function iRequest($data = [])
+    public function request($data = [])
     {
         // -4- 组织最终报文
         $this->buildMsg($data);
@@ -117,24 +117,11 @@ class HXBankConfig
         $res = (new HttpRequest())->ihttp_request($this->url, $this->message);
         //var_dump($res);exit;
 
-        // -6- 验签
+        // -6- 验签 -7- 解密
         //var_dump($this->getResStatus($res['content']));exit;
-        $this->checkAndDecrypt();
+        $this->checkAndDecrypt(); // test
         exit;
-        //$resSign = $this->getResSign($res['content']);
-        //$md5 = (new RSA())->RSADecode($resSign);
-        //var_dump($md5);exit;
 
-        // -7- 解密
-        //$plaintext =
-
-        // test
-        /*echo '明文：'.htmlspecialchars($xml);
-        var_dump(
-            '密文：'.$cipher,
-            '签名：'.$sign,
-            '报文：'.$this->message
-        );exit;*/
     }
 
     /**

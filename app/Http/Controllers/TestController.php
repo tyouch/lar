@@ -24,7 +24,7 @@ class TestController extends Controller
             'ACNO'      => '13662222344',
 
         ];
-        echo htmlspecialchars($a->iRequest($data));
+        echo htmlspecialchars($a->request($data));
         //echo htmlspecialchars($a->getSMSVerificationCode('OGW00041','1', '001', 0, 123));
     }
 

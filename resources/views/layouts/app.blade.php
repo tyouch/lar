@@ -45,7 +45,7 @@
 
             <div id="tyouNavbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a class="" href="<?= url('hosts') ?>"> 资产监控</a></li>
+                    <li><a class="" href="<?= url('hosts/1') ?>"> 资产监控</a></li>
                     <li><a class="" href="<?= url('test') ?>"> 漏洞监控</a></li>
                     <li><a class="" href="<?= url('photo') ?>"> 入侵检测</a></li>
 

@@ -30,7 +30,9 @@ Route::resource('test', 'TestController');
 
 
 Route::get('/', 'IndexController@index');
-Route::resource('hosts', 'HostsController');
+Route::get('hosts/{p}', 'HostsController@index');
+
+
 Route::get('user', 'UserController@index');
 Route::resource('photo', 'PhotoController');
 /*, [

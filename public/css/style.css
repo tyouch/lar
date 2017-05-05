@@ -3,7 +3,7 @@
     src: url(fzltxhk.ttf); !*这里是字体文件路径*!  fzltxhk
 }*/
 
-body {padding: 60px 0 60px 0; font: 14px "微软雅黑"; color: white; background-color: #404a59;/*62.5% #f0f0f0 font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;*/}
+body {padding: 60px 0 80px 0; font: 14px "微软雅黑"; color: white; background-color: #404a59;/*62.5% #f0f0f0 font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;*/}
 .navbar-inverse {opacity: .9;}
 
 .col-xs-12{padding: 5px;}
