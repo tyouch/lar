@@ -9,21 +9,47 @@ use Illuminate\Support\Facades\Input;
 
 class HostsController extends Controller
 {
-    public function index(Request $request, $p = 1)
+    public function index(Request $request)
     {
-        //var_dump(Input::get('p'));exit;
+        //var_dump($p);exit;
+        /*$filters_arr = [
+            'city'  => '北京'
+        ];*/
+        $qs = explode('/', $request->path());
+        $p = $qs[1];
         $ps = 2;
         $pb = ($p-1)*$ps;
-        $hosts = DB::connection('alienvault')
+
+        if(!empty($qs[2])) {
+            $filter = "host_detail.city like '%".urldecode($qs[2])."%'";
+        }else{
+            $filter = 1;
+        }
+
+        //var_dump($qs);exit;
+        $hosts = DB::connection('alienvault')->table('host')
+            ->select(DB::raw('hex(host.id) as id, host_detail.*'))
+            ->leftJoin('host_detail', DB::raw('hex(host.id)'), '=', 'host_detail.host_id')
+            //->where(DB::raw($filter))
+            ->offset($pb)
+            ->limit($ps)
+            ->orderBy('host_detail.createtime')
+            ->get();
+
+        //$i = 0;
+        //foreach ($hosts as $host) {
+            //$hosts[$i++]->ip = @inet_ntop($host->ip);
+        //}
             /*->table('host_detail')
             //->paginate($ps);
-            ->get()->toArray();*/
+            ->get()->toArray();
             ->select('
                 select hex(h.id) id, d.*  
-                from host h left join host_detail d on hex(h.id)=d.host_id limit :b, :e', [
-                'b'=>$pb,
-                'e'=>$ps
-            ]);
+                from host h left join host_detail d on hex(h.id)=d.host_id 
+                limit :b, :e', [
+                    'b'         => $pb,
+                    'e'         => $ps
+            ]);*/
         $hosts = json_decode(json_encode($hosts), true);
         //var_dump($hosts); exit;
 

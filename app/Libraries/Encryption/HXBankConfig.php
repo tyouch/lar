@@ -19,16 +19,13 @@ class HXBankConfig
     protected $url;
     protected $TRANSCODE;
     protected $MERCHANTID;
-    protected $APPID;
 
     public function __construct()
     {
-        $this->Des3Key  = 'A1B2C3D4E5F6G7H8I9J0K1L2';
-        $this->url      = 'http://183.63.131.106:40011/extService/ghbExtService.do';
-        $this->message  = '';
-        $this->TRANSCODE  = 'OGW00042';
-        $this->MERCHANTID  = '7654321';
-        $this->APPID  = 'PC';
+        $this->Des3Key      = config('hxbank.DES3KEY'); // 'A1B2C3D4E5F6G7H8I9J0K1L2';
+        $this->url          = config('hxbank.HTTP_REQUEST_URL'); //'http://183.63.131.106:40011/extService/ghbExtService.do';
+        $this->message      = '';
+        $this->MERCHANTID   = config('hxbank.MERCHANTID'); // '7654321';
     }
 
 
@@ -39,18 +36,18 @@ class HXBankConfig
      */
     public function buildXmlPara($data = [])
     {
-        $xml =
-            '<TRANSCODE>'.$this->TRANSCODE.'</TRANSCODE>'.
-            '<MERCHANTID>'.$this->MERCHANTID.'</MERCHANTID>'.
-            '<APPID>'.$this->APPID.'</APPID>';
-        /*$xml =
-            '<TRANSCODE>'.config('test.TRANSCODE').'</TRANSCODE>'.
-            '<MERCHANTID>'.$this->MERCHANTID.'</MERCHANTID>'.
-            '<APPID>'.$this->APPID.'</APPID>';*/
+        //$xml = '<MERCHANTID>'.$this->MERCHANTID.'</MERCHANTID>';
+        //var_dump($data);exit;
+
+        $xml = '';
 
         foreach ($data as $k=>$v)
         {
-            $xml .= '<'.$k.'>'.$v.'</'.$k.'>';
+            if(is_array($v)) {
+                $xml .= '<'.$k.'>'.$this->buildXmlPara($v).'</'.$k.'>';
+            } else {
+                $xml .= '<'.$k.'>'.$v.'</'.$k.'>';
+            }
         }
 
         return $xml;
@@ -70,7 +67,7 @@ class HXBankConfig
                     '<encryptData></encryptData>'.
                 '</header>'.
                 '<body>'.
-                    '<TRANSCODE>OGW00019</TRANSCODE>'.
+                    '<TRANSCODE>'.$this->TRANSCODE.'</TRANSCODE>'.
                     '<XMLPARA>'.$ciphertext.
                     '</XMLPARA>'.
                 '</body>'.
@@ -110,16 +107,20 @@ class HXBankConfig
     public function request($data = [])
     {
         // -4- 组织最终报文
+        //$data['MERCHANTID'] = $this->MERCHANTID;
+        $this->TRANSCODE = $data['TRANSCODE'];
+        unset($data['TRANSCODE']);
+
         $this->buildMsg($data);
         //var_dump($this->url, $this->message);exit;
 
         // -5- http request
-        $res = (new HttpRequest())->ihttp_request($this->url, $this->message);
+        //$res = (new HttpRequest())->ihttp_request($this->url, $this->message);
         //var_dump($res);exit;
 
         // -6- 验签 -7- 解密
         //var_dump($this->getResStatus($res['content']));exit;
-        $this->checkAndDecrypt(); // test
+        $this->checkAndDecrypt($this->message); // temp test $this->message
         exit;
 
     }
@@ -131,7 +132,7 @@ class HXBankConfig
     public function checkAndDecrypt($data = [])
     {
         // test data
-        $data = '001X11          000002567E8BA252167EDDA8541A2DED4A6500DBD79E44736FA60892C3E916DD507BA6A6E47CE37BC70B7242D8F3DEA1218270B22A85D1DD1AB26F00215E390AA23B261BF55203EBB63CE0B1096D92FACD60967CF587A96F25417453FDC23AF7A4AB6515E9DA83AC27B8FEC4F2B6F96C908A5305889B25F327173B6B8C5950DC774DD69D<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P001</channelCode><channelFlow>OG012016045333cg1AlM</channelFlow><channelDate>20170504</channelDate><channelTime>115509</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00019</TRANSCODE><XMLPARA>a6U4P6ZdcJRp66jZJliS5Ve2CEK2qpUeHYnSlt2kIXxQcCEZqFHpqO8QhXuL+sPAT8FdKwRRT8LroUQlbw9Ju+Bub/6/Ln3KNWBwdu9+LOKIg70kpgPLzBuTiFYaAFiA2fmE1RXZKdh+jjHN976pemX8k7RXyNhPhm0SIPb8oOE=</XMLPARA></body></Document>';
+        //var_dump($data);exit;
 
         $msg = $this->splitResMsg($data); //var_dump($msg);exit;
         $md51 = strtoupper(md5($msg['xml']));
@@ -157,6 +158,7 @@ class HXBankConfig
                     '明文：'.$plaintext,
                     '全文：'.$xml, $xmlArr
                 );
+                /*return $xmlArr;*/
             }
         } else {
             die('验签失败');
@@ -192,7 +194,7 @@ class HXBankConfig
         $reData = [
             'action'        => $this->url,
             'RequestData'   => $this->message,
-            'transCode'     => $this->TRANSCODE
+            'transCode'     => $data['TRANSCODE']
         ];
 
         return $reData;
@@ -203,9 +205,12 @@ class HXBankConfig
      */
     public function getBackReqData($data)
     {
-        // ...
+        return $this->checkAndDecrypt($data);
     }
 
+    /**
+     * test
+     */
     public function getResStatus($data)
     {
         $xml =  substr($data, strpos($data, '<'));

@@ -13,12 +13,12 @@ namespace App\Libraries\Encryption;
 
 class RSA {
 
-    private $private_key;
-    private $public_key;
+    protected $private_key;
+    protected $public_key;
 
     public function __construct()
     {
-        $private_str = <<<EOD
+        /*$private_str = <<<EOD
 -----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQCnyzixo/FKPY1e0V2ycFB+9MMkvSP/R2+x4ZsvIJ7Ygmvu2BpH
 EHQtzMWrWj40rZsf7cWWukzhytHFD+DIyRjr7kFbGg93v4t0Wfcx/7Fq3SIvU3p7
@@ -43,10 +43,10 @@ SP/R2+x4ZsvIJ7Ygmvu2BpHEHQtzMWrWj40rZsf7cWWukzhytHFD+DIyRjr7kFbGg
 93v4t0Wfcx/7Fq3SIvU3p7U/nqwkV8Xu0FScvSZJE3MLI8ivHwX98nsYwUXd5s5GY
 MBaEgZ7v2iZJU+QIDAQAB
 -----END PUBLIC KEY-----
-EOD;
+EOD;*/
 
-        $this->private_key  = openssl_pkey_get_private($private_str);
-        $this->public_key   = openssl_pkey_get_public($public_str);
+        $this->private_key  = openssl_pkey_get_private(config('hxbank.PRIVATE_STR'));
+        $this->public_key   = openssl_pkey_get_public(config('hxbank.PUBLIC_STR'));
     }
 
     /**

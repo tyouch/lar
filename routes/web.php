@@ -26,11 +26,13 @@
 
 
 Route::get('test/index2', 'TestController@index2');
+Route::get('test/excel', 'TestController@excelToDoc');
 Route::resource('test', 'TestController');
 
 
 Route::get('/', 'IndexController@index');
 Route::get('hosts/{p}', 'HostsController@index');
+Route::get('hosts/{p}/{filter}', 'HostsController@index');
 
 
 Route::get('user', 'UserController@index');

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Libraries\Encryption\Crypt3Des;
 use App\Libraries\Encryption\RSA;
 use App\Libraries\Encryption\HXBankConfig;
 //use App\Libraries\Encryption\MyRequest;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TestController extends Controller
 {
@@ -24,12 +24,126 @@ class TestController extends Controller
             'ACNO'      => '13662222344',
 
         ];
-        echo htmlspecialchars($a->request($data));
+        $OGW00051 = array (
+            'TRANSCODE' => '字段名称：交易码 | 类型：C(8) | 可空：否 | 备注：OGW00051',
+            'MERCHANTID' => '字段名称：商户唯一编号 | 类型：C (20) | 可空：否 | 备注：由华兴银行统一分配',
+            'MERCHANTNAME' => '字段名称：商户名称 | 类型：C(128) | 可空：否 | 备注：',
+            'APPID' => '字段名称：应用标识 | 类型：C(3) | 可空：否 | 备注：个人电脑:PC（不送则默认PC） 手机：APP 微信：WX',
+            'LOANNO' => '字段名称：借款编号 | 类型：C (64) | 可空：否 | 备注：目前两者为一致',
+            'INVESTID' => '字段名称：标的编号 | 类型：C (128) | 可空：否 | 备注：目前两者为一致',
+            'INVESTOBJNAME' => '字段名称：标的名称 | 类型：C (512) | 可空：否 | 备注：',
+            'INVESTOBJINFO' => '字段名称：标的简介 | 类型：C (1028) | 可空：是 | 备注：',
+            'MININVESTAMT' => '字段名称：最低投标金额 | 类型：M | 可空：是 | 备注：',
+            'MAXINVESTAMT' => '字段名称：最高投标金额 | 类型：M | 可空：是 | 备注：',
+            'INVESTOBJAMT' => '字段名称：总标的金额 | 类型：M | 可空：否 | 备注：各个借款人列表中的BWAMT总和',
+            'INVESTBEGINDATE' => '字段名称：招标开始日期 | 类型：D | 可空：否 | 备注：YYYYMMDD',
+            'INVESTENDDATE' => '字段名称：招标到期日期 | 类型：D | 可空：否 | 备注：YYYYMMDD',
+            'REPAYDATE' => '字段名称：还款日期 | 类型：D | 可空：是 | 备注：YYYYMMDD',
+            'YEARRATE' => '字段名称：年利率 | 类型：I2 | 可空：否 | 备注：最大值为：999.999999',
+            'INVESTRANGE' => '字段名称：期限 | 类型：N(10) | 可空：否 | 备注：整型，天数，单位为天',
+            'RATESTYPE' => '字段名称：计息方式 | 类型：C(128) | 可空：是 | 备注：',
+            'REPAYSTYPE' => '字段名称：还款方式 | 类型：C(128) | 可空：是 | 备注：',
+            'INVESTOBJSTATE' => '字段名称：标的状态 | 类型：C(3) | 可空：否 | 备注：0 正常 1 撤销',
+            'BWTOTALNUM' => '字段名称：借款人总数 | 类型：N(10) | 可空：否 | 备注：整型',
+            'REMARK' => '字段名称：备注 | 类型：C(512) | 可空：是 | 备注：',
+            'ZRFLAG' => '字段名称：是否为债券转让标的 | 类型：C(1) | 可空：是 | 备注：0 否，1 是',
+            'REFLOANNO' => '字段名称：债券转让原标的 | 类型：C(64) | 可空：是 | 备注：当ZRFLAG=1时必填',
+            'OLDREQSEQ' => '字段名称：原投标第三方交易流水号 | 类型：C(28) | 可空：是 | 备注：当ZRFLAG=1时必填',
+            'EXT_FILED1' => '字段名称：备用字段1 | 类型：C(200) | 可空：是 | 备注：备用字段1',
+            'BWLIST' =>
+                array (
+                    'BWACNAME' => '字段名称：借款人姓名 | 类型：C(128) | 可空：否 | 备注：',
+                    'BWIDTYPE' => '字段名称：借款人证件类型 | 类型：C(4) | 可空：是 | 备注：身份证：1010',
+                    'BWIDNO' => '字段名称：借款人证件号码 | 类型：C(32) | 可空：是 | 备注：18位身份证',
+                    'BWACNO' => '字段名称：借款人账号 | 类型：N(32) | 可空：否 | 备注：',
+                    'BWACBANKID' => '字段名称：借款人账号所属行号 | 类型：N(64) | 可空：是 | 备注：12位联行号，12位数字',
+                    'BWACBANKNAME' => '字段名称：借款人账号所属行名 | 类型：C(256) | 可空：是 | 备注：',
+                    'BWAMT' => '字段名称：借款人金额 | 类型：M | 可空：否 | 备注：',
+                    'MORTGAGEID' => '字段名称：借款人抵押品编号 | 类型：C(128) | 可空：是 | 备注：',
+                    'MORTGAGEINFO' => '字段名称：借款人抵押品简单描述 | 类型：C(1024) | 可空：是 | 备注：',
+                    'CHECKDATE' => '字段名称：借款人审批通过日期 | 类型：C(8) | 可空：是 | 备注：',
+                    'REMARK' => '字段名称：备注（其它未尽事宜） | 类型：C(1028) | 可空：是 | 备注：',
+                    'EXT_FILED2' => '字段名称：备用字段2 | 类型：C(200) | 可空：是 | 备注：备用字段2',
+                    'EXT_FILED3' => '字段名称：备用字段3 | 类型：C(300) | 可空：是 | 备注：备用字段3',
+                ),
+        );
+        echo htmlspecialchars($a->request($OGW00051));
         //echo htmlspecialchars($a->getSMSVerificationCode('OGW00041','1', '001', 0, 123));
     }
 
+    public function excelToDoc() {
+        $filePath = 'storage/exports/123.xlsx';
+        //var_dump($filePath);exit;
+        Excel::load($filePath, function ($reader) {
+            $data = $reader->all();
+            //var_dump($data);exit;
+
+
+            for($i=0; $i<count($data); $i++) {
+
+                $rData = $remarks = [];
+                $async = false; $layer = 1; $key2 = null;
+
+                for($j=0; $j<count($data[$i]); $j++) {
+                    switch ($j) {
+                        case 0:
+                            $title = $data[$i][$j]['field_id'];
+                            if(preg_match_all('#\((.*?)\)#i', $title, $matches)){
+                                $arrayName = '$'.$matches[1][0];
+                            }
+                            break;
+                        case 1: $desc  = $data[$i][$j]['field_id']; break;
+                        case 3: break;
+                        case 2:
+                        case 4:
+                        default:
+                            $key = $data[$i][$j]['field_id'];
+                            $key == 'RETURNURL' && $async = true;
+                            $remarks[$i] =
+                                '字段名称：'.$data[$i][$j]['field_name'].' | '.
+                                '类型：'.$data[$i][$j]['type'].' | '.
+                                '可空：'.$data[$i][$j]['is_null'].' | '.
+                                '备注：'.$data[$i][$j]['remarks'];
+                            if(substr($data[$i][$j]['field_id'], 0, 1) == '<'){
+                                $key2 = substr($data[$i][$j]['field_id'], 1, strlen($data[$i][$j]['field_id'])-2);
+                                $layer = 2;
+                                continue;
+                            }elseif($layer == 2){
+                                $rData[$key2][$key] = $remarks[$i];
+                            }elseif(substr($data[$i][$j]['field_id'], 0, 2) == '</'){
+                                $layer = 1;
+                            }else{
+                                $rData[$key] = $remarks[$i];
+                            }
+                    }
+                }
+                var_dump($title, $desc, $rData, '--------------------------------------------------------------------------------------');/**/
+                $file   = '../storage/exports/array.php';
+                $usage  = '(new(HXBandConfig())->request('.$arrayName.'))';
+                $usage2 = '(new(HXBandConfig())->getFormData('.$arrayName.'))';
+                file_put_contents($file, $this->remarks($title), FILE_APPEND);
+                file_put_contents($file, $this->remarks($desc), FILE_APPEND);
+                file_put_contents($file, $arrayName.' = '.var_export($rData, true).';'.PHP_EOL, FILE_APPEND);
+                file_put_contents($file, $this->remarks($usage, 'Usage: '), FILE_APPEND);
+                $async && file_put_contents($file, $this->remarks($usage2, '       '), FILE_APPEND);
+                file_put_contents($file, PHP_EOL.PHP_EOL.PHP_EOL.PHP_EOL, FILE_APPEND);
+
+            }
+        });
+        var_dump('success!');
+        exit;
+    }
+    public function remarks($connect, $etc = null)
+    {
+        return '/** '.$etc.$connect.' */'.PHP_EOL;
+    }
+
+
+
     public function index2()
     {
+
+
         //var_dump(2);exit;
         $data = [
             'TRSTYPE'   => '0',
