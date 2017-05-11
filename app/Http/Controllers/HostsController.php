@@ -11,10 +11,13 @@ class HostsController extends Controller
 {
     public function index(Request $request)
     {
-        //var_dump($p);exit;
-        /*$filters_arr = [
-            'city'  => '北京'
-        ];*/
+
+        /*$pw = 'admin123';
+        $ph = password_hash($pw, PASSWORD_BCRYPT);
+        $salt = password_verify($pw, $ph);
+
+        var_dump($pw, $ph, $salt);exit;*/
+
         $qs = explode('/', $request->path());
         $p = $qs[1];
         $ps = 2;
