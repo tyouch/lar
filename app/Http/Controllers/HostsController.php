@@ -18,6 +18,7 @@ class HostsController extends Controller
 
         var_dump($pw, $ph, $salt);exit;*/
 
+
         $qs = explode('/', $request->path());
         $p = $qs[1];
         $ps = 2;

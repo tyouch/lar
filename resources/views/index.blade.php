@@ -12,32 +12,72 @@
 
 @section('content')
     <div id="main" style="height: 810px; margin-top: -10px;"></div>
+    <div class="layer2">
+        <table class="table"><!--table-bordered table-hover-->
+            <tr>
+                <th>入侵发现时间</th>
+                <th>源地址</th>
+                <th>目标地址</th>
+                <th>目标端口</th>
+                <th>攻击方式</th>
+            </tr>
+        </table>
+    </div>
 @endsection
 
 
 @push('scripts')
 <script src="<?= url('js/echarts.min.js') ?>"></script>
 <script>
-    $(window).on('resize',function(){
-        // 调用相关echarts的resize方法. ** 放在echart声明之后
-        myChart.resize();
-    });
 
-    /*function timer() {
-     $.ajax({
-     Type        : 'GET',
-     DataType    : 'JSON',
-     Data        : {},
-     url         : '',
-     success     : function (d, s) {
-     console.log(d);
-     }
-     });
-     }
-     var timer1 = setInterval(timer, 5000); //*/
+    // 加载列表方法
+    function loadList() {
+        $.ajax({
+            url         : '<?= url('/') ?>',
+            type        : 'GET',
+            data        :{
+                'csrf-token'    : '{{ csrf_token() }}',
+                'test'          : true
+            },
+            dataType    : 'JSON',
+            headers     : {
+                'X-CSRF-TOKEN'  : $('meta[name="csrf-token"]').attr('content')
+            },
+            success     : function (d, s) {
+                console.log('[' + s +']', d);
+                if(s == 'success'){
+                    $(".layer2").html(
+                        '<table class="table">' +
+                        '<tr>' +
+                        '<th>入侵发现时间</th>' +
+                        '<th>源地址</th>' +
+                        '<th>目标地址</th>' +
+                        '<th>目标端口</th>' +
+                        '<th>攻击方式</th>' +
+                        '</tr>' +
+                        '</table>'
+                    );
+                    $.each(d.data, function (index, content) {
+                        $(".table").append(
+                            '<tr class="tra" data-id="' + content.plugin_sid + '">' +
+                            '<td>' + content.timestamp + '</td>' +
+                            '<td>' + content.ip_src + ':' + content.layer4_sport + '</td>' +
+                            '<td>' + content.ip_dst + '</td>' +
+                            '<td>' + content.layer4_dport + '</td>' +
+                            '<td>' + content.classtype + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                }
+            },
+            /*complete    : function (d, s) {
+                console.log('[['+s+']]');
+                console.log(d);
+            }*/
+        });
+    }
 
     var myChart = echarts.init(document.getElementById('main'));
-
     $(function () {
         $(".tra").click(function (e) {
             //alert($(this).attr('data-id'));
@@ -47,7 +87,12 @@
         $(window).on('resize', function () {
             // 调用相关echarts的resize方法. ** 放在echart声明之后
             myChart.resize();
-        })
+        });
+
+        //---------------- 动态刷新列表 ---------------
+        var timer1 = setInterval(loadList, 5000);
+        //--------------------------------------------
+
     });
 
     myChart.showLoading();

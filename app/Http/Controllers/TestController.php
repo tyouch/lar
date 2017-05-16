@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Libraries\Encryption\Crypt3Des;
 use App\Libraries\Encryption\RSA;
 use App\Libraries\Encryption\HXBankConfig;
@@ -69,6 +70,66 @@ class TestController extends Controller
         );
         echo htmlspecialchars($a->request($OGW00051));
         //echo htmlspecialchars($a->getSMSVerificationCode('OGW00041','1', '001', 0, 123));
+    }
+
+    public function ajax(Request $request)
+    {
+        //var_dump($request->input('test'));exit;
+        $acids = DB::connection('alienvault_siem')->table('acid_event')
+            ->where(['plugin_id'=>'1001'])
+            ->offset(0)
+            ->limit(10)
+            ->orderBy('timestamp', 'desc')
+            ->get();
+        //var_dump($acids);exit;
+
+        $data = []; $i = 0;
+        foreach ($acids as $acid) {
+            $data[$i]['timestamp'] = $acid->timestamp;
+            $data[$i]['ip_src'] = @inet_ntop($acid->ip_src);
+            $data[$i]['ip_dst'] = @inet_ntop($acid->ip_dst);
+            $data[$i]['layer4_sport'] = $acid->layer4_sport;
+            $data[$i]['layer4_dport'] = $acid->layer4_dport;
+            $data[$i]['plugin_sid'] = $acid->plugin_sid;
+            $data[$i++]['classtype'] = 'unknown';
+        }
+        //var_dump($data);exit;
+
+        /*$data = [
+            [
+                'timestamp'     => '12345678',
+                'ip_src'        => '192.168.0.1',
+                'ip_dst'        => '192.168.0.3',
+                'ip_dst'        => '192.168.0.3',
+                'layer4_sport'  => '223',
+                'layer4_dport'  => '345',
+                'classtype'     => 'xxxxooooXXXX',
+                'plugin_sid'    => '1001',
+            ],
+            [
+                'timestamp'     => '1231234',
+                'ip_src'        => '192.168.0.2',
+                'ip_dst'        => '192.168.0.4',
+                'layer4_sport'  => '2233',
+                'layer4_dport'  => '3453',
+                'classtype'     => 'ooooxxxx0000',
+                'plugin_sid'    => '1001',
+            ]
+        ];*/
+
+        if($request->input('test')){
+            return response()->json([
+                'msg'       => 'ok',
+                'status'    => 0,
+                'data'      => $data
+            ]);
+        }else {
+            //return Redirect::back()->withInput()->withErrors('失败！');
+            return response()->json([
+                'msg' => 'fail!',
+                'status' => 2
+            ]);
+        }
     }
 
     public function excelToDoc() {

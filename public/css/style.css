@@ -43,7 +43,7 @@ a, a:hover, a:visited{color: #8c8c8c; text-decoration:none;}
 .run_ones{display: none;}
 
 .tra{cursor: crosshair}/*pointer*/
-.layer2{position: fixed; left: 0; bottom: -20px; /*width: 50%;*/ height: auto; border: 0px solid #ccc; font-size: 12px;}
+.layer2{position: fixed; left: 0; bottom: 70px; /*width: 50%;*/ height: auto; border: 0px solid #ccc; font-size: 12px;}
 .layer2 th{color: #46bee9; border: none; text-align: left; background: rgba(0, 0, 0, 0.3);}
 .layer2 td{color: #46bee9; border: none; text-align: left; background: rgba(0, 0, 0, 0.2);}
 .layer2 .table>tbody>tr>td, .table>tbody>tr>th{/*padding: 4px;*/}
