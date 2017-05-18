@@ -17,18 +17,6 @@
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="<?= url('css/style.css') ?>">
-    <style>
-        .header-search{float: right; margin: 8px 0;}
-        .header-search input{background: #eee;}
-        a:hover {text-decoration: none; background-color: #eee;}
-
-        footer {position: fixed; left: 0; bottom: 0; z-index: 3; background-color: rgba(0,0,0,0.8); color: white; width: 100%; height: 90px; padding: 20px 0}
-        footer a {color: white;}
-        footer a:hover {color: #FE7600; background-color: rgba(0,0,0,0.6);}
-        /*footer a:visited {color: #ccc;}*/
-        footer .block {width: 33%; text-align: center; float: left;}
-        footer span {height: 20px;}
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -91,7 +79,10 @@
 
     <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
+    <script>
+        $('[data-toggle="tooltip"]').tooltip();
+        //$(".js-popover").popover(); //init弹出框
+    </script>
     @stack('scripts')
 
 </body>
@@ -109,7 +100,8 @@
             <a href="<?= url('/') ?>">关键词设置</a>
         </p>
         <p>
-            &copy;2015-@php echo date('Y'); @endphp <a href="http://www.tyoupub.com" target="_blank">tyoupub.com</a>&nbsp;&nbsp;
+            &copy;2015-<?= date('Y') ?>
+            <a href="http://www.tyoupub.com" target="_blank">tyoupub.com</a>&nbsp;&nbsp;
             <a href="http://www.miitbeian.gov.cn/" target="_blank">京ICP备15057572号</a>
         </p>
     </div>

@@ -23,6 +23,8 @@
             </tr>
         </table>
     </div>
+    @includeIf('public.nav', [])
+    @includeIf('public.time', [])
 @endsection
 
 

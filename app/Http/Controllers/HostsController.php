@@ -11,6 +11,7 @@ class HostsController extends Controller
 {
     public function index(Request $request)
     {
+        $begin = microtime(true);
 
         /*$pw = 'admin123';
         $ph = password_hash($pw, PASSWORD_BCRYPT);
@@ -97,13 +98,14 @@ class HostsController extends Controller
         $OSRatio = json_encode($OSRatio);
         //var_dump($ServiceRatio, $OSRatio);exit;
 
-
+        $end    = microtime(true);
         return view('hosts.index', [
             'hosts'         => $hosts,
             'ServiceRatio'  => $ServiceRatio,
             'OSRatio'       => $OSRatio,
             'p'             => $p,
-            'pm'            => ceil(DB::connection('alienvault')->table('host_detail')->count()/$ps)
+            'pm'            => ceil(DB::connection('alienvault')->table('host_detail')->count()/$ps),
+            'pass'          => $end - $begin
         ]);
     }
 }
