@@ -48,3 +48,5 @@ Route::resource('photo', 'PhotoController');
         'create' => 'photo.build'
     ]
 ]*/
+
+
