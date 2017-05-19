@@ -25,16 +25,18 @@
 })->middleware('mycheck');*/
 
 
+
+Auth::routes();
+//Route::get('/home', 'HomeController@index');
+
+Route::get('/', 'HomeController@index');
+Route::get('hosts/{p}', 'HostsController@index');
+Route::get('hosts/{p}/{filter}', 'HostsController@index');
+
 Route::get('test/index2', 'TestController@index2');
 Route::get('test/ajax', 'TestController@ajax');
 Route::get('test/excel', 'TestController@excelToDoc');
 Route::resource('test', 'TestController');
-
-
-Route::get('/', 'IndexController@index');
-Route::get('hosts/{p}', 'HostsController@index');
-Route::get('hosts/{p}/{filter}', 'HostsController@index');
-
 
 Route::get('user', 'UserController@index');
 Route::resource('photo', 'PhotoController');

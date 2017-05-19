@@ -12,6 +12,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class TestController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         //var_dump(1);exit;

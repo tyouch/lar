@@ -15,6 +15,6 @@ class Plugin_sid extends Model
 
     public function acidEnent()
     {
-        return $this->hasMany('App\Models\Acid_event', 'plugin_sid', 'sid');
+        //return $this->hasMany('App\Models\Acid_event', 'plugin_sid', 'sid');
     }
 }

@@ -1,27 +1,30 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: zhaoyao
- * Date: 2017/4/26
- * Time: 14:53
- */
+
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Acid_event;
-//use App\Models\Plugin_sid;
 
-class IndexController extends Controller
+class HomeController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    public function index(Request $request){
-
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
         $begin = microtime(true);
         /*"
         //$this->alienvault_siem->where('inet6_ntoa(ip_src) !=', '0.0.0.0');
@@ -108,17 +111,11 @@ class IndexController extends Controller
         }
 
         $end    = microtime(true);
-        return view('index', [
+        return view('home', [
             'title'         => 'ACID',
             'geoCoordMap'   => json_encode($geoCoordMap),
             'zzData'        => json_encode($zzData),
             'pass'          => $end - $begin
         ]);
     }
-
-    public function test()
-    {
-        var_dump('index-test');
-    }
-
 }
