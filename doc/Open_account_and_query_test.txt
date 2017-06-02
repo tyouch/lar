@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Document>
+  <header>
+    <channelCode>P2P174</channelCode>
+    <channelFlow>P2P17420170602042eVjC2uS0OeQ</channelFlow>
+    <channelDate>20170602</channelDate>
+    <channelTime>164820</channelTime>
+    <encryptData/>
+  </header>
+  <body>
+    <TRANSCODE>OGW00042</TRANSCODE>
+    <XMLPARA>
+      <MERCHANTID>SFD</MERCHANTID>
+      <APPID>PC</APPID>
+      <TTRANS>6</TTRANS>
+      <MERCHANTNAME>P2P三分贷</MERCHANTNAME>
+      <ACNAME>施秀艾</ACNAME>
+      <IDTYPE>1010</IDTYPE>
+      <IDNO>231181197606154944</IDNO>
+      <MOBILE>13661111444</MOBILE>
+      <EMAIL/>
+      <RETURNURL>123</RETURNURL>
+      <CUSTMNGRNO/>
+      <EXT_FILED1/>
+      <EXT_FILED2/>
+      <EXT_FILED3/>
+    </XMLPARA>
+  </body>
+</Document>
+
+
+array:4 [▼
+  "action" => "http://183.63.131.106:40011/extService/ghbExtService.do"
+  "RequestData" => "001X11          000002560CE65387C4DCA72213036A6B9C4A1BD47BFA28168739D4CF112639022885D4CDCEF99F9FFCD4286535AF665E1F8B5B9CD761648F5BD36C62F9A079E4524C584918EAFE948D2AF4D9EC5F0B91CA697FBFF662272614FB95C423BB67E40D4CDA76530A9B8B53E58483091A8937ABFE13773AADF5A06A233A62B2F7329DDF8FC83B<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P174</channelCode><channelFlow>P2P17420170602042eVjC2uS0OeQ</channelFlow><channelDate>20170602</channelDate><channelTime>164820</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00042</TRANSCODE><XMLPARA>+X2br6lee+grGi6GWUfT+UbDSfsoB2yQwt2cWC4+ZYZ9qaO0ty3TB9611W7ZMyB9HnuZDlMLVjKD4faRsh2NVCOShvm0rkhGBPGcvaenTCBzD9dePAQ2nts0I7ryFV028MRK0JsqAu37iNP8PsP/5fctJwnKVza0lADUx8Ejb2nEGB/m+j7GTmsAGPyQSebrtKKJPmCCGjQjd4VVE72c/bZjY3zIXS+D4HQlDxW8j578JBBNK7LVta3/Cw5Tce8WyvefWX6f3xkBTQFGRx9RjfbV64d+SS8NXJWQM8AWIrMI9kvAjWSG1YkowCk+26+fYvKYQVlmICChaXdqb8SxWeR9Eea9uVVrJZdaJL/hITJgZFrQjoxrSfM83b2q5HPIBOmqBagoALUawWZy6YY/mG4YZAAjrxP2n4bcKRZibGlr7Wk1mXEmuGbgwT0cSYcv/FyewOcmfD5tX8wl7Qo8JQ==</XMLPARA></body></Document> ?"
+  "plaintext" => "<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P174</channelCode><channelFlow>P2P17420170602042eVjC2uS0OeQ</channelFlow><channelDate>20170602</channelDate><channelTime>164820</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00042</TRANSCODE><XMLPARA><MERCHANTID>SFD</MERCHANTID><APPID>PC</APPID><TTRANS>6</TTRANS><MERCHANTNAME>P2P三分贷</MERCHANTNAME><ACNAME>施秀艾</ACNAME><IDTYPE>1010</IDTYPE><IDNO>231181197606154944</IDNO><MOBILE>13661111444</MOBILE><EMAIL></EMAIL><RETURNURL>123</RETURNURL><CUSTMNGRNO></CUSTMNGRNO><EXT_FILED1></EXT_FILED1><EXT_FILED2></EXT_FILED2><EXT_FILED3></EXT_FILED3></XMLPARA></body></Document> ?"
+  "transCode" => "OGW00042"
+]
+
+
+
+16:52
+
+
+返回的数据：
+
+ "sign" => "001X11          000002560F66959CA2D46D55FBCC80DAAB7CD976D93420576223DAF9C0641273537F4073F9B82136AD1B92734B7784C60348B8B53E5E7D3F7BBC83714E4F2D4AFA4268CEBC881D38970E95E9F04319E2D060219DD2E7F9EEAFA5E50A19F941141016FFF40B54729A451EC946AA2D1AE53A93BC60833B65F13A1AE20403BBAB9D5775D499 ?"
+  "xml" => "<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA>3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A==</XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document> ?"
+
+  "json" => "{"header":{"encryptData":"N","serverFlow":"OGW012017060244JVxn","channelCode":"GHB","status":"testMode","serverTime":"172048","errorCode":"0","errorMsg":{},"channelFlow":"P2P17420170602043xocyRj2wsMd","serverDate":"20170602"},"body":{"TRANSCODE":"OGW00043","BANKID":"GHB","XMLPARA":"3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo\/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy\/W22VT3aoj5A==","MERCHANTID":"SFD"}} ?"
+
+  "array" => array:2 [▼
+    "header" => array:9 [▼
+      "encryptData" => "N"
+      "serverFlow" => "OGW012017060244JVxn"
+      "channelCode" => "GHB"
+      "status" => "testMode"
+      "serverTime" => "172048"
+      "errorCode" => "0"
+      "errorMsg" => []
+      "channelFlow" => "P2P17420170602043xocyRj2wsMd"
+      "serverDate" => "20170602"
+    ]
+    "body" => array:4 [▼
+      "TRANSCODE" => "OGW00043"
+      "BANKID" => "GHB"
+      "XMLPARA" => "3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1 ?"
+      "MERCHANTID" => "SFD"
+    ]
+  ]
+
+  "msg" => "001X11          000002560F66959CA2D46D55FBCC80DAAB7CD976D93420576223DAF9C0641273537F4073F9B82136AD1B92734B7784C60348B8B53E5E7D3F7BBC83714E4F2D4AFA4268CEBC881D38970E95E9F04319E2D060219DD2E7F9EEAFA5E50A19F941141016FFF40B54729A451EC946AA2D1AE53A93BC60833B65F13A1AE20403BBAB9D5775D499<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA>3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A==</XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document> ?"
+
+
+
+
+
+验签后解密：
+
+"全文：001X11          000002560F66959CA2D46D55FBCC80DAAB7CD976D93420576223DAF9C0641273537F4073F9B82136AD1B92734B7784C60348B8B53E5E7D3F7BBC83714E4F2D4AFA4268CEBC881D38970E95E9F04319E2D060219DD2E7F9EEAFA5E50A19F941141016FFF40B54729A451EC946AA2D1AE53A93BC60833B65F13A1AE20403BBAB9D5775D499<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA>3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A==</XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document> ?"
+"签名：0F66959CA2D46D55FBCC80DAAB7CD976D93420576223DAF9C0641273537F4073F9B82136AD1B92734B7784C60348B8B53E5E7D3F7BBC83714E4F2D4AFA4268CEBC881D38970E95E9F04319E2D060219DD2E7F9EEAFA5E50A19F941141016FFF40B54729A451EC946AA2D1AE53A93BC60833B65F13A1AE20403BBAB9D5775D499 ?"
+"XML：<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA>3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A==</XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document> ?"
+"摘要：C2B8D3916382DA357C16B1C601359607<=>C2B8D3916382DA357C16B1C601359607"
+"密文：3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A== ?"
+"明文：<EXT_FILED2></EXT_FILED2><EXT_FILED3></EXT_FILED3><OLDREQSEQNO>P2P17420170602042eVjC2uS0OeQ</OLDREQSEQNO><EXT_FILED1></EXT_FILED1>"
+"全文：<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA><EXT_FILED2></EXT_FILED2><EXT_FILED3></EXT_FILED3><OLDREQSEQNO>P2P17420170602042eVjC2uS0OeQ</OLDREQSEQNO><EXT_FILED1></EXT_FILED1></XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document> ?"
+array:2 [▼
+  "header" => array:9 [▼
+    "encryptData" => "N"
+    "serverFlow" => "OGW012017060244JVxn"
+    "channelCode" => "GHB"
+    "status" => "testMode"
+    "serverTime" => "172048"
+    "errorCode" => "0"
+    "errorMsg" => []
+    "channelFlow" => "P2P17420170602043xocyRj2wsMd"
+    "serverDate" => "20170602"
+  ]
+  "body" => array:4 [▼
+    "TRANSCODE" => "OGW00043"
+    "BANKID" => "GHB"
+    "XMLPARA" => array:4 [▼
+      "EXT_FILED2" => []
+      "EXT_FILED3" => []
+      "OLDREQSEQNO" => "P2P17420170602042eVjC2uS0OeQ"
+      "EXT_FILED1" => []
+    ]
+    "MERCHANTID" => "SFD"
+  ]
+]

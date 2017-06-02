@@ -6,7 +6,7 @@
  * Time: 13:53
  */
 
-namespace App\Libraries\Encryption;
+namespace App\Lib\Sumapay;
 
 class HttpRequest{
 
@@ -28,18 +28,17 @@ class HttpRequest{
 
         $split2 = explode("\r\n", $split1[0], 2);
         //var_dump($split2);exit;
-
         preg_match('/^(\S+) (\S+) (\S+)$/', $split2[0], $matches);
-        $rlt['code'] = $matches[2];
-        $rlt['status'] = $matches[3];
-        $rlt['responseline'] = $split2[0];
-        $header = explode("\r\n", $split2[1]);
+        @$rlt['code'] = $matches[2];
+        @$rlt['status'] = $matches[3];
+        @$rlt['responseline'] = $split2[0]; //var_dump($split2);exit;//zzz
+        $header = @explode("\r\n", $split2[1]);
         $isgzip = false;
         $ischunk = false;
         foreach ($header as $v) {
             $row = explode(':', $v);
             $key = trim($row[0]);
-            $value = trim($row[1]);
+            @$value = trim($row[1]);
             if (@is_array($rlt['headers'][$key])) {
                 $rlt['headers'][$key][] = $value;
             } elseif (!empty($rlt['headers'][$key])) {
@@ -169,6 +168,7 @@ class HttpRequest{
                 return $this->error(1, $error);
             } else {
                 //var_dump($data);exit;
+                //return $data;
                 return $this->ihttp_response_parse($data);
             }
         }
@@ -223,5 +223,42 @@ class HttpRequest{
             'errno' => $code,
             'message' => $msg,
         );
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return array|void
+     */
+    public static function __callStatic($name, $arguments) {
+
+        //var_dump($name, $arguments, get_called_class());exit;
+        $url = !empty($arguments[0]) ? $arguments[0] : '';
+        $post = !empty($arguments[1]) ? $arguments[1] : '';
+        $extra = !empty($arguments[2]) ? $arguments[2] : [];
+        $timeout = !empty($arguments[3]) ? $arguments[3] : 60;
+        //dd($url, $post, $extra, $timeout);
+        $res = (new HttpRequest())->ihttp_request($url, $post, $extra, $timeout);
+
+        switch ($name) {
+            case 'to':
+                return $res;
+
+            case 'toFormat':
+                //dd($res['content']);
+                list($sign, $xml) = explode('<?', $res['content']);
+                $xml = '<?'.$xml;
+                $data = [
+                    'signPlus'  => $sign,
+                    'xml'   => $xml,
+                    'json'  => json_encode(simplexml_load_string($xml),JSON_UNESCAPED_UNICODE),
+                    'array' => json_decode(json_encode(simplexml_load_string($xml)), true),
+                    'msg'   => $res['content']
+                ];
+                return $data;
+
+            default:
+                die('error');
+        }
     }
 }

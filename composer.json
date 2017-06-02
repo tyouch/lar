@@ -19,13 +19,13 @@
     "autoload": {
         "classmap": [
             "database",
-            "app/Libraries/Encryption"
+            "app/Lib/Sumapay"
         ],
         "psr-4": {
             "App\\": "app/"
         },
         "files": [
-            "app/Libraries/Function/helper.php"
+            "app/Lib/Function/helper.php"
         ]
     },
     "autoload-dev": {

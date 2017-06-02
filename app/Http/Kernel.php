@@ -2,7 +2,7 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\CheckAge;
+//use App\Http\Middleware\CheckAge;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -57,6 +57,6 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'mycheck' => CheckAge::class,
+        'mycheck' => \App\Http\Middleware\CheckAge::class,
     ];
 }

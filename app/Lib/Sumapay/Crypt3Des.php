@@ -6,7 +6,7 @@
  * Time: 11:06
  */
 
-namespace App\Libraries\Encryption;
+namespace App\Lib\Sumapay;
 
 class Crypt3Des {
 

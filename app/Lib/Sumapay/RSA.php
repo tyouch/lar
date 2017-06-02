@@ -9,7 +9,7 @@
  * Class MyRSA
  * 私钥签名和公钥验证签名
  */
-namespace App\Libraries\Encryption;
+namespace App\Lib\Sumapay;
 
 class RSA {
 
@@ -46,7 +46,7 @@ MBaEgZ7v2iZJU+QIDAQAB
 EOD;*/
 
         $this->private_key  = openssl_pkey_get_private(config('hxbank.PRIVATE_STR'));
-        $this->public_key   = openssl_pkey_get_public(config('hxbank.PUBLIC_STR'));
+        $this->public_key   = openssl_pkey_get_public(config('hxbank.PUBLIC_STR_BANK')); //PUBLIC_STR
     }
 
     /**
