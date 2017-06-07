@@ -9,6 +9,7 @@ use App\Lib\Sumapay\Crypt3Des;
 use App\Lib\Sumapay\RSA;
 use App\Lib\Sumapay\HXBankApi;
 use App\Lib\Sumapay\HttpRequest;
+use App\Models\Ip;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TestController extends Controller
@@ -107,7 +108,8 @@ class TestController extends Controller
 
 
     public function excelToDoc() {
-        $filePath = 'storage/exports/123.xlsx';
+        //$filePath = 'storage/exports/123.xlsx';
+        $filePath = 'doc/Api_array.xlsx';
         //var_dump($filePath);exit;
         Excel::load($filePath, function ($reader) {
             $data = $reader->all();
@@ -153,14 +155,15 @@ class TestController extends Controller
                     }
                 }
                 var_dump($title, $desc, $rData, '--------------------------------------------------------------------------------------');/**/
-                $file   = '../storage/exports/array.php';
-                $usage  = '(new(HXBandConfig())->request('.$arrayName.'))';
-                $usage2 = '(new(HXBandConfig())->getFormData('.$arrayName.'))';
+                //$file   = '../storage/exports/array.php';
+                $file   = '../doc/Api_array.php';
+                $usage  = 'HXBandApi::request('.$arrayName.'))';
+                $usage2 = 'HXBankApi::getFormData('.$arrayName.'))';
                 file_put_contents($file, $this->remarks($title), FILE_APPEND);
                 file_put_contents($file, $this->remarks($desc), FILE_APPEND);
                 file_put_contents($file, $arrayName.' = '.var_export($rData, true).';'.PHP_EOL, FILE_APPEND);
-                file_put_contents($file, $this->remarks($usage, 'Usage: '), FILE_APPEND);
-                $async && file_put_contents($file, $this->remarks($usage2, '       '), FILE_APPEND);
+                !$async && file_put_contents($file, $this->remarks($usage, 'Usage: '), FILE_APPEND);
+                $async && file_put_contents($file, $this->remarks($usage2, 'Usage: '), FILE_APPEND);
                 file_put_contents($file, PHP_EOL.PHP_EOL.PHP_EOL.PHP_EOL, FILE_APPEND);
 
             }
@@ -238,5 +241,114 @@ class TestController extends Controller
                 'status' => 2
             ]);
         }
+    }
+
+    public function putIp() {
+
+        $data = [
+            [
+                'ip_src'    => '58.48.232.114',
+                'att_times' => 1,
+                'time1'     => '2017-05-24 01:19:01',
+                'time2'     => '2017-05-24 01:19:01'
+            ],
+            [
+                'ip_src'    => '118.184.35.238',
+                'att_times' => 311,
+                'time1'     => '2017-05-16 01:27:57',
+                'time2'     => '2017-05-16 01:35:26'
+            ],
+            [
+                'ip_src'    => '103.249.162.211',
+                'att_times' => 14,
+                'time1'     => '2017-05-03 22:50:23',
+                'time2'     => '2017-05-03 22:50:36'
+            ],
+            [
+                'ip_src'    => '103.249.162.21',
+                'att_times' => 12,
+                'time1'     => '2017-05-03 02:59:48',
+                'time2'     => '2017-05-03 02:59:51'
+            ],
+            [
+                'ip_src'    => '103.249.162.21',
+                'att_times' => 6,
+                'time1'     => '2017-05-03 02:59:48',
+                'time2'     => '2017-05-03 02:59:51'
+            ],
+            [
+                'ip_src'    => '118.252.30.62',
+                'att_times' => 29,
+                'time1'     => '2017-05-02 13:22:43',
+                'time2'     => '2017-05-02 13:26:39'
+            ],
+            [
+                'ip_src'    => '113.223.241.199',
+                'att_times' => 22,
+                'time1'     => '2017-05-02 13:22:31',
+                'time2'     => '2017-05-02 13:26:36'
+            ],
+            [
+                'ip_src'    => '118.252.227.166',
+                'att_times' => 31,
+                'time1'     => '2017-05-02 13:22:41',
+                'time2'     => '2017-05-02 13:26:30'
+            ],
+            [
+                'ip_src'    => '118.248.5.219',
+                'att_times' => 45,
+                'time1'     => '2017-05-02 13:22:19',
+                'time2'     => '2017-05-02 13:26:09'
+            ],
+            [
+                'ip_src'    => '118.252.49.85',
+                'att_times' => 15,
+                'time1'     => '2017-05-02 13:22:34',
+                'time2'     => '2017-05-02 13:26:05'
+            ],
+            [
+            'ip_src'    => '58.221.44.73',
+                'att_times' => 89,
+                'time1'     => '2017-05-01 17:00:50',
+                'time2'     => '2017-05-01 17:01:24'
+            ],
+            [
+                'ip_src'    => '103.249.162.21',
+                'att_times' => 14,
+                'time1'     => '2017-05-01 04:28:59',
+                'time2'     => '2017-05-01 04:29:13'
+            ],
+            [
+                'ip_src'    => '119.98.120.29',
+                'att_times' => 2,
+                'time1'     => '2017-04-26 00:24:44',
+                'time2'     => '2017-04-26 00:24:44'
+            ],
+            [
+                'ip_src'    => '62.28.167.246',
+                'att_times' => 1,
+                'time1'     => '2017-04-22 09:08:00',
+                'time2'     => '2017-04-22 09:08:00'
+            ],
+            [
+                'ip_src'    => '63.141.246.75',
+                'att_times' => 85,
+                'time1'     => '2017-04-21 12:09:51',
+                'time2'     => '2017-04-21 12:11:00'
+            ],
+        ];
+
+
+        foreach ($data as $rec) {
+            $ip = new Ip();
+            $ip->ip_src     = @inet_pton($rec['ip_src']);
+            $ip->att_times  = $rec['att_times'];
+            $ip->time1      = strtotime($rec['time1']);
+            $ip->time2      = strtotime($rec['time2']);
+            //dd($ip);
+            //$ip->save();
+        }
+        dd('success!');
+
     }
 }

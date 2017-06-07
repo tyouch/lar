@@ -36,6 +36,8 @@ Route::get('hosts/{p}/{filter}', 'HostsController@index');
 Route::get('test/index2', 'TestController@index2');
 Route::get('test/ajax', 'TestController@ajax');
 Route::get('test/excel', 'TestController@excelToDoc');
+Route::get('test/putip', 'TestController@putIp');
+Route::get('detection/map', 'DetectionController@map');
 Route::resource('test', 'TestController');
 
 Route::get('user', 'UserController@index');
