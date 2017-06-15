@@ -15,7 +15,7 @@ use App\Lib\Sumapay\HttpRequest;
 class HXBankApi
 {
     protected $message;
-    protected $plaintext;
+    protected $plainText;
     protected $des3Key;
     protected $url;
     protected $merchantID;
@@ -27,8 +27,9 @@ class HXBankApi
     {
         $this->message      = '';
         $this->des3Key      = config('hxbank.DES3KEY'); // 'AZJ174D4G9849H6GEMJ0K1I3';
-        $this->url          = config('hxbank.HTTP_REQUEST_URL_TEST'); // HTTP_REQUEST_URL 'http://183.63.131.106:40011/extService/ghbExtService.do';
+        $this->url          = config('hxbank.HTTP_REQUEST_URL'); // 'http://183.63.131.106:40011/extService/ghbExtService.do';
         $this->merchantID   = config('hxbank.MERCHANTID'); // '商户号:SFD';
+        $this->merchantName = config('hxbank.MERCHANTNAME'); // '商户号:SFD';
         $this->channelCode  = config('hxbank.CHANNELCODE'); // '接口报文头字段“接入渠道”:P2P174';
         $this->channelFlow  = config('hxbank.CHANNELCODE').date("Ymd"); // '接口报文头字段“接入渠道”:P2P174';
     }
@@ -59,7 +60,7 @@ class HXBankApi
     }
 
     //
-    public function buildXml($ciphertext)
+    public function buildXml($cipherText)
     {
         $xml =
             '<?xml version="1.0" encoding="utf-8"?>'.
@@ -73,7 +74,7 @@ class HXBankApi
                 '</header>'.
                 '<body>'.
                     '<TRANSCODE>'.$this->transCode.'</TRANSCODE>'.
-                    '<XMLPARA>'.$ciphertext.
+                    '<XMLPARA>'.$cipherText.
                     '</XMLPARA>'.
                 '</body>'.
             '</Document>';
@@ -87,22 +88,25 @@ class HXBankApi
      */
     public function buildMsg($data)
     {
+        isset($data['MERCHANTID']) && $data['MERCHANTID'] = $this->merchantID;
+        isset($data['MERCHANTNAME']) && $data['MERCHANTNAME'] = $this->merchantName;
+
         $this->transCode = $data['TRANSCODE'];
         $this->channelFlow .= substr($data['TRANSCODE'], -3, 3).$this->generateMerchantFlow(11);
-        //dd($this->channelFlow);
         unset($data['TRANSCODE']);
+        //dd($this->channelFlow, $data);
+
 
         // -1- 组织数据 <XMLPARA>
-        $data['MERCHANTID'] = $this->merchantID;
         $xmlpara = $this->buildXmlPara($data);
         //dd($xmlpara);
 
         // -2- 对称加密获得密文
-        $ciphertext = (new Crypt3Des($this->des3Key))->encrypt($xmlpara);
+        $cipherText = (new Crypt3Des($this->des3Key))->encrypt($xmlpara);
 
         // 组织 <XML>
-        $xml = $this->buildXml($ciphertext);
-        $this->plaintext = $this->buildXml2($xmlpara);
+        $xml = $this->buildXml($cipherText);
+        $this->plainText = $this->buildXml2($xmlpara); // test
 
         // -3- 单向加密获得签名
         $sign = (new RSA())->RSAEncode($xml);
@@ -143,15 +147,14 @@ class HXBankApi
         //dd($this->url, $this->message);
 
         // -5- http request
-        //$res = (new HttpRequest())->ihttp_request($this->url, $this->message);
-        //$res = HttpRequest::toFormat($this->url, $this->message);
+        //$res = HttpRequest::to($this->url, $this->message);
+        $res = HttpRequest::toFormat($this->url, $this->message);
         //dd($res);
 
         // -6- 验签 -7- 解密
         //var_dump($this->getResStatus($res['content']));exit;
-        $res['msg'] = '001X11          000002560F66959CA2D46D55FBCC80DAAB7CD976D93420576223DAF9C0641273537F4073F9B82136AD1B92734B7784C60348B8B53E5E7D3F7BBC83714E4F2D4AFA4268CEBC881D38970E95E9F04319E2D060219DD2E7F9EEAFA5E50A19F941141016FFF40B54729A451EC946AA2D1AE53A93BC60833B65F13A1AE20403BBAB9D5775D499<?xml version="1.0" encoding="UTF-8" ?><Document><header><encryptData>N</encryptData><serverFlow>OGW012017060244JVxn</serverFlow><channelCode>GHB</channelCode><status>testMode</status><serverTime>172048</serverTime><errorCode>0</errorCode><errorMsg></errorMsg><channelFlow>P2P17420170602043xocyRj2wsMd</channelFlow><serverDate>20170602</serverDate></header><body><TRANSCODE>OGW00043</TRANSCODE><BANKID>GHB</BANKID><XMLPARA>3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvCeGx7QZmyjkwZGvso3MDRgbfJax7GB4o9Sen0tAfEhsxN5qV4GOfmBV8OiHuZh+VdBEqyQLqvSYgblp1OXEOyMPPk1IGSpE1ZuDBPRxJhy/W22VT3aoj5A==</XMLPARA><MERCHANTID>SFD</MERCHANTID></body></Document>';
-        $this->checkAndDecrypt($res['msg']); //$this->message $res['content'] temp test $this->message
-        exit;
+        return $this->checkAndDecrypt($res['msg']); //$this->message $res['content'] temp test $this->message
+        //exit;
 
     }
 
@@ -169,30 +172,38 @@ class HXBankApi
         $md52 = (new RSA())->RSADecode($msg['sign']);
         //dd($msg, $md51, $md52);
 
-        if($md51 == $md52){ //验签成功
+        if($md51 == $md52) { //验签成功
 
             // 进行解密
             $rule = '#<XMLPARA>(.*?)</XMLPARA>#i';
-            if(preg_match_all($rule, $msg['xml'], $matches))
-            {
+            if(preg_match_all($rule, $msg['xml'], $matches)) {
                 //var_dump($matches);exit;
-                $ciphertext = $matches[1][0];
-                $plaintext  = (new Crypt3Des($this->des3Key))->decrypt($ciphertext);
-                $xml = preg_replace($rule, '<XMLPARA>'.$plaintext.'</XMLPARA>', $msg['xml']);
-                $xmlArr = json_decode(json_encode(simplexml_load_string($xml)), true);
-                dd(
-                    '全文：'.$data,
-                    '签名：'.$msg['sign'],
-                    'XML：'.$msg['xml'],
-                    '摘要：'.$md51.'<=>'.$md52,
-                    '密文：'.$ciphertext,
-                    '明文：'.$plaintext,
-                    '全文：'.$xml, $xmlArr
-                );
-                /*return $xmlArr;*/
+                $cipherText = $matches[1][0];
+                $plainText  = (new Crypt3Des($this->des3Key))->decrypt($cipherText);
+                $msg['xml'] = preg_replace($rule, '<XMLPARA>'.$plainText.'</XMLPARA>', $msg['xml']);
             }
+            $array = json_decode(json_encode(simplexml_load_string($msg['xml'])), true);
+            $json = json_encode(simplexml_load_string($msg['xml']), JSON_UNESCAPED_UNICODE);
+            /*dd(
+                '全文：'.$data,
+                '签名：'.$msg['sign'],
+                'XML：'.$msg['xml'],
+                '摘要：'.$md51.'<=>'.$md52,
+                '密文：'.$cipherText,
+                '明文：'.$plainText,
+                '全文：'.$xml, $array
+            );*/
+            return [
+                'xml'   => $msg['xml'],
+                'json'  => $json,
+                'array' => $array
+            ];
+
         } else {
-            die('验签失败');
+            response()->json([
+                'errorCode' => 'xxxx',
+                'errorMsg'  => '验签失败'
+            ]);
         }
 
     }
@@ -225,7 +236,7 @@ class HXBankApi
         $reData = [
             'action'        => $this->url,
             'RequestData'   => $this->message,
-            'plaintext'     => $this->plaintext,
+            'plainText'     => $this->plainText,
             'transCode'     => $data['TRANSCODE']
         ];
 
@@ -235,7 +246,7 @@ class HXBankApi
     /**
      * 获取回调请求数据
      */
-    public function getBackReqData($data)
+    public function getBackReqData1($data)
     {
         return $this->checkAndDecrypt($data);
     }
@@ -243,10 +254,10 @@ class HXBankApi
 
     /**
      * 查看明文 测试用
-     * @param $plaintext
+     * @param $plainText
      * @return string
      */
-    public function buildXml2($plaintext)
+    public function buildXml2($plainText)
     {
         $xml =
             '<?xml version="1.0" encoding="utf-8"?>'.
@@ -260,7 +271,7 @@ class HXBankApi
             '</header>'.
             '<body>'.
             '<TRANSCODE>'.$this->transCode.'</TRANSCODE>'.
-            '<XMLPARA>'.$plaintext.
+            '<XMLPARA>'.$plainText.
             '</XMLPARA>'.
             '</body>'.
             '</Document>';
@@ -293,6 +304,10 @@ class HXBankApi
             case 'getFormData':
                 $data= $arguments[0];
                 return (new HXBankApi())->doGetFormData($data);
+
+            case 'getBackReqData':
+                $data= $arguments[0];
+                return (new HXBankApi())->checkAndDecrypt($data);
 
             default:
                 throw new Exception('Invalid method : '.$name);

@@ -167,6 +167,7 @@ class HttpRequest{
             if($errno || empty($data)) {
                 return $this->error(1, $error);
             } else {
+                //dd($data);
                 //var_dump($data);exit;
                 //return $data;
                 return $this->ihttp_response_parse($data);
@@ -245,7 +246,7 @@ class HttpRequest{
                 return $res;
 
             case 'toFormat':
-                //dd($res['content']);
+                //dd($res);
                 list($sign, $xml) = explode('<?', $res['content']);
                 $xml = '<?'.$xml;
                 $data = [
@@ -255,6 +256,7 @@ class HttpRequest{
                     'array' => json_decode(json_encode(simplexml_load_string($xml)), true),
                     'msg'   => $res['content']
                 ];
+                //dd($data);
                 return $data;
 
             default:

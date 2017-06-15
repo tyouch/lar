@@ -33,44 +33,46 @@ return [
         'MBaEgZ7v2iZJU+QIDAQAB '.PHP_EOL.
         '-----END PUBLIC KEY-----',*/
 
+    //http://183.63.131.106:5001/msg/app?&userid=00876
 
     'DES3KEY'           => 'AZJ174D4G9849H6GEMJ0K1I3',
-    'HTTP_REQUEST_URL'      => 'http://183.63.131.106:40011/extService/ghbExtService.do',
     'HTTP_REQUEST_URL_TEST' => 'http://183.63.131.106:40015/extServiceTest/ghbExtService.do',
+    'HTTP_REQUEST_URL_UAT'  => 'http://183.63.131.106:40013/extService/ghbExtService.do',
+    'HTTP_REQUEST_URL'      => 'http://183.63.131.106:40013/extService/ghbExtService.do', //'http://183.63.131.106:40011/extService/ghbExtService.do',
     'MERCHANTID'        => 'SFD',
     'MERCHANTNAME'      => 'P2P三分贷',
     'CHANNELCODE'       => 'P2P174',
 
 
     'PRIVATE_STR'       => '-----BEGIN RSA PRIVATE KEY-----'.PHP_EOL.
-        'MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALK1tDnHNoi34Kyw'.PHP_EOL.
-        'bOqs2aAURjca6EurRxA73+IDwxvSHpbBg/HfJfWToluqnQ4hqnrySLPX2EwqS+/M'.PHP_EOL.
-        'h+LDzkqPuWPFypiomNoopmRenUYpjAsKHgyMm24ZWfcLbmgSItbuVNsfo2asxvB7'.PHP_EOL.
-        '6VMfNMELQ0Yd1T3s72iOnwpAcWrlAgMBAAECgYEApg6jfkC3UskR00VIn7OnsNDG'.PHP_EOL.
-        'AfRVv+JScSpBucFnLdXMKKd+lGSW4B+j8OuTbosn34B8v+gkC3oN/7Ac4ECz0RIo'.PHP_EOL.
-        'UjYUecA1ywIjVe4hXgGSawJGwnLtwUW1ne8W9FZblMcAoTyKVczahJS9uHOFPfWo'.PHP_EOL.
-        '0TUvVlkduln63lKwOwECQQDyYwIpWca+uVkKeck+WzMDkCGOjBycPb8oj5HLL7vp'.PHP_EOL.
-        'kQvXHStglNyABoTXm9EBqAKfbVvH1xxVBsyR3/2n0n8lAkEAvL8o8jVWLf5haKOm'.PHP_EOL.
-        'QXm2NvyYRkvI+q96/fYuBtANJ/XV0yXG+MGKiRmNX0ZYGfgroOOE/X7s9JksBzeS'.PHP_EOL.
-        'SbRQwQJBALssGY809HRzTH76bJzqcApgUolxSOaeB++abkspIULL7wi+TbDXQy7Z'.PHP_EOL.
-        '2dtlR5Cv3Naf7C/1vLsr9Ozwuz/NHMECQEUK1AqNciHO7IjfXACVag8BJR6JuFHj'.PHP_EOL.
-        'AOWHONzrG/TjGz1qkzcJbQirnSgdzjppqmPm9g3YcQskQJO/QzbMy8ECQBKwVvZz'.PHP_EOL.
-        '+OBeSyNEUa4b71Z0JmMgCZIH3yOCbjT13bHgrewWc1cb1pBjkd3tiOHKL2Ljk6Qe'.PHP_EOL.
-        'P99opaCQWuKcMxI='.PHP_EOL.
+        'MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAKVr8zVQgolGBcXr'.PHP_EOL.
+        'RQA4kAvWRBr4C7+oYvFKejuHOyXFUQZkLfb3wALwlbPRVcG2Y/rFu0AtoSwGKDVU'.PHP_EOL.
+        'hFwPgO6wNCUXX1Ixd0X7V7XKlYgYQ7O5yNtFfNL7MLHLnsPrf8kvrGfnJQcnZTt7'.PHP_EOL.
+        'gWHUc8MMRzq24+vtYboQHCl2fzSfAgMBAAECgYBzTPsIfkV+SUBc49AEh2hf18lA'.PHP_EOL.
+        'wwPtYwEUDkWEmI2xlgcT3V/sdGNxqR+vZonPq8GkWY5a/XMJrID6Kx7WzDehCG4j'.PHP_EOL.
+        'D49tk+kzE/QzAHGcXBFCectm5+WpCs6a+fAQjPZXnJDAuymU/qBqTRLjKYt1USIT'.PHP_EOL.
+        'I/8CRHjLVvMSwlbQgQJBAM9l2pF5bJe8fMI2TvD6bvNNXplV7RfwqtvYuEqyFGen'.PHP_EOL.
+        'SeMf7dj4ZC0a3TMM/VpBqQUquUiXwVly3rLC5e1Yd00CQQDML9/U+HlaeerdRTrM'.PHP_EOL.
+        'IUIipOw+aOI70uYf7a+/zyBVRQ8E8oiDwo80dEhUII1ites9lm3ZcBZ5D38wKlA8'.PHP_EOL.
+        '+F2bAkEAutwS9DUJkSDC6xyRPW71ngKcc9zGNGajGlcFnE8cMVO5L4ip/G23nCfz'.PHP_EOL.
+        'Gjbe4X39MemPbIdGLjhfy4HsNU8alQJBALvZS35+Pf7b7RQ2bbqA2nxO6D0edwv8'.PHP_EOL.
+        'odQ78pVvM9re1suBadB2PRNP637iF9D5dntJmrQRJ8umUyf3tavx/wMCQHnY4bPq'.PHP_EOL.
+        'Nq7Ym31wJnzGpNRJKWpq2CZuz6ZolGQzW5IPaFchBhI7YGhaUcnePbHaJ8Iv+J9/'.PHP_EOL.
+        'xrUQO8jJVooeYTc='.PHP_EOL.
         '-----END RSA PRIVATE KEY-----',
 
     'PUBLIC_STR'        => '-----BEGIN PUBLIC KEY-----'.PHP_EOL.
-        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCytbQ5xzaIt+CssGzqrNmgFEY3'.PHP_EOL.
-        'GuhLq0cQO9/iA8Mb0h6WwYPx3yX1k6Jbqp0OIap68kiz19hMKkvvzIfiw85Kj7lj'.PHP_EOL.
-        'xcqYqJjaKKZkXp1GKYwLCh4MjJtuGVn3C25oEiLW7lTbH6NmrMbwe+lTHzTBC0NG'.PHP_EOL.
-        'HdU97O9ojp8KQHFq5QIDAQAB'.PHP_EOL.
+        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCla/M1UIKJRgXF60UAOJAL1kQa'.PHP_EOL.
+        '+Au/qGLxSno7hzslxVEGZC3298AC8JWz0VXBtmP6xbtALaEsBig1VIRcD4DusDQl'.PHP_EOL.
+        'F19SMXdF+1e1ypWIGEOzucjbRXzS+zCxy57D63/JL6xn5yUHJ2U7e4Fh1HPDDEc6'.PHP_EOL.
+        'tuPr7WG6EBwpdn80nwIDAQAB'.PHP_EOL.
         '-----END PUBLIC KEY-----',
 
     'PUBLIC_STR_BANK'   => '-----BEGIN PUBLIC KEY-----'.PHP_EOL.
-        'MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQDRs7+q/7N3ElgxuXpUXFmP7b+3'.PHP_EOL.
-        'H36I6SJ+Tl9mMktSTn5ykdGiZV89FNCqbZqBzi8q1F6WC3DHkqXEL4yNiQsRYubF'.PHP_EOL.
-        'mn0U0YRltnqsmzUOIR2nGLuYprg5ApuQ+dIH725YnZ453HNyvEZZbGxyVgjWh05+'.PHP_EOL.
-        'wkSV6HmfiB6fcTBfkwIBAw=='.PHP_EOL.
+        'MIGdMA0GCSqGSIb3DQEBAQUAA4GLADCBhwKBgQDYxWYkqOIafSg5i3AwqD9S5uQP'.PHP_EOL.
+        'd21o4yCXrJZOQmkHTIir/GbPVfxuLT3bBSbwVYQqSbaZEhsTsKVsoKsttj1/+Ew3'.PHP_EOL.
+        'oAhTXhAQNq127atwmyh1JnFVw7ynlRQ9FXNmkkqVKklSr0Iyv6CNHC3a9qgSdRQB'.PHP_EOL.
+        'ct/ZvWfQ8K/BoYy1mQIBAw=='.PHP_EOL.
         '-----END PUBLIC KEY-----',
 
 ];
