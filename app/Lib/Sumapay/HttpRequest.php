@@ -115,11 +115,12 @@ class HttpRequest{
         if(empty($urlset['port'])) {
             $urlset['port'] = $urlset['scheme'] == 'https' ? '443' : '80';
         }
-        /*if (strexists($url, 'https://') && !extension_loaded('openssl')) {
+        if ($this->strexists($url, 'https://') && !extension_loaded('openssl')) {
             if (!extension_loaded("openssl")) {
-                message('请开启您PHP环境的openssl');
+                dd('请开启您PHP环境的openssl');
             }
-        }*/
+        }
+        // dd($urlset);
 
         if(function_exists('curl_init') && function_exists('curl_exec')) {
             $ch = curl_init();

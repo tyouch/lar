@@ -15,8 +15,9 @@
     <title>@yield('title')</title>
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="<?= url('css/style.css') ?>">
+    {{--<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{{ url('css/app.css') }}">--}}
+    <link rel="stylesheet" href="{{ url('css/style.css') }}">
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -28,14 +29,14 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="<?= url('/') ?>" class="navbar-brand">Tyoupub</a>
+                <a href="{{ url('/') }}" class="navbar-brand">Tyoupub</a>
             </div>
 
             <div id="tyouNavbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a class="" href="<?= url('hosts/1') ?>"> 资产监控</a></li>
-                    <li><a class="" href="<?= url('test') ?>"> 漏洞监控</a></li>
-                    <li><a class="" href="<?= url('photo') ?>"> 入侵检测</a></li>
+                    <li><a class="" href="{{ route('hosts', 1) }}"> 资产监控</a></li>
+                    <li><a class="" href="{{ route('test.index') }}"> 漏洞监控</a></li>
+                    <li><a class="" href="{{ route('detection.map') }}"> 入侵检测</a></li>
 
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true"> 威胁智能</a>
@@ -77,7 +78,8 @@
     @yield('content')
 
 
-    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="{{ url('js/app.js') }}"></script>
+    {{--<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>--}}
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script>
         $('[data-toggle="tooltip"]').tooltip();

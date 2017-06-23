@@ -10,7 +10,7 @@ use App\Lib\Sumapay\RSA;
 use App\Lib\Sumapay\HXBankApi;
 //use App\Lib\aliyunOpenapiPhpSdkMaster;
 use App\Lib\Sumapay\HttpRequest;
-//use App\Models\Ip;
+use App\Models\Ip;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TestController extends Controller
@@ -22,8 +22,30 @@ class TestController extends Controller
 
     public function index()
     {
-        dd('test!');
+        $begin = microtime(true);
 
+        $title_str = file_get_contents('../doc/title.txt');
+        $titles = explode(PHP_EOL, $title_str);
+        //dd($titles);
+        $data = [];
+        foreach ($titles as $title) {
+            $rule = '#\(OGW(.*?)\)#i';
+            if(preg_match_all($rule, $title, $matches)) {
+                //var_dump($matches[1][0]);
+                $data['OGW'.$matches[1][0]] = $title;
+            }else{
+                dd('error');
+            }
+        }
+        /*for($i=41; $i<78; $i++) {
+            $data[$i-41] = 'ogw000'.$i;
+        }*/
+        //dd($data);
+        $end    = microtime(true);
+        return view('test.index', [
+            'data'  => $data,
+            'pass'  => $end - $begin
+        ]);
         //echo htmlspecialchars(HXBankApi::request($OGW00051));
         //echo htmlspecialchars($a->getSMSVerificationCode('OGW00041','1', '001', 0, 123));
     }
@@ -700,10 +722,12 @@ class TestController extends Controller
                 }
                 var_dump($title, $desc, $rData, '--------------------------------------------------------------------------------------');/**/
                 //$file   = '../storage/exports/array.php';
-                $file   = '../doc/Api_array.php';
+                $file       = '../doc/Api_array.php';
+                $tit_file   = '../doc/title.txt';//----
                 $usage  = 'HXBandApi::request('.$arrayName.'))';
                 $usage2 = 'HXBankApi::getFormData('.$arrayName.'))';
                 file_put_contents($file, $this->remarks($title), FILE_APPEND);
+                file_put_contents($tit_file, $title.PHP_EOL, FILE_APPEND);//----
                 file_put_contents($file, $this->remarks($desc), FILE_APPEND);
                 file_put_contents($file, $arrayName.' = '.var_export($rData, true).';'.PHP_EOL, FILE_APPEND);
                 !$async && file_put_contents($file, $this->remarks($usage, 'Usage: '), FILE_APPEND);
@@ -790,6 +814,18 @@ class TestController extends Controller
     public function putIp() {
 
         $data = [
+            [
+                'ip_src'    => '193.107.172.15',
+                'att_times' => 24,
+                'time1'     => '2017-06-13 09:24:19',
+                'time2'     => '2017-06-13 09:36:23'
+            ],
+            [
+                'ip_src'    => '221.234.167.61',
+                'att_times' => 2,
+                'time1'     => '2017-06-09 18:19:52',
+                'time2'     => '2017-06-09 18:19:52'
+            ],
             [
                 'ip_src'    => '58.48.232.114',
                 'att_times' => 1,
@@ -891,6 +927,12 @@ class TestController extends Controller
             $ip->time2      = strtotime($rec['time2']);
             //dd($ip);
             //$ip->save();
+            /*IP::create([
+                'ip_src'    => @inet_pton($rec['ip_src']),
+                'att_times' => $rec['att_times'],
+                'time1'     => strtotime($rec['time1']),
+                'time2'     => strtotime($rec['time2'])
+            ]);*/
         }
         dd('success!');
 

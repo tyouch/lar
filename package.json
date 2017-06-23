@@ -12,8 +12,12 @@
   "devDependencies": {
     "axios": "^0.15.3",
     "bootstrap-sass": "^3.3.7",
+    "browser-sync": "^2.18.12",
+    "browser-sync-webpack-plugin": "^1.1.4",
     "cross-env": "^3.2.3",
+    "glup": "^1.0.14",
     "jquery": "^3.1.1",
+    "laravel-elixir": "^6.0.0-15",
     "laravel-mix": "0.*",
     "lodash": "^4.17.4",
     "vue": "^2.1.10"
