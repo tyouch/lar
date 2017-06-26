@@ -2,19 +2,25 @@
 /**
  * Created by PhpStorm.
  * User: zhaoyao
- * Date: 2017/6/15
- * Time: 17:26
+ * Date: 2017/6/26
+ * Time: 10:59
  */
 ?>
 @extends('layouts.app')
-@section('title', 'HxBankApi')
+@section('title', 'VueTest')
 
 @section('content')
+
+    <div id="app">
+        <div :class="msg"></div>
+        <example></example>
+    </div>
+
     <div class="container">
         <div class="row assets">
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading">HxBank Test</div>
+                    <div class="panel-heading">Vue Test</div>
                     <div class="panel-body">
                         <div class="well">
                             <ul class="">
@@ -28,6 +34,11 @@
             </div>
         </div>
     </div>
+
     @includeIf('public.nav', [])
     @includeIf('public.time', [])
 @endsection
+
+@push('scripts')
+
+@endpush

@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['prefix'=>'test'], function (){
         Route::get('/', 'TestController@index')->name('test.index');
         Route::get('index2', 'TestController@index2');
+        Route::get('vue', 'TestController@vue')->name('test.vue');
         Route::get('ajax', 'TestController@ajax');
         Route::get('excel', 'TestController@excelToDoc');
         Route::get('putip', 'TestController@putIp');

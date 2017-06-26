@@ -11,22 +11,22 @@ const { mix } = require('laravel-mix');
  |
  */
 
-/*const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
-
-mix.webpackConfig({
-    plugins: [
-        new BrowserSyncPlugin({
-            files: [
-                '../!*.css'
-            ]
-        }, { reload: false})
-    ]
+/*mix.webpackConfig({
+    resolve: {
+        modules: [
+            path.resolve(__dirname, 'vendor/laravel/spark/resources/assets/js')
+        ]
+    }
 });*/
 
-mix.js('resources/assets/js/app.js', 'public/js')
-   //.js('resources/assets/js/echarts.min.js', 'public/js')
+mix.js('resources/assets/js/app.js', 'public/js').extract(['vue'])
    .js('resources/assets/js/bootstrap-treeview.min.js', 'public/js')
+   //.scripts(['resources/assets/js/echarts.min.js'], 'public/js')
+   //.babel(['resources/assets/js/echarts.min.js'], 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css');
+
+mix.copy('resources/assets/imgs/nav_bg.png', 'public/imgs');
+
 
 mix.browserSync({
     proxy: 'local.tyoupub.com/lar/public',   // apache或iis等代理地址

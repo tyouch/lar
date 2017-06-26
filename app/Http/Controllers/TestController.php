@@ -50,6 +50,31 @@ class TestController extends Controller
         //echo htmlspecialchars($a->getSMSVerificationCode('OGW00041','1', '001', 0, 123));
     }
 
+    public function vue()
+    {
+        $begin = microtime(true);
+
+        $title_str = file_get_contents('../doc/title.txt');
+        $titles = explode(PHP_EOL, $title_str);
+        //dd($titles);
+        $data = [];
+        foreach ($titles as $title) {
+            $rule = '#\(OGW(.*?)\)#i';
+            if(preg_match_all($rule, $title, $matches)) {
+                //var_dump($matches[1][0]);
+                $data['OGW'.$matches[1][0]] = $title;
+            }else{
+                dd('error');
+            }
+        }
+
+        $end    = microtime(true);
+        return view('test.vue', [
+            'data'  => $data,
+            'pass'  => $end - $begin
+        ]);
+    }
+
     public function getFormData()
     {
         // 6.2	账户开立(OGW00042) （必选，跳转我行页面处理）

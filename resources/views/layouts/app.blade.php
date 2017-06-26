@@ -36,7 +36,7 @@
                 <ul class="nav navbar-nav">
                     <li><a class="" href="{{ route('hosts', 1) }}"> 资产监控</a></li>
                     <li><a class="" href="{{ route('test.index') }}"> 漏洞监控</a></li>
-                    <li><a class="" href="{{ route('detection.map') }}"> 入侵检测</a></li>
+                    <li><a class="" href="{{ route('test.vue') }}"> 入侵检测</a></li>
 
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true"> 威胁智能</a>
@@ -77,8 +77,9 @@
 
     @yield('content')
 
-
-    <script src="{{ url('js/app.js') }}"></script>
+    <script src="{{ asset('/js/manifest.js') }}"></script>
+    <script src="{{ asset('/js/vendor.js') }}"></script>
+    <script src="{{ asset('/js/app.js') }}"></script>
     {{--<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>--}}
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script>
