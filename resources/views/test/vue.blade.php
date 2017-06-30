@@ -40,5 +40,23 @@
 @endsection
 
 @push('scripts')
+<script>
+    $("#app a").click(function (e) {
+        /*$.ajax({
+            url: 'https://hello.tyoupub.com/lar/public/cors',
+            //url: 'http://local.tyoupub.com/lar/public/cors',
+            type: 'GET',
+            dataType: 'JSON',
+            data:{
 
+            },
+            success: function (d, s) {
+                console.log(d, s);
+            },
+            complete: function (d, s) {
+
+            }
+        });*/
+    });
+</script>
 @endpush

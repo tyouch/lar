@@ -10,7 +10,7 @@ class HxCallingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     /**
@@ -54,9 +54,9 @@ class HxCallingController extends Controller
 
             case '42': // 6.2	账户开立(OGW00042) （必选，跳转我行页面处理）
                 $OGW00042 = array (
-                    'TRANSCODE' => 'OGW00042',
+                    'TRANSCODE' => 'OGW00090',//'OGW00042',
                     'MERCHANTID' => '',
-                    'APPID' => 'PC',
+                    'APPID' => 'APP',//'PC',
                     'TTRANS' => '6',
                     'MERCHANTNAME' => 'P2P三分贷',
                     'ACNAME' => '李旭',//'郝洪刚',//'黄耿嘉', //'刘通', //'蒋静',
@@ -109,7 +109,7 @@ class HxCallingController extends Controller
                     'ACNAME' => '郝洪刚',//'黄耿嘉', //'刘通', //'蒋静',
                     'AMOUNT' => '400000.00',
                     'REMARK' => '',
-                    'RETURNURL' => 'http://121.43.37.74:8080/hxcalling/tx',
+                    'RETURNURL' => 'https://121.43.37.74:8080/hxcalling/tx',
                     'EXT_FILED1' => '',
                     'EXT_FILED2' => '',
                     'EXT_FILED3' => '',
@@ -669,7 +669,81 @@ class HxCallingController extends Controller
      */
     public function tx(Request $request)
     {
-        echo $request->input('RequestData');
+
+        $file = '../tx.txt';
+        $raw_post_data = file_get_contents('php://input', 'r');
+        if(empty($raw_post_data)) {
+            $msg = file_get_contents($file);
+            //file_put_contents($file, null, LOCK_EX);
+            unlink($file);
+            $ret = HXBankApi::getBackReqData($msg);
+            echo $ret['json'];
+            $data = [
+                'channelCode'   => $ret['array']['header']['channelCode'],
+                'channelFlow'   => $ret['array']['header']['channelFlow'],
+                'channelDate'   => $ret['array']['header']['channelDate'],
+                'channelTime'   => $ret['array']['header']['channelTime'],
+                //'BANKID'    => $ret['array']['body']['BANKID'],
+                'TRANSCODE' => $ret['array']['body']['TRANSCODE'],
+                'RETURNCODE'    => '000000',
+                'RETURNMSG' => '交易成功',
+                'OLDREQSEQNO'   => $ret['array']['body']['XMLPARA']['OLDREQSEQNO'],
+            ];
+            dump($ret, $data);
+            $res = HXBankApi::resBank($data);
+            dd($res);
+        } else {
+            file_put_contents($file, $raw_post_data, LOCK_EX);
+        }
+
+    }
+
+    /**
+     * 测试提交
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function post()
+    {
+        // 登录
+        /*$cookie_jar = $_SERVER['DOCUMENT_ROOT'].'/lar/doc/laravel.cookie';
+        $extra = array(
+            'CURLOPT_COOKIEJAR'     => $cookie_jar,
+            'CURLOPT_COOKIEFILE'    => $cookie_jar
+        );
+        $url = url('login');
+        $data =[
+            'email'     => 'you.ch@foxmail.com',
+            'password'  => 'admin123',
+        ];
+        //dd($url, $data);
+        HttpRequest::to($url, $data, $extra);*/
+
+        // 测试post
+        $url = url('hxcalling/tx');
+        $post = [
+            'RequestData'   => '001X11          0000025620F051CE06E1CB555EE119DF98DA756DC34FDA709FDB723168830DCBF3721B41D700926DDA9EF0D25992EAA8848B3510545FB3DA28B68DABD08A22055E8D7D2F9766B34E2F0ECA0957334B388D51D1DA8D6E4F21FAEC1B8596246FC69885F1CA9AC87A079AB7832900C94C25A4B19C9778275B4AA6BFAD61C20D12CE786688AC<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P174</channelCode><channelFlow>P2P17420170612045Ui6BpyMfIoI</channelFlow><channelDate>20170612</channelDate><channelTime>033242</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00045</TRANSCODE><XMLPARA>+X2br6lee+grGi6GWUfT+UbDSfsoB2yQDEw+geQXLwbGmRvSusD9zEcIsSGuHmg9rXi+dJuNuK4jkob5tK5IRurERamuYDH4lTsp+qz0MbZPEKpNek0mFMJHek7JsJ4NfTWDwYsi9zPUMc88MMsP3q92OU3N5/s7wMSHBmzh2umhpHdW7pISxfuI0/w+w//lLHDhY61GOfW+BD8i1r8VD/ravmH6qZ6MmkVX3VP4UJb0Jr/lxdIBQQSnRKF/k0ObJR3A9V+1PdaUL3xBokWSUnSLwAxs7pIAjCFqXIFJBSNc3gaz/xA296A5C8MInfOvgsEV6LUm5yZVsI5h0lcrevfCirlk1zbQY/5FAz00u7+L/6pECOj+PvM83b2q5HPI3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvjV+Anjx7ww4=</XMLPARA></body></Document>',
+            'transCode'     => 'OGW00047',
+        ];
+        $post = pack("a*",$post['RequestData']);
+        //dd($post);
+        //dd($_SERVER['DOCUMENT_ROOT'], $cookie_jar);
+        //$post = 'abc=1&xyz=2';
+        //dd($url, $post); //, $extra
+        dd(HttpRequest::to($url, $post));
+        //dd(HttpRequest::toJson($url, $post));
+        //dd(HttpRequest::toFormat($url, $post, $extra));
+        exit;
+
+        return view('test.request',[
+
+        ]);
+    }
+
+    public function test()
+    {
+        //$raw_post_data = $request->getContent();
+        //echo $raw_post_data;
+        //echo $request->input('RequestData');
 
         //return response()->json($request->all());
         //print_r($request->all());
@@ -685,46 +759,6 @@ class HxCallingController extends Controller
         echo json_encode($post);
         //return response()->json($post);
         exit;*/
-
-        HXBankApi::getBackReqData();
-    }
-
-    /**
-     * 测试提交
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function post()
-    {
-        // 登录
-        $cookie_jar = $_SERVER['DOCUMENT_ROOT'].'/lar/doc/laravel.cookie';
-        $extra = array(
-            'CURLOPT_COOKIEJAR'     => $cookie_jar,
-            'CURLOPT_COOKIEFILE'    => $cookie_jar
-        );
-        $url = url('login');
-        $data =[
-            'email'     => 'you.ch@foxmail.com',
-            'password'  => 'admin123',
-        ];
-        //dd($url, $data);
-        HttpRequest::to($url, $data, $extra);
-
-        // 测试post
-        $url = url('hxcalling/tx');
-        $post = [
-            'RequestData'   => '001X11          0000025620F051CE06E1CB555EE119DF98DA756DC34FDA709FDB723168830DCBF3721B41D700926DDA9EF0D25992EAA8848B3510545FB3DA28B68DABD08A22055E8D7D2F9766B34E2F0ECA0957334B388D51D1DA8D6E4F21FAEC1B8596246FC69885F1CA9AC87A079AB7832900C94C25A4B19C9778275B4AA6BFAD61C20D12CE786688AC<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P174</channelCode><channelFlow>P2P17420170612045Ui6BpyMfIoI</channelFlow><channelDate>20170612</channelDate><channelTime>033242</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00045</TRANSCODE><XMLPARA>+X2br6lee+grGi6GWUfT+UbDSfsoB2yQDEw+geQXLwbGmRvSusD9zEcIsSGuHmg9rXi+dJuNuK4jkob5tK5IRurERamuYDH4lTsp+qz0MbZPEKpNek0mFMJHek7JsJ4NfTWDwYsi9zPUMc88MMsP3q92OU3N5/s7wMSHBmzh2umhpHdW7pISxfuI0/w+w//lLHDhY61GOfW+BD8i1r8VD/ravmH6qZ6MmkVX3VP4UJb0Jr/lxdIBQQSnRKF/k0ObJR3A9V+1PdaUL3xBokWSUnSLwAxs7pIAjCFqXIFJBSNc3gaz/xA296A5C8MInfOvgsEV6LUm5yZVsI5h0lcrevfCirlk1zbQY/5FAz00u7+L/6pECOj+PvM83b2q5HPI3cY1iThbmEmCbiSxiHCJdG4YZAAjrxP2IG5adTlxDsgnoLepo/Vo6GbgwT0cSYcvjV+Anjx7ww4=</XMLPARA></body></Document>',
-            'transCode'     => 'OGW00047',
-        ];
-
-        //dd($_SERVER['DOCUMENT_ROOT'], $cookie_jar);
-        //$post = 'abc=1&xyz=2';
-        //dd($url, $post);
-        dd(HttpRequest::to($url, $post, $extra));
-        //dd(HttpRequest::toJson($url, $post));
-        //dd(HttpRequest::toFormat($url, $post, $extra));
-
-        return view('test.request',[
-
-        ]);
+        //stream_context_create();
     }
 }

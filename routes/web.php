@@ -28,7 +28,7 @@
 
 Auth::routes();
 
-Route::group(['middleware' => 'auth'], function () {
+//Route::group(['middleware' => 'auth'], function () {
 
     Route::get('home', 'HomeController@index')->name('home');
     Route::get('/', 'HomeController@index');
@@ -72,7 +72,8 @@ Route::group(['middleware' => 'auth'], function () {
             'create' => 'photo.build'
         ]
     ]*/
-});
+//});
 
-
+Route::get('post', 'HxCallingController@post');
+Route::get('cors', 'TestController@cors');
 

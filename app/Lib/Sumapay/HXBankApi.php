@@ -19,9 +19,16 @@ class HXBankApi
     protected $des3Key;
     protected $url;
     protected $merchantID;
+    protected $transCode;
+
     protected $channelCode;
     protected $channelFlow;
-    protected $transCode;
+    protected $channelDate;
+    protected $channelTime;
+
+    protected $serverFlow;
+    protected $serverDate;
+    protected $serverTime;
 
     public function __construct()
     {
@@ -60,7 +67,7 @@ class HXBankApi
     }
 
     //
-    public function buildXml($cipherText)
+    public function buildXml($cipherText, $type = 'req')
     {
         $xml =
             '<?xml version="1.0" encoding="utf-8"?>'.
@@ -68,16 +75,33 @@ class HXBankApi
                 '<header>'.
                     '<channelCode>'.$this->channelCode.'</channelCode>'.
                     '<channelFlow>'.$this->channelFlow.'</channelFlow>'.
-                    '<channelDate>'.date('Ymd').'</channelDate>'.
-                    '<channelTime>'.date('His').'</channelTime>'.
-                    '<encryptData></encryptData>'.
+                    '<channelDate>'.$this->channelDate.'</channelDate>'.
+                    '<channelTime>'.$this->channelTime.'</channelTime>'.
+                    '<encryptData></encryptData>'
+        ;
+
+        if($type == 'res') {
+            $xml .=
+                '<transCode>'.$this->transCode.'</transCode>'.
+                '<serverFlow>'.$this->serverFlow.'</serverFlow>'.
+                '<serverDate>'.$this->serverDate.'</serverDate>'.
+                '<serverTime>'.$this->serverTime.'</serverTime>'.
+                '<status>0</status>'.
+                '<errorCode>0</errorCode>'.
+                '<errorMsg>success</errorMsg>'
+            ;
+        }
+
+        $xml .=
                 '</header>'.
                 '<body>'.
                     '<TRANSCODE>'.$this->transCode.'</TRANSCODE>'.
                     '<XMLPARA>'.$cipherText.
                     '</XMLPARA>'.
                 '</body>'.
-            '</Document>';
+            '</Document>'
+        ;
+
         return $xml;
     }
 
@@ -86,15 +110,32 @@ class HXBankApi
      * @param $sign
      * @param $cipher
      */
-    public function buildMsg($data)
+    public function buildMsg($data, $type = 'req')
     {
-        isset($data['MERCHANTID']) && $data['MERCHANTID'] = $this->merchantID;
-        isset($data['MERCHANTNAME']) && $data['MERCHANTNAME'] = $this->merchantName;
-
         $this->transCode = $data['TRANSCODE'];
-        $this->channelFlow .= substr($data['TRANSCODE'], -3, 3).$this->generateMerchantFlow(11);
         unset($data['TRANSCODE']);
-        //dd($this->channelFlow, $data);
+
+        if($type == 'req') {
+            isset($data['MERCHANTID']) && $data['MERCHANTID'] = $this->merchantID;
+            isset($data['MERCHANTNAME']) && $data['MERCHANTNAME'] = $this->merchantName;
+            $this->channelFlow .= substr($this->transCode, -3, 3).$this->generateMerchantFlow(11);
+            $this->channelDate  = date('Ymd');
+            $this->channelTime  = date('His');
+            //dd($this->channelFlow, $data);
+        } else {
+            //$this->channelCode  = $data['channelCode'];
+            $this->channelFlow  = $data['channelFlow'];
+            $this->channelDate  = $data['channelDate'];
+            $this->channelTime  = $data['channelTime'];
+            unset($data['channelCode']);
+            unset($data['channelFlow']);
+            unset($data['channelDate']);
+            unset($data['channelTime']);
+            $this->serverFlow   = 'SFD'.date('YmdHis').$this->generateMerchantFlow(3);
+            $this->serverDate   = date('Ymd');
+            $this->serverTime   = date('His');
+            //dump($this->serverFlow, $this->serverDate, $this->serverTime);
+        }
 
 
         // -1- 组织数据 <XMLPARA>
@@ -105,8 +146,13 @@ class HXBankApi
         $cipherText = (new Crypt3Des($this->des3Key))->encrypt($xmlpara);
 
         // 组织 <XML>
-        $xml = $this->buildXml($cipherText);
-        $this->plainText = $this->buildXml2($xmlpara); // test
+        if ($type == 'req') {
+            $xml = $this->buildXml($cipherText);
+            $this->plainText = $this->buildXml2($xmlpara); // test
+        } else {
+            $xml = $this->buildXml($cipherText, 'res');
+            $this->plainText = $this->buildXml2($xmlpara, 'res');
+        }
 
         // -3- 单向加密获得签名
         $sign = (new RSA())->RSAEncode($xml);
@@ -244,11 +290,16 @@ class HXBankApi
     }
 
     /**
-     * 获取回调请求数据
+     * 第三方公司应返回
      */
-    public function getBackReqData1($data)
+    public function responseBank($data = [])
     {
-        return $this->checkAndDecrypt($data);
+        // -4- 组织最终报文
+        $this->buildMsg($data, 'res');
+        dump($this->url, $this->message, $this->plainText);
+
+        // -5- http request
+        return HttpRequest::to($this->url, $this->message);
     }
 
 
@@ -257,7 +308,7 @@ class HXBankApi
      * @param $plainText
      * @return string
      */
-    public function buildXml2($plainText)
+    public function buildXml2($plainText, $type = 'req')
     {
         $xml =
             '<?xml version="1.0" encoding="utf-8"?>'.
@@ -265,16 +316,33 @@ class HXBankApi
             '<header>'.
             '<channelCode>'.$this->channelCode.'</channelCode>'.
             '<channelFlow>'.$this->channelFlow.'</channelFlow>'.
-            '<channelDate>'.date('Ymd').'</channelDate>'.
-            '<channelTime>'.date('His').'</channelTime>'.
-            '<encryptData></encryptData>'.
+            '<channelDate>'.$this->channelDate.'</channelDate>'.
+            '<channelTime>'.$this->channelTime.'</channelTime>'.
+            '<encryptData></encryptData>'
+        ;
+
+        if($type == 'res') {
+            $xml .=
+                '<transCode>'.$this->transCode.'</transCode>'.
+                '<serverFlow>'.$this->serverFlow.'</serverFlow>'.
+                '<serverDate>'.$this->serverDate.'</serverDate>'.
+                '<serverTime>'.$this->serverTime.'</serverTime>'.
+                '<status>0</status>'.
+                '<errorCode>0</errorCode>'.
+                '<errorMsg>success</errorMsg>'
+            ;
+        }
+
+        $xml .=
             '</header>'.
             '<body>'.
             '<TRANSCODE>'.$this->transCode.'</TRANSCODE>'.
             '<XMLPARA>'.$plainText.
             '</XMLPARA>'.
             '</body>'.
-            '</Document>';
+            '</Document>'
+        ;
+
         return $xml;
     }
 
@@ -308,6 +376,10 @@ class HXBankApi
             case 'getBackReqData':
                 $data= $arguments[0];
                 return (new HXBankApi())->checkAndDecrypt($data);
+
+            case 'resBank':
+                $data= $arguments[0];
+                return (new HXBankApi())->responseBank($data);
 
             default:
                 throw new Exception('Invalid method : '.$name);

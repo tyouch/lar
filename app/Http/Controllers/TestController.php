@@ -968,8 +968,26 @@ class TestController extends Controller
         dd(1);
     }
 
-    public function post1(Request $request)
+    public function cors(Request $request)
     {
-        dd($request);
+        $ips = Ip::get();
+        $data = []; $i = 0;
+        //dd($ips);
+        foreach ($ips as $item) {
+            $data[$i]['id'] = $item->id;
+            $data[$i]['ip_src'] = @inet_ntop($item->ip_src);
+            $data[$i]['att_times'] = $item->att_times;
+            $data[$i]['time1'] = date('Y-m-d H:i:s', $item->time1);
+            $data[$i++]['time2'] = date('Y-m-d H:i:s', $item->time2);
+        }
+        //dd($data);
+
+        header('Content-type: application/json;charset=UTF-8');
+        header("Access-Control-Allow-Origin: *");
+        //header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+
+        return response()->json($data);
+        //echo json_encode($data, JSON_UNESCAPED_UNICODE);
+
     }
 }
