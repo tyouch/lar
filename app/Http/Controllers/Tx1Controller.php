@@ -24,15 +24,19 @@ class Tx1Controller extends Controller
             $ret = HXBankApi::getBackReqData($msg);
             echo $ret['json'];
             $data = [
+                'channelCode'   => $ret['array']['header']['channelCode'],
+                'channelFlow'   => $ret['array']['header']['channelFlow'],
+                'channelDate'   => $ret['array']['header']['channelDate'],
+                'channelTime'   => $ret['array']['header']['channelTime'],
+                //'BANKID'    => $ret['array']['body']['BANKID'],
                 'TRANSCODE' => $ret['array']['body']['TRANSCODE'],
-                'XMLPARA'   => [
-                    'RETURNCODE'    => '000000',
-                    'RETURNMSG'     => '交易成功',
-                    'OLDREQSEQNO'   => $ret['array']['body']['XMLPARA']['OLDREQSEQNO'],
-                ]
+                'RETURNCODE'    => '000000',
+                'RETURNMSG' => '交易成功',
+                'OLDREQSEQNO'   => $ret['array']['body']['XMLPARA']['OLDREQSEQNO'],
             ];
+            //dump($ret, $data);
             $res = HXBankApi::resBank($data);
-            //dd($data, $res);
+            //dd($res);
         } else {
             file_put_contents($file, $raw_post_data, LOCK_EX);
         }

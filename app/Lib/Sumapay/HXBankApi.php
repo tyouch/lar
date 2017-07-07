@@ -296,7 +296,7 @@ class HXBankApi
     {
         // -4- 组织最终报文
         $this->buildMsg($data, 'res');
-        dump($this->url, $this->message, $this->plainText);
+        //dump($this->url, $this->message, $this->plainText);
 
         // -5- http request
         return HttpRequest::to($this->url, $this->message);

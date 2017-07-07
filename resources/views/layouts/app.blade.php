@@ -37,6 +37,7 @@
                     <li><a class="" href="{{ route('hosts', 1) }}"> 资产监控</a></li>
                     <li><a class="" href="{{ route('test.index') }}"> 漏洞监控</a></li>
                     <li><a class="" href="{{ route('test.vue') }}"> 入侵检测</a></li>
+                    <li><a class="" href="{{ route('account.index') }}"> 公众号管理</a></li>
 
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="true"> 威胁智能</a>
@@ -80,8 +81,8 @@
     <script src="{{ asset('/js/manifest.js') }}"></script>
     <script src="{{ asset('/js/vendor.js') }}"></script>
     <script src="{{ asset('/js/app.js') }}"></script>
-    {{--<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>--}}
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    {{--<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>--}}
     <script>
         $('[data-toggle="tooltip"]').tooltip();
         //$(".js-popover").popover(); //init弹出框

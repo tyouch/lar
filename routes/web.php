@@ -42,6 +42,11 @@ Auth::routes();
         Route::get('map', 'DetectionController@map')->name('detection.map');
     });
 
+    Route::group(['prefix'=>'account'], function (){
+        Route::get('/', 'AccountController@index')->name('account.index');
+        Route::post('upload', 'AccountController@uploadFile')->name('account.upload');
+    });
+
     Route::group(['prefix'=>'test'], function (){
         Route::get('/', 'TestController@index')->name('test.index');
         Route::get('index2', 'TestController@index2');

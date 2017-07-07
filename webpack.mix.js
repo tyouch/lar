@@ -26,6 +26,7 @@ mix.js('resources/assets/js/app.js', 'public/js').extract(['vue'])
    .sass('resources/assets/sass/app.scss', 'public/css');
 
 mix.copy('resources/assets/imgs/nav_bg.png', 'public/imgs');
+mix.copy('resources/assets/imgs/up_pic_bg.jpg', 'public/imgs');
 
 
 mix.browserSync({

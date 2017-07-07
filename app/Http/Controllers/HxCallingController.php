@@ -689,9 +689,9 @@ class HxCallingController extends Controller
                 'RETURNMSG' => '交易成功',
                 'OLDREQSEQNO'   => $ret['array']['body']['XMLPARA']['OLDREQSEQNO'],
             ];
-            dump($ret, $data);
+            //dump($ret, $data);
             $res = HXBankApi::resBank($data);
-            dd($res);
+            //dd($res);
         } else {
             file_put_contents($file, $raw_post_data, LOCK_EX);
         }
