@@ -1,0 +1,94 @@
+/*@font-face {
+    font-family: fzltxhk; !*这里是说明调用来的字体名字*!
+    src: url(fzltxhk.ttf); !*这里是字体文件路径*!  fzltxhk
+}*/
+
+body {padding: 60px 0 80px 0; font: 14px "微软雅黑"; color: white; background-color: #404a59;/*62.5% #f0f0f0 font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;*/}
+.navbar-inverse {opacity: .9;}
+
+.col-xs-12{padding: 5px;}
+
+a, a:hover, a:visited{color: #8c8c8c; text-decoration:none;}
+
+.header-search{float: right; margin: 8px 0;}
+.header-search input{color: #fff; background: #404a59;}
+
+#main{height: 800px}
+.btn3{position: fixed; top: 70px; z-index: 2; padding: 10px; background: url(../imgs/nav_bg.png) repeat-y; width: 7.5%;}
+.btn3 a,
+.btn3 a:hover,
+.btn3 a:visited{color: white; text-decoration:none;}
+.btn-scan{float: left; margin: 20px 0;}
+.time{position: fixed; bottom: 0; right: 0; z-index: 2; padding: 10px; color: white; background: rgba(0,0,0,0.2);}
+
+
+/*资产*/
+*{border: 0px solid transparent !important;}
+.container .panel-heading{background: #666; color: white;}
+.container .panel-body{background: #323c48;/*#404a59*/;}
+.container .modal-content{background: #666;}
+.container th{color: #15ceff;}
+
+.assets{color: white; font-size: 14px;}
+.assets .well,.pager li>a{background: #404a59;}
+.assets .col-2xx{/*height: 220px;*/ overflow: hidden;}
+.assets .pager-top{margin-top: 29px;}
+.assets .tbl th{width: 30%;}
+.assets .tbl td{width: 70%;}
+.assets .tbr th{width: 30%;}
+.assets .bs-modal-lg-assets-edit input{background: #404a59; width: 90%;}
+.assets .bs-modal-lg-vuln-edit input{background: #404a59; width: 90%;}
+.assets .pos input{width: 27%;}
+.day{float: left; margin-right: 6px; width: 28%;}
+.run_ones{display: none;}
+
+.tra{cursor: crosshair}/*pointer*/
+.layer2{position: fixed; left: 0; bottom: 70px; /*width: 50%;*/ height: auto; border: 0px solid #ccc; font-size: 12px;}
+.layer2 th{color: #46bee9; border: none; text-align: left; background: rgba(0, 0, 0, 0.3);}
+.layer2 td{color: #46bee9; border: none; text-align: left; background: rgba(0, 0, 0, 0.2);}
+.layer2 .table>tbody>tr>td, .table>tbody>tr>th{/*padding: 4px;*/}
+
+/*.sit-row{height: 400px; background-color: #323332;}
+.sit-row div{width: 10px; height: 90%; background-color: #0a0a0a;}*/
+
+.sit-box{width: 100%; height: 800px; background-color: #323332;;
+    display: flex; flex-flow: row wrap; justify-content: center; align-items: center; align-content: center;}
+.sit-boxn{width: 32%; height: 380px; background-color: #0a0a0a; margin: 5px;}
+
+footer {position: fixed; left: 0; bottom: 0; z-index: 3; background-color: rgba(0,0,0,0.8); color: white; width: 100%; height: 90px; padding: 20px 0}
+/*footer a {color: #8c8c8c; text-decoration:none;}*/
+footer a:hover {color: #ff4546;}
+footer .active {color: #ff4546;}
+/*footer a:visited {color: #ccc;}*/
+footer .block {width: 25%; font-size: 1.6rem; text-align: center; float: left; line-height: 20px;}
+footer .text {font-size: 1.4rem; margin-top: 2px;}
+
+
+.progress1 {height: 14px; margin-top: 4px; margin-bottom:0;}
+.checkbox1 {margin-top: 0; margin-bottom:0;}
+.checkbox1 .label1 {min-height: 0;}
+
+/*lend
+.lend-title{width: 100%; height:130px; border-radius: 5px 5px 0 0; background-position: 10px 20px; background-repeat:no-repeat;}
+.lend-title-color-other{background-color: #7cb862; background-image: url(../images/lend-title-other.png);}
+.lend-title-color-new{background-color: #fe6458; background-image: url(../images/lend-title-new.png);}
+.lend-title-color-right{background-color: #72a7d9; background-image: url(../images/lend-title-right.png);}*/
+
+
+/*iphone6s & plus 414 992*/
+@media screen and (max-width: 2048px) {
+
+
+}
+
+/*iphone6s*/
+@media screen and (max-width: 375px) {
+
+
+}
+
+/*iphone5s*/
+@media screen and (max-width: 320px) {
+
+
+}

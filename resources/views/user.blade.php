@@ -7,44 +7,47 @@
  */
 ?>
 
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ $title }}</title>
-    <!-- 新 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+@extends('layouts.app')
+@section('title', 'myUser')
 
-    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
-    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+@section('content')
+    <div class="container">
+        <div class="row">
+            @section('sidebar')
+                <div class="col-md-3">
+                    <div class="panel panel-success">
+                        <div class="panel-heading">Navi</div>
+                        <ul class="list-group">
+                            <li class="list-group-item">nav11</li>
+                            <li class="list-group-item">nav22</li>
+                        </ul>
+                    </div>
+                </div>
+            @show
 
-    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <style>
-        body{margin-top: 60px;}
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="panel panel-success">
-                <div class="panel-heading">Navi</div>
-                <ul class="list-group">
-                    <li class="list-group-item">nav1</li>
-                    <li class="list-group-item">nav2</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-md-9">
-            <div class="panel panel-info">
-                <div class="panel-heading">Content</div>
-                <div class="panel-body">123456</div>
-                <div class="panel-footer">Copyritht</div>
+            <div class="col-md-9">
+                <div class="panel panel-info">
+                    <div class="panel-heading">Content</div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <tr>
+                                <th>Username</th>
+                                <th>Credit1</th>
+                                <th>Credit2</th>
+                            </tr>
+                            @foreach ($members as $user)
+                                <tr>
+                                    <td>{{ $user->username }}</td>
+                                    <td>{{ $user->credit1 }}</td>
+                                    <td>{{ $user->credit2 }}</td>
+                                </tr>
+                            @endforeach
+                        </table>
+                    </div>
+                    <div class="panel-footer">Copyritht</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</body>
-</html>
+
+@endsection
