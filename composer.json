@@ -19,7 +19,8 @@
     "autoload": {
         "classmap": [
             "database",
-            "app/Lib/Sumapay"
+            "app/Lib/Sumapay",
+            "app/Lib/Wechat"
         ],
         "psr-4": {
             "App\\": "app/"

@@ -45,6 +45,16 @@ Auth::routes();
     Route::group(['prefix'=>'account'], function (){
         Route::get('/', 'AccountController@index')->name('account.index');
         Route::post('upload', 'AccountController@uploadFile')->name('account.upload');
+        Route::get('operate', 'AccountController@operate')->name('account.operate');
+        Route::post('store', 'AccountController@store')->name('account.store');
+    });
+
+    Route::group(['prefix'=>'wetest'], function (){
+        Route::get('/', 'WetestController@index')->name('wetest.index');
+    });
+
+    Route::group(['prefix'=>'pay'], function (){
+        Route::get('/', 'Payment\PayController@index')->name('pay.index');
     });
 
     Route::group(['prefix'=>'test'], function (){

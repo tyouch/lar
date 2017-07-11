@@ -6,6 +6,80 @@
  * Time: 22:44
  */
 
+
+/**
+ * @param $length
+ * @param int $numeric
+ * @return string
+ */
+function random($length, $numeric = 0) {
+    $seed = base_convert(md5(microtime().$_SERVER['DOCUMENT_ROOT']), 16, $numeric ? 10 : 35);
+    $seed = $numeric ? (str_replace('0', '', $seed).'012340567890') : ($seed.'zZ'.strtoupper($seed));
+    if($numeric) {
+        $hash = '';
+    } else {
+        $hash = chr(rand(1, 26) + rand(0, 1) * 32 + 64);
+        $length--;
+    }
+    $max = strlen($seed) - 1;
+    for($i = 0; $i < $length; $i++) {
+        $hash .= $seed{mt_rand(0, $max)};
+    }
+    return $hash;
+}
+
+/**
+ * 将一个数组转换为 XML 结构的字符串
+ * @param array $arr 要转换的数组
+ * @param int $level 节点层级, 1 为 Root.
+ * @return string XML 结构的字符串
+ */
+function array2xml($arr, $level = 1) {
+    $s = $level == 1 ? "<xml>" : '';
+    foreach($arr as $tagname => $value) {
+        if (is_numeric($tagname)) {
+            $tagname = $value['TagName'];
+            unset($value['TagName']);
+        }
+        if(!is_array($value)) {
+            $s .= "<{$tagname}>".(!is_numeric($value) ? '<![CDATA[' : '').$value.(!is_numeric($value) ? ']]>' : '')."</{$tagname}>";
+        } else {
+            $s .= "<{$tagname}>" . array2xml($value, $level + 1)."</{$tagname}>";
+        }
+    }
+    $s = preg_replace("/([\x01-\x08\x0b-\x0c\x0e-\x1f])+/", ' ', $s);
+    return $level == 1 ? $s."</xml>" : $s;
+}
+
+/**
+ * 获取客户ip
+ * @return string
+ *			 返回IP地址
+ *			 如果未获取到返回unknown
+ */
+function getip() {
+    static $ip = '';
+    $ip = $_SERVER['REMOTE_ADDR'];
+    if(isset($_SERVER['HTTP_CDN_SRC_IP'])) {
+        $ip = $_SERVER['HTTP_CDN_SRC_IP'];
+    } elseif (isset($_SERVER['HTTP_CLIENT_IP']) && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', $_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif(isset($_SERVER['HTTP_X_FORWARDED_FOR']) AND preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', $_SERVER['HTTP_X_FORWARDED_FOR'], $matches)) {
+        foreach ($matches[0] AS $xip) {
+            if (!preg_match('#^(10|172\.16|192\.168)\.#', $xip)) {
+                $ip = $xip;
+                break;
+            }
+        }
+    }
+    return $ip;
+}
+
+/**
+ * @param $string
+ * @param $find
+ * @return bool
+ */
 function strexists($string, $find) {
     return !(strpos($string, $find) === FALSE);
 }
