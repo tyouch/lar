@@ -14,16 +14,17 @@ class WetestController extends Controller
 
     public function __construct()
     {
-        $this->middleware('wechatAuth');
+        //$this->middleware('wechatAuth');
         $this->appId = config('wechat.AppID');
         $this->appSecret = config('wechat.AppSecret');
         $this->redirectUri = config('wechat.redirectUri');
+        $this->apiKey = config('wechat.apiKey');
     }
 
     public function index()
     {
         //var_dump(session());
-
+        dd(public_path());
         $package = [
             'appid'         => config('wechat.AppID'), // test
             'mch_id'        => config('wechat.mchID'), // test
@@ -41,7 +42,7 @@ class WetestController extends Controller
         ];
 
         ksort($package, SORT_STRING);
-        $string1 = '';
+        $string = $string1 = '';
         foreach($package as $key => $v) {
             $string1 .= "{$key}={$v}&";
         }
@@ -52,12 +53,26 @@ class WetestController extends Controller
         $res = HttpRequest::xmlToArray(config('wechat.wPayUrl'), $data);
         dump($res);
 
+        $wOpt = [
+            'appId'         => $this->appId,
+            'timeStamp'     => time(),
+            'nonceStr'      => random(32),
+            'package'       => 'prepay_id='.$res['prepay_id'],
+            'signType'      => 'MD5',
+        ];
+        ksort($wOpt, SORT_STRING);
+        foreach($wOpt as $key => $v) {
+            $string .= "{$key}={$v}&";
+        }
+        $string .= 'key='.$this->apiKey;
+        $wOpt['paySign'] = strtoupper(md5($string));
 
+        $signPackage = $this->getSignPackage();
+        dump($signPackage);
 
         return view('wechat.wetest', [
-            'prepay_id'     => $res['prepay_id'],
-            'prepay_sign'   => $res['sign'],
-            'signPackage'   => $this->getSignPackage(),
+            'wOpt'          => $wOpt,
+            'signPackage'   => $signPackage,
         ]);
     }
 

@@ -7,44 +7,51 @@
  */
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <!-- 新 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+@extends('layouts.app')
+@section('title', '微信支付')
 
-    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
-    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+<style>
+    .breakLine{width: 100%; word-break: break-all;}
+</style>
 
-    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-</head>
-<body>
-<div class="container">
-    <div class="row">
-
-        <div class="col-md-12">
-
-            <div class="pay-btn" id="wechat-panel">
-                <form action="{php echo create_url('mobile/cash/wechat', array('weid' => $_W['weid']));}" method="post">
-                    <input type="hidden" name="params" value="{php echo base64_encode(json_encode($params));}" />
-                    <button class="btn btn-warning btn-lg" disabled="disabled" type="submit" id="wBtn" value="wechat">微信支付(必须使用微信内置浏览器)</button>
-                </form>
+@section('content')
+    <div class="container">
+        <div class="row assets">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Package</div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <tr>
+                                <th>openid</th>
+                                <td class="breakLine">{{ $package['openid'] }}</td>
+                            </tr>
+                            <tr>
+                                <th>prepay_id</th>
+                                <td class="breakLine">{{ $unifiedorderRes['prepay_id'] }}</td>
+                            </tr>
+                            <tr>
+                                <th>raw</th>
+                                <td class="breakLine">{{ $signPackage['rawString'] }}</td>
+                            </tr>
+                            <tr>
+                                <th>notify_url</th>
+                                <td class="breakLine">{{ $package['notify_url'] }}</td>
+                            </tr>
+                            <tr>
+                                <th>location</th>
+                                <td id="loc"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <script type="text/javascript">
-                document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-                    $('#wBtn').removeAttr('disabled');
-                    $('#wBtn').html('微信支付');
-                });
-            </script>
-
         </div>
-
     </div>
-</div>
+@endsection
 
+@push('scripts')
+<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 <script>
     var HOST = '<?= $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'] . '/';?>';
     wx.config({
@@ -78,13 +85,14 @@
         });
 
         wx.chooseWXPay({
-            timestamp: 0, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-            nonceStr: '', // 支付签名随机串，不长于 32 位
-            package: '', // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-            signType: '', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-            paySign: '', // 支付签名
+            timestamp: '{{ $wOpt['timeStamp'] }}', // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+            nonceStr: '{{ $wOpt['nonceStr'] }}', // 支付签名随机串，不长于 32 位
+            package: '{{ $wOpt['package'] }}', // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
+            signType: '{{ $wOpt['signType'] }}', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+            paySign: '{{ $wOpt['paySign'] }}', // 支付签名
             success: function (res) {
                 // 支付成功后的回调函数
+                alert(res);
             }
         });
 
@@ -95,10 +103,11 @@
                 var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
                 var speed = res.speed; // 速度，以米/每秒计
                 var accuracy = res.accuracy; // 位置精度
-                //alert("纬度:"+latitude+" 经度:"+longitude);
+                alert("纬度:"+latitude+" 经度:"+longitude);
 
 
                 console.log('微信位置',longitude, latitude);
+                $("#loc").html(longitude+','+latitude)
 
             },
             cancel: function (res) {
@@ -107,5 +116,7 @@
         });
     });
 </script>
+@endpush
+
 </body>
 </html>

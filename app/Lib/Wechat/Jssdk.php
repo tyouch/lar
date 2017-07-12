@@ -50,25 +50,25 @@ class Jssdk {
 
     private function getJsApiTicket() {
         // jsapi_ticket 应该全局存储与更新，以下代码以写入到文件中做示例
-        $data = json_decode(file_get_contents("../storage/json/jsapi_ticket.json"));
-        //dd($data);
-        if ($data->expire_time < time()) {
+        $file = '../public/js/jsapi_ticket.json';
+        file_exists($file) && $data = json_decode(file_get_contents($file), true); //dd($data);
+
+        if (!file_exists($file) || $data['expires_in'] < time()) {
             $accessToken = $this->getAccessToken();
             // 如果是企业号用以下 URL 获取 ticket
             // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
             $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$accessToken";
-            //$res = json_decode($this->httpGet($url));
-            $res = HttpRequest::toObj($url);
-            $ticket = $res->ticket;
-            if ($ticket) {
-                $data->expire_time = time() + 7000;
-                $data->jsapi_ticket = $ticket;
-                $fp = fopen("../storage/json/jsapi_ticket.json", "w");
-                fwrite($fp, json_encode($data));
-                fclose($fp);
+            $res = HttpRequest::toArray($url); //dd($res);
+            $ticket = $res['ticket'];
+            if (!empty($ticket)) {
+                $data['errcode']    = $res['errcode'];
+                $data['errmsg']     = $res['errmsg'];
+                $data['ticket']     = $ticket;
+                $data['expires_in'] = time() + 7000;
+                file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE));
             }
         } else {
-            $ticket = $data->jsapi_ticket;
+            $ticket = $data['ticket'];
         }
 
         return $ticket;
@@ -76,24 +76,24 @@ class Jssdk {
 
     private function getAccessToken() {
         // access_token 应该全局存储与更新，以下代码以写入到文件中做示例
-        $data = json_decode(file_get_contents("../storage/json/access_token.json"));
-        if ($data->expire_time < time()) {
+        $file = '../public/js/access_token.json';
+        file_exists($file) &&  $data = json_decode(file_get_contents($file), true);
+
+        if (!file_exists($file) || $data['expires_in'] < time()) {
             // 如果是企业号用以下URL获取access_token
             // $url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=$this->appId&corpsecret=$this->appSecret";
             $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=$this->appId&secret=$this->appSecret";
-            //$res = json_decode($this->httpGet($url));
-            $res = HttpRequest::toObj($url);
-            $access_token = $res->access_token;
-            if ($access_token) {
-                $data->expire_time = time() + 7000;
-                $data->access_token = $access_token;
-                $fp = fopen("../storage/json/access_token.json", "w");
-                fwrite($fp, json_encode($data));
-                fclose($fp);
+            $res = HttpRequest::toArray($url); //dd($res);
+            $access_token = $res['access_token'];
+            if (!empty($access_token)) {
+                $data['access_token'] = $access_token;
+                $data['expires_in'] = time() + 7000;
+                file_put_contents($file, json_encode($data));
             }
         } else {
-            $access_token = $data->access_token;
+            $access_token = $data['access_token'];
         }
+
         return $access_token;
     }
 

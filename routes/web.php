@@ -55,7 +55,14 @@ Auth::routes();
 
     Route::group(['prefix'=>'pay'], function (){
         Route::get('/', 'Payment\PayController@index')->name('pay.index');
+        //Route::get('notify', 'Payment\PayController@notify')->name('pay.notify');
     });
+
+    Route::group(['prefix'=>'notify'], function (){
+        Route::get('/', 'Payment\NotifyController@index')->name('notify.index');
+    });
+
+
 
     Route::group(['prefix'=>'test'], function (){
         Route::get('/', 'TestController@index')->name('test.index');

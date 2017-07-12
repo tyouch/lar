@@ -21,29 +21,34 @@ class WechatAuth
      */
     public function handle($request, Closure $next)
     {
+        $appID          = config('wechat.appID');
+        $appSecret      = config('wechat.appSecret');
+        $redirectUri    = config('wechat.redirectUri');
+
         //dd($request->input('code') && $request->session()->get('openid'));
-        $openid = session('openid') && null;
+        $openid = session('openid') ? session('openid') : null;
+        //dd($openid, session('openid'));
 
         if(empty($openid)){
 
             //第一步：用户同意授权，获取code
             $code = $request->input('code') ? $request->input('code') : null;
             if (empty($code)) {
-                $authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . config('wechat.AppID') . '&redirect_uri=' . urlencode(config('wechat.redirectUri')) . '&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
+                $authorize_url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='.$appID.'&redirect_uri='.urlencode($redirectUri).'&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect';
                 //dd($authorize_url);
                 return redirect($authorize_url);
                 exit;
             }
 
             // 第二步：通过code换取网页授权access_token
-            $get_token_url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . config('wechat.AppID') . '&secret=' . config('wechat.AppSecret') . '&code=' . $code . '&grant_type=authorization_code';
+            $get_token_url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid='.$appID.'&secret='.$appSecret.'&code='.$code.'&grant_type=authorization_code';
             $token_openid = HttpRequest::toArray($get_token_url);
             //dd($token_openid, $code, $get_token_url);
 
             // 第三步：刷新access_token（如果需要）
 
             // 第四步：拉取用户信息(需scope为 snsapi_userinfo)
-            $get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo?access_token=' . $token_openid['access_token'] . '&openid=' . $token_openid['openid'] . '&lang=zh_CN';
+            $get_user_info_url = 'https://api.weixin.qq.com/sns/userinfo?access_token='.$token_openid['access_token'].'&openid='.$token_openid['openid'].'&lang=zh_CN';
             $user_info = HttpRequest::toArray($get_user_info_url);
             $user_info = array_merge($token_openid, $user_info); //dd($user_info);
             session($user_info);
