@@ -26,7 +26,7 @@ class PayController extends Controller
         $this->appId = config('wechat.appID');
         $this->appSecret = config('wechat.appSecret');
 
-        $this->redirectUri = config('wechat.redirectUri');
+        $this->redirectUri = config('wechat.redirectUri');//
         $this->unifiedorderUrl = config('wechat.unifiedorderUrl');
         $this->notifyUrl = config('wechat.notifyUrl');
 
@@ -36,13 +36,14 @@ class PayController extends Controller
 
     public function index(Request $request)
     {
+        //dd($this->redirectUri);
         $this->openid = session('openid');
         //dd($this->openid, session('openid'));
         $package = [
             'appid'         => $this->appId, // test
             'mch_id'        => $this->mchID, // test
             'nonce_str'     => random(32),
-            'body'          => 'JSAPI支付测试',
+            'body'          => '打赏店主1分钱',
             'out_trade_no'  => 'oid'.time(),
             'total_fee'     => 0.01 * 100,
             'spbill_create_ip'  => getip(),
@@ -80,16 +81,22 @@ class PayController extends Controller
         $string .= 'key='.$this->apiKey;
         $wOpt['paySign'] = strtoupper(md5($string));
 
-        $signPackage = $this->getSignPackage();
+        //$signPackage = $this->getSignPackage();
+        $signPackage = (new Jssdk([
+            'appid'     => $this->appId,
+            'appsecret' => $this->appSecret,
+        ]))->getSignPackage($this->redirectUri.'pay/index');
         //dump($signPackage);
 
-        return view('wechat.wetest', [
+        return view('mobile.shop.pay', [
             'wOpt'              => $wOpt,
             'signPackage'       => $signPackage,
             'package'           => $package,
-            'unifiedorderRes'   => $unifiedorderRes
+            'unifiedorderRes'   => $unifiedorderRes,
+            'navActive'         => 'index'
         ]);
     }
+
 
     public function getSignPackage()
     {
@@ -100,6 +107,7 @@ class PayController extends Controller
         $jsskd = new Jssdk($params);
         return $jsskd->getSignPackage($this->redirectUri);
     }
+
 
     public function notify()
     {

@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cookie;
 use App\Lib\Wechat\HttpRequest;
 use App\Models\Account;
+use App\Models\Fans;
 
 class WechatAuth
 {
@@ -61,34 +62,44 @@ class WechatAuth
         //dd($user_info, cookie('nickname', session('nickname'), 1800));
 
         // 判断用户表中是否有该用户
-        $account = Account::where(['openid'=>session('openid')])->first();
+        $fans = Fans::where(['from_user'=>session('openid')])->first();
+        //$account = Account::where(['openid'=>session('openid')])->first();
         //dd($user_info, session('openid'),$account->openid, $account);
         //var_dump($user_info, $account);exit;
 
         //没有则保存
-        if (empty($account)){ // insert
-            $post = new Account;
-            $post->openid   = $user_info['openid'];
-            $post->nickname = urlencode($user_info['nickname']);
-            $post->headimgurl = $user_info['headimgurl'];
-            $post->hers_bit = 0;
-            $post->telephone = '';
+        if (empty($fans)){ // $account insert
+            $post = new Fans; //
+            $post->from_user        = $user_info['openid'];
+            $post->nickname         = $user_info['nickname'];
+            $post->avatar           = $user_info['headimgurl'];
+            $post->gender           = $user_info['sex'];
+            $post->nationality      = $user_info['country'];
+            $post->resideprovince   = $user_info['province'];
+            $post->residecity       = $user_info['city'];
+            $post->createtime       = time();
+            $post->salt             = random(8);
+            $post->weid             = 11;
+            $post->bio              = '';
+            $post->interest         = '';
             //dd($post);
+
             $post->save();
+            $weid = $post->weid;
             //dd('Insert ok');
         }else{
-            if($account->nickname != urlencode($user_info['nickname']) || $account->headimgurl != $user_info['headimgurl']){
-                $account->nickname = urlencode($user_info['nickname']);
-                $account->headimgurl = $user_info['headimgurl'];
-                $account->openid   = $user_info['openid'];
-                //dd($account);
-                $account->save();
-                dd('Update ok');
-            }
-            cookie('if_register', $account['if_register'], 1800);
-            //dd('Not updated');
-        }
+            if($fans->nickname != urlencode($user_info['nickname']) || $fans->headimgurl != $user_info['headimgurl']){
+                $fans->nickname     = $user_info['nickname'];
+                $fans->avatar       = $user_info['headimgurl'];
+                //dd($fans);
 
+                $fans->save();
+                $weid = $fans->weid;
+                //dd('Update ok');
+            }
+            //cookie('if_register', $account['if_register'], 1800);
+        }
+        session(['weid'=>$weid]);
         return $next($request);
     }
 }

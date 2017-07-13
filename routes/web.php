@@ -30,8 +30,9 @@ Auth::routes();
 
 //Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('home', 'HomeController@index')->name('home');
-    Route::get('/', 'HomeController@index');
+    Route::get('admin', 'HomeController@index')->name('home');
+    //Route::get('/', 'HomeController@index');
+    Route::get('/', 'Mobile\ShopController@index');
 
     Route::group(['prefix'=>'hosts'], function (){
         Route::get('{p}', 'HostsController@index')->name('hosts');
@@ -49,19 +50,28 @@ Auth::routes();
         Route::post('store', 'AccountController@store')->name('account.store');
     });
 
-    Route::group(['prefix'=>'wetest'], function (){
-        Route::get('/', 'WetestController@index')->name('wetest.index');
+
+    //---------------------------------------------
+    Route::group(['prefix'=>'mobile'], function (){
+        Route::group(['prefix'=>'shop'], function (){
+            Route::get('index', 'Mobile\ShopController@index')->name('mobile.shop.index');
+            Route::get('category', 'Mobile\ShopController@category')->name('mobile.shop.category');
+            Route::get('cart', 'Mobile\ShopController@cart')->name('mobile.shop.cart');
+            Route::get('home', 'Mobile\ShopController@home')->name('mobile.shop.home');
+        });
     });
 
     Route::group(['prefix'=>'pay'], function (){
-        Route::get('/', 'Payment\PayController@index')->name('pay.index');
+        //Route::get('/', 'Payment\PayController@index')->name('pay.index');
+        Route::get('index', 'Payment\PayController@index')->name('pay.index');
         //Route::get('notify', 'Payment\PayController@notify')->name('pay.notify');
     });
 
+    Route::get('notify.php', 'Payment\NotifyController@index')->name('notify.index');
     Route::group(['prefix'=>'notify'], function (){
-        Route::get('/', 'Payment\NotifyController@index')->name('notify.index');
+        Route::get('test', 'Payment\NotifyController@test')->name('notify.test');
     });
-
+    //---------------------------------------------
 
 
     Route::group(['prefix'=>'test'], function (){

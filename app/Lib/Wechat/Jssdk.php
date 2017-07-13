@@ -17,11 +17,11 @@ class Jssdk {
     }
 
     public function getSignPackage($url) {
-        $jsapiTicket = $this->getJsApiTicket();
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $url  = $url ? : "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $timestamp = time();
-        $nonceStr = $this->createNonceStr();
+        $jsapiTicket    = $this->getJsApiTicket();
+        $protocol       = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+        $url            = $url ? $url : "{$protocol}{$_SERVER[HTTP_HOST]}{$_SERVER[REQUEST_URI]}";
+        $timestamp      = time();
+        $nonceStr       = $this->createNonceStr(32);
 
         // 这里参数的顺序要按照 key 值 ASCII 码升序排序
         $string = "jsapi_ticket=$jsapiTicket&noncestr=$nonceStr&timestamp=$timestamp&url=$url";

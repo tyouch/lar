@@ -27,10 +27,12 @@ mix.js('resources/assets/js/app.js', 'public/js').extract(['vue'])
 
 mix.copy('resources/assets/imgs/nav_bg.png', 'public/imgs');
 mix.copy('resources/assets/imgs/up_pic_bg.jpg', 'public/imgs');
+mix.copy('resources/assets/imgs/headimg.jpg', 'public/imgs');
+mix.copy('resources/assets/imgs/qrcode.jpg', 'public/imgs');
 
 
 mix.browserSync({
-    proxy: 'local.tyoupub.com/lar/public',   // apache或iis等代理地址
+    proxy: 'local.tyoupub.com/lar/public/admin',   // apache或iis等代理地址
     port: 80,
     notify: false,        // 刷新是否提示
     watchTask: true,

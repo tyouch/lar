@@ -9,6 +9,8 @@
 @extends('layouts.app')
 @section('title', '公众号管理')
 
+
+@section('content')
 <style>
     .file-size{width: 85px; height: 85px;}
     .file-size img{width: 100%; height: 100%;}
@@ -18,7 +20,6 @@
     .btn50{width: 50px;}
 </style>
 
-@section('content')
 <div class="container">
     <div class="row assets">
         <div class="col-md-12">
