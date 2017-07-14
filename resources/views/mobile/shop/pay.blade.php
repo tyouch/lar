@@ -21,7 +21,7 @@
         <div class="row assets">
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading">Package</div>
+                    <div class="panel-heading">Info</div>
                     <div class="panel-body">
                         <table class="table">
                             <tr>

@@ -183,6 +183,11 @@ return [
         Maatwebsite\Excel\ExcelServiceProvider::class,
 
         /*
+         * QrCode
+         */
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
+
+        /*
          * Passport
          */
         Laravel\Passport\PassportServiceProvider::class,
@@ -236,7 +241,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
-
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ],
 
 ];

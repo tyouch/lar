@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
 use App\Lib\Wechat\HttpRequest;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PayController extends Controller
 {
@@ -34,39 +35,41 @@ class PayController extends Controller
         $this->apiKey = config('wechat.apiKey');
     }
 
-    public function index(Request $request)
+
+    /**
+     * JSSAPI 支付
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function jsapi(Request $request)
     {
-        //dd($this->redirectUri);
-        $this->openid = session('openid');
-        //dd($this->openid, session('openid'));
+        // 验证并组织数据
+        $this->validate($request, [
+            'total_fee' => 'required|numeric|between:0.01,100000',
+        ]);
+
         $package = [
-            'appid'         => $this->appId, // test
-            'mch_id'        => $this->mchID, // test
-            'nonce_str'     => random(32),
-            'body'          => '打赏店主1分钱',
-            'out_trade_no'  => 'oid'.time(),
-            'total_fee'     => 0.01 * 100,
-            'spbill_create_ip'  => getip(),
-            'notify_url'    => $this->notifyUrl,
-            'trade_type'    => 'JSAPI',
-            'openid'        => $this->openid//'odk8d0vQ3Oqr7UAOOPFaGxCuOG0E'
+            'appid'             => $request->input('appid'), // test
+            'mch_id'            => $request->input('mch_id'), // test
+            'nonce_str'         => $request->input('nonce_str'),
+            'body'              => $request->input('body'),
+            'out_trade_no'      => $request->input('out_trade_no'),
+            'total_fee'         => $request->input('total_fee') * 100,
+            'spbill_create_ip'  => $request->input('spbill_create_ip'),
+            'notify_url'        => $request->input('notify_url'),
+            'trade_type'        => $request->input('trade_type'),
+            'openid'            => session('openid')//'odk8d0vQ3Oqr7UAOOPFaGxCuOG0E'
 
             //'time_start'    => date('YmdHis', time()+0),
             //'time_expire'   => date('YmdHis', time() + 600),
         ];
+        //dd($package);
 
-        ksort($package, SORT_STRING);
-        $string = $string1 = '';
-        foreach($package as $key => $v) {
-            $string1 .= "{$key}={$v}&";
-        }
-        $string1 .= 'key='.config('wechat.apiKey');
-        $package['sign'] = strtoupper(md5($string1));
-        //dump($package);
-        $data = array2xml($package);
-        $unifiedorderRes = HttpRequest::xmlToArray($this->unifiedorderUrl, $data);
+        // 统一下单
+        $unifiedorderRes = $this->unifiedOrder($package);
         //dump($unifiedorderRes);
 
+        // 组织支付数据
         $wOpt = [
             'appId'         => $this->appId,
             'timeStamp'     => time(),
@@ -74,18 +77,11 @@ class PayController extends Controller
             'package'       => 'prepay_id='.$unifiedorderRes['prepay_id'],
             'signType'      => 'MD5',
         ];
-        ksort($wOpt, SORT_STRING);
-        foreach($wOpt as $key => $v) {
-            $string .= "{$key}={$v}&";
-        }
-        $string .= 'key='.$this->apiKey;
-        $wOpt['paySign'] = strtoupper(md5($string));
+        $wOpt['paySign']    = $this->sign($wOpt);
+        //dump($wOpt);
 
-        //$signPackage = $this->getSignPackage();
-        $signPackage = (new Jssdk([
-            'appid'     => $this->appId,
-            'appsecret' => $this->appSecret,
-        ]))->getSignPackage($this->redirectUri.'pay/index');
+        //获取签名包
+        $signPackage = $this->getSignPackage($this->redirectUri.'pay/jsapi');
         //dump($signPackage);
 
         return view('mobile.shop.pay', [
@@ -98,29 +94,64 @@ class PayController extends Controller
     }
 
 
-    public function getSignPackage()
+    public function native()
+    {
+
+    }
+
+
+    /**
+     * 统一下单
+     * @param $package
+     * @return mixed
+     */
+    public function unifiedOrder($package)
+    {
+        ksort($package, SORT_STRING); //
+        $string1 = '';
+        foreach($package as $key => $v) {
+            $string1 .= "{$key}={$v}&";
+        }
+        $string1 .= 'key='.config('wechat.apiKey');
+        $package['sign'] = strtoupper(md5($string1));
+        //dump($package);
+        $data = array2xml($package);
+        $unifiedorderRes = HttpRequest::xmlToArray($this->unifiedorderUrl, $data);
+
+        return $unifiedorderRes;
+    }
+
+
+    /**
+     * 签名算法
+     * @param $wOpt
+     * @return string
+     */
+    public function sign($wOpt)
+    {
+        $string = '';
+        ksort($wOpt, SORT_STRING);
+        foreach($wOpt as $key => $v) {
+            $string .= "{$key}={$v}&";
+        }
+        $string .= 'key='.$this->apiKey;
+
+        return strtoupper(md5($string));
+    }
+
+
+    /**
+     * 获取签名包
+     * @return array
+     */
+    public function getSignPackage($url)
     {
         $params = [
             'appid'     => $this->appId,
             'appsecret' => $this->appSecret,
         ];
-        $jsskd = new Jssdk($params);
-        return $jsskd->getSignPackage($this->redirectUri);
+        $jssdk = new Jssdk($params);
+        return $jssdk->getSignPackage($url);
     }
 
-
-    public function notify()
-    {
-        $file = public_path('js/cb.json');
-        $raw_post_data = file_get_contents('php://input', 'r');
-
-        if(empty($raw_post_data)) {
-            $msg = file_get_contents($file);
-            //unlink($file);//file_put_contents($file, null, LOCK_EX);
-            dd($msg);
-        } else {
-            $obj = simplexml_load_string($raw_post_data, 'SimpleXMLElement', LIBXML_NOCDATA);
-            file_put_contents($file, json_encode($obj, JSON_UNESCAPED_UNICODE), LOCK_EX);
-        }
-    }
 }

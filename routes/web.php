@@ -52,6 +52,7 @@ Auth::routes();
 
 
     //---------------------------------------------
+    // 导航
     Route::group(['prefix'=>'mobile'], function (){
         Route::group(['prefix'=>'shop'], function (){
             Route::get('index', 'Mobile\ShopController@index')->name('mobile.shop.index');
@@ -61,13 +62,15 @@ Auth::routes();
         });
     });
 
+    // 支付
     Route::group(['prefix'=>'pay'], function (){
-        //Route::get('/', 'Payment\PayController@index')->name('pay.index');
-        Route::get('index', 'Payment\PayController@index')->name('pay.index');
-        //Route::get('notify', 'Payment\PayController@notify')->name('pay.notify');
+        Route::any('jsapi', 'Payment\PayController@jsapi')->name('pay.jsapi');
+        Route::any('native', 'Payment\PayController@native')->name('pay.native');
     });
 
-    Route::get('notify.php', 'Payment\NotifyController@index')->name('notify.index');
+    // 回调通知
+    Route::get('notify.php', 'Payment\NotifyController@jsapi')->name('notify.jsapi');
+    Route::get('notify_qrcode.php', 'Payment\NotifyController@qrcode')->name('notify.qrcode');
     Route::group(['prefix'=>'notify'], function (){
         Route::get('test', 'Payment\NotifyController@test')->name('notify.test');
     });

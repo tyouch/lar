@@ -18,7 +18,7 @@
     <div class="container">
         <div class="row assets">
             <div class="col-md-12">
-
+                <img src="../imgs/wx_pay_qrcode.png">
             </div>
         </div>
     </div>

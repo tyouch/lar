@@ -16,7 +16,7 @@ class AccountController extends Controller
     {
         $begin = microtime(true);
 
-        dd(public_path('js/cb.json'));
+        //dd(public_path('js/cb.json'));
 
         $account = Wechats::get();
         //dd($account);
