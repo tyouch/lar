@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
+use App\Lib\Wechat\Pay;
 use App\Lib\Wechat\HttpRequest;
 use App\Models\Fans;
 
@@ -18,7 +19,6 @@ class ShopController extends Controller
     private $apiKey;
     private $unifiedorderUrl;
     private $notifyUrl;
-    private $openid;
 
 
     public function __construct()
@@ -39,14 +39,24 @@ class ShopController extends Controller
 
     public function index()
     {
-
-        $qs1 = 'appid='.$this->appId.'&mch_id='.$this->mchID.'&nonce_str='.random(32).'&product_id='.$this->appId.time().'&time_stamp='.time();
-        $url = 'weixin://wxpay/bizpayurl?'.$qs1.'&sign='.strtoupper(md5($qs1.'&key='.$this->apiKey));
-        //$url = 'http://www.tyoupub.com/';
+        //模式一
+        $pkg1 = [
+            'appid'     => $this->appId,
+            'mch_id'    => $this->mchID,
+            'nonce_str' => random(32),
+            'product_id'=> $this->appId.time(),//
+            'time_stamp'=> time()
+        ];
+        $qs1 = Pay::string1($pkg1); // 'appid='.$this->appId.'&mch_id='.$this->mchID.'&nonce_str='.random(32).'&product_id='.$this->appId.time().'&time_stamp='.time();
+        $sign1 = Pay::sign($pkg1); //$url1 = 'weixin://wxpay/bizpayurl?'.$qs1.'&sign='.strtoupper(md5($qs1.'&key='.$this->apiKey));
+        $url1 = 'weixin://wxpay/bizpayurl?'.$qs1.'sign='.$sign1;
+        //dump($pkg1, $url1);
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(1)->generate($url1, public_path('imgs/wx_pay_qrcode1.png'));
         //dd($url, $qs1, $qs1.'key='.$this->apiKey);
-        QrCode::format('png')->size(200)->merge('/public/imgs/headimg.jpg', .2)->margin(1)->generate($url, public_path('imgs/wx_pay_qrcode.png'));
 
 
+
+        //模式二
         $package = [
             'appid'         => $this->appId, // test
             'mch_id'        => $this->mchID, // test
@@ -56,13 +66,17 @@ class ShopController extends Controller
             'total_fee'     => 0.01 * 100,
             'spbill_create_ip'  => getip(),
             'notify_url'    => $this->notifyUrl,
-            'trade_type'    => 'JSAPI',
-            'openid'        => session('openid')//'odk8d0vQ3Oqr7UAOOPFaGxCuOG0E'
+            'trade_type'    => 'NATIVE',//'JSAPI',
 
             //'time_start'    => date('YmdHis', time()+0),
             //'time_expire'   => date('YmdHis', time() + 600),
         ];
-        //dd($package);
+        $package['sign']    = Pay::sign($package); //dd($package);
+        $unifiedorderRes = Pay::unifiedOrder($package); //dd($unifiedorderRes);
+        $url2 = $unifiedorderRes['code_url'];
+
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(1)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
+
 
         $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index');
         return view('mobile.shop.index', [

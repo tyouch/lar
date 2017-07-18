@@ -117,6 +117,3 @@
     });
 </script>
 @endpush
-
-</body>
-</html>

@@ -299,7 +299,8 @@ class HXBankApi
         //dump($this->url, $this->message, $this->plainText);
 
         // -5- http request
-        return HttpRequest::to($this->url, $this->message);
+        echo $this->message;
+        //return HttpRequest::to($this->url, $this->message);
     }
 
 

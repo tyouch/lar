@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
+use App\Lib\Wechat\Pay;
 use App\Lib\Wechat\HttpRequest;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -17,7 +18,6 @@ class PayController extends Controller
     private $apiKey;
     private $unifiedorderUrl;
     private $notifyUrl;
-    private $openid;
 
     public function __construct()
     {
@@ -53,7 +53,7 @@ class PayController extends Controller
             'mch_id'            => $request->input('mch_id'), // test
             'nonce_str'         => $request->input('nonce_str'),
             'body'              => $request->input('body'),
-            'out_trade_no'      => $request->input('out_trade_no'),
+            'out_trade_no'      => 'oid'.time(),
             'total_fee'         => $request->input('total_fee') * 100,
             'spbill_create_ip'  => $request->input('spbill_create_ip'),
             'notify_url'        => $request->input('notify_url'),
@@ -63,11 +63,12 @@ class PayController extends Controller
             //'time_start'    => date('YmdHis', time()+0),
             //'time_expire'   => date('YmdHis', time() + 600),
         ];
-        //dd($package);
+        $package['sign']    = Pay::sign($package); //dd($package);
 
         // 统一下单
-        $unifiedorderRes = $this->unifiedOrder($package);
-        //dump($unifiedorderRes);
+        $unifiedorderRes = Pay::unifiedOrder($package); //$this->unifiedOrder($package);
+        $unifiedorderRes['result_code'] == 'FAIL' && die($unifiedorderRes['err_code_des']);
+        //dd($unifiedorderRes);
 
         // 组织支付数据
         $wOpt = [
@@ -77,7 +78,7 @@ class PayController extends Controller
             'package'       => 'prepay_id='.$unifiedorderRes['prepay_id'],
             'signType'      => 'MD5',
         ];
-        $wOpt['paySign']    = $this->sign($wOpt);
+        $wOpt['paySign']    = Pay::sign($wOpt); //$this->sign($wOpt);
         //dump($wOpt);
 
         //获取签名包
@@ -96,47 +97,11 @@ class PayController extends Controller
 
     public function native()
     {
+        $package = [
 
-    }
-
-
-    /**
-     * 统一下单
-     * @param $package
-     * @return mixed
-     */
-    public function unifiedOrder($package)
-    {
-        ksort($package, SORT_STRING); //
-        $string1 = '';
-        foreach($package as $key => $v) {
-            $string1 .= "{$key}={$v}&";
-        }
-        $string1 .= 'key='.config('wechat.apiKey');
-        $package['sign'] = strtoupper(md5($string1));
-        //dump($package);
-        $data = array2xml($package);
-        $unifiedorderRes = HttpRequest::xmlToArray($this->unifiedorderUrl, $data);
-
-        return $unifiedorderRes;
-    }
-
-
-    /**
-     * 签名算法
-     * @param $wOpt
-     * @return string
-     */
-    public function sign($wOpt)
-    {
-        $string = '';
-        ksort($wOpt, SORT_STRING);
-        foreach($wOpt as $key => $v) {
-            $string .= "{$key}={$v}&";
-        }
-        $string .= 'key='.$this->apiKey;
-
-        return strtoupper(md5($string));
+            //'time_start'    => date('YmdHis', time()+0),
+            //'time_expire'   => date('YmdHis', time() + 600),
+        ];
     }
 
 

@@ -6,17 +6,29 @@ use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\HttpRequest;
+use App\Lib\Wechat\Pay;
 use App\Models\Paylog;
 
 class NotifyController extends Controller
 {
+    private $appId;
+    private $mchID;
     private $apiKey;
+
     private $unifiedorderUrl;
+    private $notifyUrl;
+    private $notifyUrlQrcode;
+
 
     public function __construct()
     {
+        $this->appId = config('wechat.appID');
+        $this->mchID = config('wechat.mchID');
+
         $this->apiKey           = config('wechat.apiKey');
         $this->unifiedorderUrl  = config('wechat.unifiedorderUrl');
+        $this->notifyUrl        = config('wechat.notifyUrl');
+        $this->notifyUrlQrcode  = config('wechat.notifyUrlQrcode');
     }
 
 
@@ -54,11 +66,12 @@ class NotifyController extends Controller
             file_put_contents($file, json_encode($ret, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
             $xml = array2xml($ret);
             file_put_contents($file, $xml.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            echo $xml;
+            exit;
 
-            $res = HttpRequest::to($this->unifiedorderUrl, $xml);
-            file_put_contents($file, $res['content'], FILE_APPEND | LOCK_EX);
         } else {
             file_put_contents($file, '验签失败'.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            exit('fail');
         }
 
     }
@@ -70,9 +83,49 @@ class NotifyController extends Controller
     public function qrcode()
     {
         $file = 'js/notify_qrcode.json';
+        //$raw_post_data = file_get_contents('php://input', 'r');
+        //file_put_contents($file, $raw_post_data, LOCK_EX);
+        //exit;
+
         $get = $this->check($file);
         if ($get['sign'] == $get['sign1']) {
-            file_put_contents($file, 'notify_qrcode.php'.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents($file, date('Y-m-d H:i:s', time()).' | notify_qrcode.php'.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            // 响应请求，生成商户订单()
+            // 统一下单
+            $package = [
+                'appid'         => $this->appId, // test
+                'mch_id'        => $this->mchID, // test
+                'nonce_str'     => $get['nonce_str'],//random(32),
+                'body'          => '打赏店主',
+                'out_trade_no'  => $get['product_id'],
+                'total_fee'     => 0.01 * 100,
+                'spbill_create_ip'  => getip(),
+                'notify_url'    => $this->notifyUrl,
+                'trade_type'    => 'NATIVE',//'JSAPI',
+                'openid'        => $get['openid'],
+                'product_id'    => $get['product_id']
+
+                //'time_start'    => date('YmdHis', time()+0),
+                //'time_expire'   => date('YmdHis', time() + 600),
+            ];
+            file_put_contents($file, Pay::string1($package).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            $package['sign']    = Pay::sign($package, null); //dd($package);
+            file_put_contents($file, array2xml($package).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            //file_put_contents($file, json_encode($get, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            //file_put_contents($file, json_encode($package, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            file_put_contents($file, 'unifiedOrder begin'.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            $unifiedorderRes = Pay::unifiedOrder($package);
+            file_put_contents($file, json_encode($unifiedorderRes, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            unset($unifiedorderRes['code_url']);
+            $unifiedorderRes['sign']       = Pay::sign($unifiedorderRes);
+
+            $xml = array2xml($unifiedorderRes);
+            file_put_contents($file, $xml.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+
+            echo $xml;
         }
     }
 
@@ -101,8 +154,8 @@ class NotifyController extends Controller
             //file_put_contents($file, $get.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
 
 
-            ksort($get, SORT_STRING);
             $string1 = '';
+            ksort($get, SORT_STRING);
             foreach ($get as $k => $v) {
                 if ($v != '' && $k != 'sign') {
                     $string1 .= "{$k}={$v}&";

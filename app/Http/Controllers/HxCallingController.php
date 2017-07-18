@@ -675,9 +675,9 @@ class HxCallingController extends Controller
         if(empty($raw_post_data)) {
             $msg = file_get_contents($file);
             //file_put_contents($file, null, LOCK_EX);
-            unlink($file);
+            //unlink($file);
             $ret = HXBankApi::getBackReqData($msg);
-            echo $ret['json'];
+            //echo $ret['json'];
             $data = [
                 'channelCode'   => $ret['array']['header']['channelCode'],
                 'channelFlow'   => $ret['array']['header']['channelFlow'],
@@ -690,8 +690,8 @@ class HxCallingController extends Controller
                 'OLDREQSEQNO'   => $ret['array']['body']['XMLPARA']['OLDREQSEQNO'],
             ];
             //dump($ret, $data);
-            $res = HXBankApi::resBank($data);
-            //dd($res);
+            HXBankApi::resBank($data);
+
         } else {
             file_put_contents($file, $raw_post_data, LOCK_EX);
         }

@@ -254,8 +254,8 @@ class HttpRequest{
                 return json_decode($res['content'], true);
 
             case 'xmlToArray':
-                $xml    = @simplexml_load_string($res['content'], 'SimpleXMLElement', LIBXML_NOCDATA);
-                $json   = json_encode($xml, JSON_UNESCAPED_UNICODE);
+                $obj    = @simplexml_load_string($res['content'], 'SimpleXMLElement', LIBXML_NOCDATA);
+                $json   = json_encode($obj, JSON_UNESCAPED_UNICODE);
                 return json_decode($json, true);
 
             default:
