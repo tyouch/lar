@@ -52,6 +52,50 @@ function array2xml($arr, $level = 1) {
 }
 
 /**
+ * xml to array
+ * @param $xml
+ * @return mixed
+ */
+function xmlToArray($xml)
+{
+    $obj = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
+    $json = json_encode($obj, JSON_UNESCAPED_UNICODE);
+    return json_decode($json, true);
+}
+
+/**
+ * xml 格式化
+ * @param $xml
+ * @return mixed
+ */
+function xmlFormatting($xml)
+{
+    return preg_replace('#</[^>]+>#i','$0'.PHP_EOL, $xml);
+}
+
+/**
+ * 构建升序查询串
+ * @param $wOpt
+ * @param null $check
+ * @return string
+ */
+function createUrlStr($wOpt ,$check = null)
+{
+    $string = '';
+    ksort($wOpt, SORT_STRING);
+    foreach($wOpt as $k => $v) {
+        if(empty($check)){
+            $string .= "{$k}={$v}&";
+        } else {
+            if ($v != '' && $k != 'sign') {
+                $string .= "{$k}={$v}&";
+            }
+        }
+    }
+    return $string;
+}
+
+/**
  * 获取客户ip
  * @return string
  *			 返回IP地址

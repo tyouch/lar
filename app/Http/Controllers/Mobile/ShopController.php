@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mobile;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
@@ -19,6 +20,7 @@ class ShopController extends Controller
     private $apiKey;
     private $unifiedorderUrl;
     private $notifyUrl;
+    private $shorturl;
 
 
     public function __construct()
@@ -31,6 +33,7 @@ class ShopController extends Controller
         $this->redirectUri = config('wechat.redirectUri');//
         $this->unifiedorderUrl = config('wechat.unifiedorderUrl');
         $this->notifyUrl = config('wechat.notifyUrl');
+        $this->shorturl = config('wechat.shorturl');
 
         $this->mchID = config('wechat.mchID');
         $this->apiKey = config('wechat.apiKey');
@@ -44,14 +47,25 @@ class ShopController extends Controller
             'appid'     => $this->appId,
             'mch_id'    => $this->mchID,
             'nonce_str' => random(32),
-            'product_id'=> $this->appId.time(),//
+            'product_id'=> $this->appId.'001',//
             'time_stamp'=> time()
         ];
-        $qs1 = Pay::string1($pkg1); // 'appid='.$this->appId.'&mch_id='.$this->mchID.'&nonce_str='.random(32).'&product_id='.$this->appId.time().'&time_stamp='.time();
+        $qs1 = createUrlStr($pkg1); // 'appid='.$this->appId.'&mch_id='.$this->mchID.'&nonce_str='.random(32).'&product_id='.$this->appId.time().'&time_stamp='.time();
         $sign1 = Pay::sign($pkg1); //$url1 = 'weixin://wxpay/bizpayurl?'.$qs1.'&sign='.strtoupper(md5($qs1.'&key='.$this->apiKey));
         $url1 = 'weixin://wxpay/bizpayurl?'.$qs1.'sign='.$sign1;
-        //dump($pkg1, $url1);
-        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(1)->generate($url1, public_path('imgs/wx_pay_qrcode1.png'));
+        Log::info('模式一 长URL:'.PHP_EOL.$url1.PHP_EOL);
+
+        $short = [
+            'appid'     => $this->appId,
+            'mch_id'    => $this->mchID,
+            'nonce_str' => random(32),
+            'long_url'  => $url1
+        ];
+        $short['sign']  = Pay::sign($short);
+        $res = HttpRequest::xmlToArray($this->shorturl, array2xml($short));
+        Log::info('模式一 短URL:'.PHP_EOL.$res['short_url'].PHP_EOL);
+
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0.5)->generate($res['short_url'], public_path('imgs/wx_pay_qrcode1.png'));
         //dd($url, $qs1, $qs1.'key='.$this->apiKey);
 
 
@@ -72,10 +86,10 @@ class ShopController extends Controller
             //'time_expire'   => date('YmdHis', time() + 600),
         ];
         $package['sign']    = Pay::sign($package); //dd($package);
-        $unifiedorderRes = Pay::unifiedOrder($package); //dd($unifiedorderRes);
+        $unifiedorderRes    = Pay::unifiedOrder(array2xml($package)); //dd($unifiedorderRes);
         $url2 = $unifiedorderRes['code_url'];
 
-        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(1)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0.5)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
 
 
         $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index');

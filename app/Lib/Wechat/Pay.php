@@ -7,6 +7,8 @@
  */
 namespace App\Lib\Wechat;
 
+use Illuminate\Support\Facades\Log;
+
 class pay {
 
     private $appId;
@@ -35,42 +37,14 @@ class pay {
      * @param $package
      * @return mixed
      */
-    public function doUnifiedOrder($package)
+    public function doUnifiedOrder($xml)
     {
-        $xml = array2xml($package);
 
-        //$file = 'js/notify_qrcode.json';
-        //file_put_contents($file, $xml.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
-
-        //$unifiedorderRes = HttpRequest::to($this->unifiedorderUrl, $xml);
+        //$unifiedorderRes = HttpRequest::content($this->unifiedorderUrl, $xml);
         $unifiedorderRes = HttpRequest::xmlToArray($this->unifiedorderUrl, $xml);
-
         $unifiedorderRes['return_code'] == 'FAIL' && exit($unifiedorderRes['return_msg']);
 
         return $unifiedorderRes;
-    }
-
-
-    /**
-     * 构建升序查询串
-     * @param $wOpt
-     * @param null $check
-     * @return string
-     */
-    public function doQueryString($wOpt ,$check = null)
-    {
-        $string = '';
-        ksort($wOpt, SORT_STRING);
-        foreach($wOpt as $k => $v) {
-            if(empty($check)){
-                $string .= "{$k}={$v}&";
-            } else {
-                if ($v != '' && $k != 'sign') {
-                    $string .= "{$k}={$v}&";
-                }
-            }
-        }
-        return $string;
     }
 
 
@@ -81,9 +55,9 @@ class pay {
      */
     public function doSign($wOpt ,$check = null)
     {
-        $string = $this->doQueryString($wOpt ,$check);
+        $string = createUrlStr($wOpt ,$check);
         $string .= 'key='.$this->apiKey;
-
+        //Log::info($string);
         return strtoupper(md5($string));
     }
 
@@ -95,12 +69,9 @@ class pay {
      */
     public function doCheck($xml)
     {
-        $obj = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
-        $json = json_encode($obj, JSON_UNESCAPED_UNICODE);
-        $get = json_decode($json, true);
-
-        $get['sign1'] = $this->doSign($get, true);
-        return $get;
+        $get = xmlToArray($xml);
+        $sign = $this->doSign($get, true);
+        return $sign == $get['sign'];
     }
 
 
@@ -118,9 +89,6 @@ class pay {
         switch ($name) {
             case 'unifiedOrder':
                 return (new Pay())->doUnifiedOrder($data);
-
-            case 'string1':
-                return (new Pay())->doQueryString($data);
 
             case 'sign':
                 return (new Pay())->doSign($data);

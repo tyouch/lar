@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payment;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
 use App\Lib\Wechat\Pay;
@@ -66,11 +67,11 @@ class PayController extends Controller
         $package['sign']    = Pay::sign($package); //dd($package);
 
         // 统一下单
-        $unifiedorderRes = Pay::unifiedOrder($package); //$this->unifiedOrder($package);
+        $unifiedorderRes = Pay::unifiedOrder(array2xml($package)); //$this->unifiedOrder($package);
         $unifiedorderRes['result_code'] == 'FAIL' && die($unifiedorderRes['err_code_des']);
         //dd($unifiedorderRes);
 
-        // 组织支付数据
+        // 组织支付临时展示数据
         $wOpt = [
             'appId'         => $this->appId,
             'timeStamp'     => time(),

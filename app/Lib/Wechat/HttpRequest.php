@@ -241,10 +241,10 @@ class HttpRequest{
         $res = (new HttpRequest())->ihttp_request($url, $post, $extra, $timeout);
 
         switch ($name) {
-            case 'to':
+            case 'origin':
                 return $res;
 
-            case 'toJson':
+            case 'content':
                 return $res['content'];
 
             case 'toObj':
