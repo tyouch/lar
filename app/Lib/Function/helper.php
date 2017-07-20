@@ -82,7 +82,7 @@ function xmlFormatting($xml)
 function createUrlStr($wOpt ,$check = null)
 {
     $string = '';
-    ksort($wOpt, SORT_STRING);
+    ksort($wOpt);//, SORT_STRING
     foreach($wOpt as $k => $v) {
         if(empty($check)){
             $string .= "{$k}={$v}&";

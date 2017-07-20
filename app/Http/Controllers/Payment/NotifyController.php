@@ -38,6 +38,8 @@ class NotifyController extends Controller
      */
     public function index()
     {
+        //echo htmlspecialchars('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
+        //exit;
         $xml = file_get_contents('php://input', 'r');
         Log::info('接收回调原始数据 [普通]：'.PHP_EOL.$xml.PHP_EOL);
 
@@ -70,10 +72,10 @@ class NotifyController extends Controller
                 'return_msg'    => '签名错误'
             ];
         }
+
         $xml = array2xml($ret);
         Log::info('告知微信通知处理结果：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
         echo $xml;
-        //echo $ret['return_code'];
     }
 
 
@@ -95,8 +97,6 @@ class NotifyController extends Controller
             $get['spbill_create_ip']    = getip();
             $get['notify_url']          = $this->notifyUrl;
             $get['trade_type']          = 'NATIVE';
-            $get['spbill_create_ip']    = getip();
-            $get['nonce_str']           = random(32);
             unset($get['is_subscribe']);
             unset($get['sign']);
             $get['sign']                = Pay::sign($get);
@@ -118,16 +118,18 @@ class NotifyController extends Controller
                 'appid'         => $unifiedorderRes['appid'],
                 'err_code_des'  => 'OK',
                 'mch_id'        => $unifiedorderRes['mch_id'],
-                'nonce_str'     => random(32),//$unifiedorderRes['nonce_str'],
+                'nonce_str'     => $unifiedorderRes['nonce_str'],
                 'prepay_id'     => $unifiedorderRes['prepay_id'],
                 'result_code'   => 'SUCCESS',
                 'return_code'   => 'SUCCESS',
                 'return_msg'    => 'OK',
             ];
             $data['sign']       = Pay::sign($data);
-            $xml = array2xml($data); //$unifiedorderRes
+
+            $xml = array2xml($data);
             Log::info('结果输出：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
-            echo $xml;
+            //echo $xml;
+            return $xml;
 
         } else {
             Log::info('验签失败');
@@ -271,6 +273,10 @@ class NotifyController extends Controller
     public function test()
     {
 
+        echo htmlspecialchars('<xml><return_code><![CDATA[SUCCESS]]></return_code>
+<return_msg><![CDATA[OK]]></return_msg>
+</xml>');
+        exit;
         /*$paylog = new Paylog();
         $paylog->type       = 'wechat';
         $paylog->weid       = 11;

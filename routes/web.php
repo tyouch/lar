@@ -71,7 +71,11 @@ Auth::routes();
     // 回调通知
     Route::get('notify.php', 'Payment\NotifyController@index')->name('notify.index');
     Route::get('notify_native.php', 'Payment\NotifyController@native')->name('notify.native');
+    Route::get('notify_test.php', 'Payment\NotifyController@test')->name('notify.test');
+
     Route::group(['prefix'=>'notify'], function (){
+        //Route::get('index', 'Payment\NotifyController@index')->name('notify.index');
+        //Route::get('native', 'Payment\NotifyController@native')->name('notify.native');
         Route::get('test', 'Payment\NotifyController@test')->name('notify.test');
     });
     //---------------------------------------------
