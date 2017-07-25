@@ -3,15 +3,33 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Lib\Wechat\HttpRequest;
 use App\Models\Wechats;
+
 
 class AccountController extends Controller
 {
+    private $tokenUrl;
+    private $ipListUrl;
+    private $menuQueryUrl;
+    private $menuCreateUrl;
+    private $redirectUri;
+
     public function __construct()
     {
         $this->middleware('auth');
+        $this->tokenUrl     = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&';
+        $this->ipListUrl    = 'https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=';
+        $this->menuQueryUrl = 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token=';
+        $this->menuCreateUrl = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=';
+        $this->redirectUri = config('wechat.redirectUri');
     }
 
+    /**
+     * 公众号管理首页
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index(Request $request)
     {
         $begin = microtime(true);
@@ -28,6 +46,149 @@ class AccountController extends Controller
         ]);
     }
 
+    public function checkToken($weid)
+    {
+        $acctount = Wechats::where(['weid'=>$weid])->first(); //dump($acctount);
+        $tokenArr = unserialize($acctount['access_token']); //dump($tokenArr);
+
+        //dump($tokenArr['expire']-time());
+        if(empty($tokenArr['access_token']) || $tokenArr['expire']-time() < 0) {
+            $this->tokenUrl .= 'appid='.$acctount['key'].'&secret='.$acctount['secret'];
+            $resArr = HttpRequest::toArray($this->tokenUrl); //dump($resArr);
+            !empty($resArr['errcode']) && dump($resArr['errmsg']);
+
+            $acctount->access_token = serialize([
+                'token'     => $resArr['access_token'],
+                'expire'    => time() + $resArr['expires_in'],
+            ]);
+            $acctount->save();
+            //dump(2);
+            //... ...
+            session(['token'=>$tokenArr['token']]);
+            //dd(session('token'));
+        }
+
+        return $acctount;
+    }
+
+    /**
+     * 公众号管理
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function manage(Request $request)
+    {
+        $begin = microtime(true);
+        $weid = $request->input('weid');
+        $account = $this->checkToken($weid);
+
+        $info = [
+            'token'     => session('token'),
+            'apiUrl'    => $account['hash'],
+
+        ];
+
+        $this->ipListUrl .= session('token');
+        //$res = HttpRequest::content($this->wxIpListUrl); dump(session('token'), $res);
+        //$this->menuQueryUrl .= $tokenArr['token'];
+        //$res = HttpRequest::content($this->menuQueryUrl); dump(session('token'), $res);
+
+        $end    = microtime(true);
+        return view('wechat.manage', [
+            'pass'      => $end - $begin,
+            'weid'      => $weid,
+            'account'   => $account,
+            'token'     => session('token'),
+            'apiAddress'=> $this->redirectUri.'api?hash='.$account['hash']
+        ]);
+    }
+
+    /**
+     * 自定义菜单管理
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function manageMenu(Request $request)
+    {
+        $begin = microtime(true);
+        $weid = $request->input('weid');
+        $account = $this->checkToken($weid);
+        //dd($account['menuset']);
+        $_token = $request->input('_token'); //dd($_token);
+
+        if(empty($account['menuset'])) { // db menuset is null or request flush
+            $this->menuQueryUrl .= session('token');//$tokenArr['token'];
+            $menuSet = HttpRequest::toArray($this->menuQueryUrl); //dump(session('token'), $menuSet);
+            //dd($menuSet);
+            $account['menuset'] = base64_encode(serialize($menuSet));
+            $account->save();
+
+        } elseif(isset($_token) && $_token == csrf_token()) { // 提交编辑
+
+            $buttonPost = $request->input('button');
+            $button = []; $i=0;
+            foreach ($buttonPost as $btn) {
+                $button[$i]['name'] = urlencode($btn['name']);
+                $button[$i]['type'] = urlencode($btn['type']);
+                $button[$i]['url'] = urlencode($btn['url']);
+
+                if(!empty($btn['sub_button'])) {
+                    $j = 0;
+                    foreach ($btn['sub_button'] as $sBtn) {
+                        $button[$i]['sub_button'][$j]['name'] = urlencode($sBtn['name']);
+                        $button[$i]['sub_button'][$j]['type'] = urlencode($sBtn['type']);
+                        $button[$i]['sub_button'][$j++]['url'] = urlencode($sBtn['url']);
+                    }
+                }
+                $i++;
+            }
+            $menuSet['menu'] = [
+                'button'        => $button,
+                'createtime'    => time()
+            ]; //dd($buttonPost, $menuSet);
+            $account['menuset'] = base64_encode(serialize($menuSet));
+            $account->save();
+
+            $json = json_encode(['button'=>$buttonPost], JSON_UNESCAPED_UNICODE); //dump($json);
+            $this->menuCreateUrl .= session('token'); //dump($this->menuCreateUrl);
+            $resArr = HttpRequest::toArray($this->menuCreateUrl, $json);
+            !empty($resArr['errcode']) && dump($resArr);
+        }
+
+        //调取渲染
+        $menuSet1 = unserialize(base64_decode($account['menuset'])); //dump($menuSet1);
+        $menuSet = []; $i=0;
+        foreach ($menuSet1['menu']['button'] as $btn) {
+            $menuSet['menu']['button'][$i]['name'] = urldecode($btn['name']);
+            $menuSet['menu']['button'][$i]['type'] = urldecode($btn['type']);
+            $menuSet['menu']['button'][$i]['url'] = urldecode($btn['url']);
+            if(!empty($btn['sub_button'])) {
+                $j = 0;
+                foreach ($btn['sub_button'] as $sBtn) {
+                    $menuSet['menu']['button'][$i]['sub_button'][$j]['name'] = urldecode($sBtn['name']);
+                    $menuSet['menu']['button'][$i]['sub_button'][$j]['type'] = urldecode($sBtn['type']);
+                    $menuSet['menu']['button'][$i]['sub_button'][$j++]['url'] = urldecode($sBtn['url']);
+                }
+            }
+            $i++;
+        }
+        //$menuSet['menu']['createtime'] = $menuSet1['createtime'];
+        //dd($menuSet1, $menuSet);
+
+
+        $end    = microtime(true);
+        return view('wechat.menu', [
+            'pass'      => $end - $begin,
+            'weid'      => $weid,
+            'button'    => $menuSet['menu']['button']
+        ]);
+    }
+
+    /**
+     * 编辑 和删除 操作
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
+     */
     public function operate(Request $request)
     {
         $weid = $request->input('id');
@@ -36,13 +197,18 @@ class AccountController extends Controller
             return response()->json($account);
         }
         if ($request->input('op') == 'del') {
-            $account->delete();
-            @unlink('imgs/uploads/qrcode_'.$weid.'.jpg');
-            @unlink('imgs/uploads/headimg_'.$weid.'.jpg');
+            //$account->delete();
+            //@unlink('imgs/uploads/qrcode_'.$weid.'.jpg');
+            //@unlink('imgs/uploads/headimg_'.$weid.'.jpg');
             return redirect('account');
         }
     }
 
+    /**
+     * 插入 和更新 操作
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|void
+     */
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -73,7 +239,6 @@ class AccountController extends Controller
             $account->password  = '';
             $account->welcome   = '';
             $account->default   = '';
-            $account->lastupdate        = '0';
             $account->default_period    = '0';
             $account->styleid   = 1;
 
@@ -90,6 +255,8 @@ class AccountController extends Controller
         $account->secret    = $request->input('secret');
         $account->account   = $request->input('account');
         $account->original  = $request->input('original');
+        $account->lastupdate= time();
+
 
         //dd($account);
         $account->save();
@@ -104,6 +271,12 @@ class AccountController extends Controller
         return redirect('account');
     }
 
+    /**
+     * 上传 头像和 二维码
+     * @param $file
+     * @param $name
+     * @return string
+     */
     public function uploadFile($file, $name){
 
         /*$data = [

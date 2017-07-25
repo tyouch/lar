@@ -65,7 +65,7 @@ class ShopController extends Controller
         $res = HttpRequest::xmlToArray($this->shorturl, array2xml($short));
         Log::info('模式一 短URL:'.PHP_EOL.$res['short_url'].PHP_EOL);
 
-        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0.5)->generate($res['short_url'], public_path('imgs/wx_pay_qrcode1.png'));
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0)->generate($res['short_url'], public_path('imgs/wx_pay_qrcode1.png'));
         //dd($url, $qs1, $qs1.'key='.$this->apiKey);
 
 
@@ -89,7 +89,7 @@ class ShopController extends Controller
         $unifiedorderRes    = Pay::unifiedOrder(array2xml($package)); //dd($unifiedorderRes);
         $url2 = $unifiedorderRes['code_url'];
 
-        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0.5)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
+        QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
 
 
         $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index');

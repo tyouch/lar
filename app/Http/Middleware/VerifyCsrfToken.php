@@ -14,6 +14,8 @@ class VerifyCsrfToken extends BaseVerifier
     protected $except = [
         //'stripe/*',
         '/hxcalling/tx',
+        '/notify/index',
+        '/notify/native',
         '/notify.php',
         '/notify_native.php',
         '/notify_test.php',

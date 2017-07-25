@@ -41,6 +41,7 @@ class NotifyController extends Controller
         //echo htmlspecialchars('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
         //exit;
         $xml = file_get_contents('php://input', 'r');
+        empty($xml) && die('无回调数据！');
         Log::info('接收回调原始数据 [普通]：'.PHP_EOL.$xml.PHP_EOL);
 
         if(Pay::check($xml)) {
@@ -85,7 +86,12 @@ class NotifyController extends Controller
     public function native()
     {
         $xml = file_get_contents('php://input', 'r');
-        Log::info('接收回调原始数据 [扫码支付模式一]：'.PHP_EOL.$xml.PHP_EOL);
+
+        if(empty($xml)) {
+            Log::info('没有接到回调数据'.PHP_EOL.$xml.PHP_EOL); die('无回调数据！');
+        } else {
+            Log::info('接收回调原始数据 [扫码支付模式一]：'.PHP_EOL.$xml.PHP_EOL);
+        }
 
         if(Pay::check($xml)) {
             $get = xmlToArray($xml);
@@ -126,14 +132,17 @@ class NotifyController extends Controller
             ];
             $data['sign']       = Pay::sign($data);
 
-            $xml = array2xml($data);
-            Log::info('结果输出：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
-            //echo $xml;
-            return $xml;
-
         } else {
+            $data = [
+                'return_code'   => 'FAIL',
+                'return_msg'    => '签名错误'
+            ];
             Log::info('验签失败');
         }
+
+        $xml = array2xml($data);
+        Log::info('结果输出：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
+        echo $xml;
 
     }
 
@@ -270,12 +279,16 @@ class NotifyController extends Controller
      * test
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function test()
+    public function test($ex)
     {
-
-        echo htmlspecialchars('<xml><return_code><![CDATA[SUCCESS]]></return_code>
+        if($ex == '.html'){
+            $str = htmlspecialchars('<xml><return_code><![CDATA[SUCCESS]]></return_code>
 <return_msg><![CDATA[OK]]></return_msg>
 </xml>');
+            echo $str;
+        }
+
+        //return response($str);//, 200->header('Content-Type', 'text/plain');
         exit;
         /*$paylog = new Paylog();
         $paylog->type       = 'wechat';

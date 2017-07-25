@@ -64,8 +64,7 @@
                                 <td>
                                     <input type="button" class="btn btn-info btn-xs btn50" name="edit" data-id="{{ $item['weid'] }}" data-toggle="modal" data-target=".bs-example-modal-lg" value="编辑">
                                     <a href="{{ route('account.operate', ['id'=>$item['weid'], 'op'=>'del']) }}" class="btn btn-danger btn-xs btn50" style="margin: 5px 0;">删除</a>
-                                    {{--<input type="button" class="btn btn-info btn-xs btn50" name="del" data-id="{{ $item['weid'] }}" value="删除">--}}
-                                    <input type="button" class="btn btn-info btn-xs btn50" name="mamt" data-id="{{ $item['weid'] }}" value="管理">
+                                    <a href="{{ route('account.manage',['weid'=>$item['weid']]) }}" class="btn btn-info btn-xs btn50">管理</a>
                                 </td>
                             </tr>
                         @endforeach

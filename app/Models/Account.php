@@ -8,7 +8,7 @@ class Account extends Model
 {
     protected $connection   = 'mysql';
     protected $table        = 'account';
-    protected $primaryKey   = 'weid';
+    protected $primaryKey   = 'id';
     protected $keyType      = 'int';
     //public $incrementing    = false;
     public $timestamps      = false;

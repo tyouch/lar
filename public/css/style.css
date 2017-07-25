@@ -24,7 +24,8 @@ a, a:hover, a:visited{color: #8c8c8c; text-decoration:none;}
 
 /*资产*/
 *{border: 0px solid transparent !important;}
-.container .panel-heading{background: #666; color: white;}
+.btn{border: 1px solid transparent}
+.container .panel-heading, .container .panel-footer{background: #666; color: white;}
 .container .panel-body{background: #323c48;/*#404a59*/;}
 .container .modal-content{background: #666;}
 .container th{color: #15ceff;}
