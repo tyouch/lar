@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Lib\Wechat\HttpRequest;
 use App\Lib\Wechat\Pay;
 use App\Models\Paylog;
+use App\Models\Wechats;
 
 class NotifyController extends Controller
 {

@@ -3,8 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 use App\Lib\Wechat\HttpRequest;
 use App\Models\Wechats;
+use App\Models\Rule;
+use App\Models\RuleKeyword;
+use App\Models\BasicReply;
 
 
 class AccountController extends Controller
@@ -46,6 +52,11 @@ class AccountController extends Controller
         ]);
     }
 
+    /**
+     * 检查 access_token
+     * @param $weid
+     * @return mixed
+     */
     public function checkToken($weid)
     {
         $acctount = Wechats::where(['weid'=>$weid])->first(); //dump($acctount);
@@ -100,6 +111,90 @@ class AccountController extends Controller
             'account'   => $account,
             'token'     => session('token'),
             'apiAddress'=> $this->redirectUri.'api?hash='.$account['hash']
+        ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View-----------------------------------------
+     */
+    public function manageRule(Request $request)
+    {
+        $begin  = microtime(true);
+        $weid   = $request->input('weid');
+        $module = $request->input('module');
+        $_token = $request->input('_token');
+
+
+        if (isset($_token) && $_token == csrf_token()) {
+            if ($module == 'basic') {
+                $this->validate($request, [
+                    'name'          => 'required|max:20',
+                    'keyword'       => 'required',
+                    'basicReply'    => 'required'
+                ]);
+                $rid = $request->input('id');
+                $rule = Rule::with('keyword', 'basicReply')->where([
+                    'weid'          => $weid,
+                    'module'        => 'basic',
+                    'id'            => $rid])->first();
+                //var_dump($rule,$weid,$rid);exit;// $rule['name'].'|'.$request->input('name'), $rule['keyword'][0]['content'].'|'.$request->input('keyword'), $rule['basicReply'][0]['content'].'|'.$request->input('basicReply'));
+                if(empty($rule)) {
+                    $rule           = new Rule();
+                    $keyword        = new RuleKeyword();
+                    $basicReply     = new BasicReply();
+                } else {
+                    $keyword        = RuleKeyword::where(['rid'=>$rid])->first();
+                    $basicReply     = BasicReply::where(['rid'=>$rid])->first();
+                }
+
+                $rule->name         = $request->input('name');
+                $rule->weid         = $weid;
+                $rule->module       = 'basic';
+                $rule->save();
+                $rid = $rule->id;
+
+                $keyword->rid       = $rid;
+                $keyword->content   = $request->input('keyword');
+                $keyword->weid      = $weid;
+                $keyword->module    = 'basic';
+                $keyword->save();
+
+                $basicReply->rid    = $rid;
+                $basicReply->content= $request->input('basicReply');
+                $basicReply->save();
+
+                return redirect()->route('account.rule', ['weid'=>$weid, 'module'=>'basic']);
+            }
+
+            if ($module == 'news') {
+
+            }
+        }
+
+        switch ($module) {
+            case 'basic':
+                $rules = Rule::with('keyword', 'basicReply')->where(['weid' => $weid, 'module' => 'basic'])->get();
+                break;
+            case 'news':
+                $rules = Rule::with('keyword', 'newsReply')->where(['weid' => $weid, 'module' => 'news'])->get();
+                break;
+            case 'image':
+                break;
+            case 'audio':
+                break;
+            case 'video':
+                break;
+            default:
+        }
+
+
+        $end    = microtime(true);
+        return view('wechat.rule', [
+            'pass'      => $end - $begin,
+            'weid'      => $weid,
+            'rules'     => $rules,
+            'module'    => $module
         ]);
     }
 

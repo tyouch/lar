@@ -43,6 +43,7 @@ Auth::routes();
         Route::get('map', 'DetectionController@map')->name('detection.map');
     });
 
+    // account
     Route::group(['prefix'=>'account'], function (){
         Route::get('/', 'AccountController@index')->name('account.index');
         Route::post('upload', 'AccountController@uploadFile')->name('account.upload');
@@ -50,6 +51,7 @@ Auth::routes();
         Route::post('store', 'AccountController@store')->name('account.store');
         Route::get('manage', 'AccountController@manage')->name('account.manage');
         Route::any('menu', 'AccountController@manageMenu')->name('account.menu');
+        Route::any('rule', 'AccountController@manageRule')->name('account.rule');
     });
 
 
@@ -71,7 +73,7 @@ Auth::routes();
     });
 
     // 回调通知
-    Route::get('notify.php', 'Payment\NotifyController@index')->name('notify.index');
+    //Route::get('notify.php', 'Payment\NotifyController@index')->name('notify.index');
     //Route::get('notify_native.php', 'Payment\NotifyController@native')->name('notify.native');
     //Route::get('notify_test.php', 'Payment\NotifyController@test')->name('notify.test');
 
@@ -80,6 +82,9 @@ Auth::routes();
         Route::any('native', 'Payment\NotifyController@native')->name('notify.native');
         //Route::get('test', 'Payment\NotifyController@test')->name('notify.test');
     });
+
+    // API
+    Route::any('api', 'ApiController@index')->name('api');
     //---------------------------------------------
 
 

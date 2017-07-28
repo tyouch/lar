@@ -16,7 +16,9 @@ class VerifyCsrfToken extends BaseVerifier
         '/hxcalling/tx',
         '/notify/index',
         '/notify/native',
+        '/api',
         '/notify.php',
+        '/api.php',
         '/notify_native.php',
         '/notify_test.php',
     ];

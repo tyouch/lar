@@ -6,6 +6,10 @@
  * Time: 22:44
  */
 
+function myTs()
+{
+    return '['.date('Y-m-d H:i:s', time()).'] ';
+}
 
 /**
  * @param $length

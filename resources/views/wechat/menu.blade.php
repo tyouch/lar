@@ -20,7 +20,10 @@
     </style>
     <div class="container">
         <div class="row assets">
-            @includeIf('wechat.nav', [])
+            <div class="col-md-3">
+                @includeIf('wechat.nav', [])
+                @includeIf('wechat.nav2', [])
+            </div>
 
             <div class="col-md-9">
                 <div class="panel panel-default">
@@ -83,6 +86,7 @@
                 </div>
             </div>
         </div>
+
 
         {{--模态框--}}
         <div class="modal fade bs-example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
