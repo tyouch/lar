@@ -43,6 +43,8 @@ Auth::routes();
         Route::get('map', 'DetectionController@map')->name('detection.map');
     });
 
+
+    //---------------------------------------------
     // account
     Route::group(['prefix'=>'account'], function (){
         Route::get('/', 'AccountController@index')->name('account.index');
@@ -52,6 +54,7 @@ Auth::routes();
         Route::get('manage', 'AccountController@manage')->name('account.manage');
         Route::any('menu', 'AccountController@manageMenu')->name('account.menu');
         Route::any('rule', 'AccountController@manageRule')->name('account.rule');
+        Route::any('payment', 'AccountController@payment')->name('account.payment');
     });
 
 

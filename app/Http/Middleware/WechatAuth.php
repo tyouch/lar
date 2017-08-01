@@ -20,11 +20,11 @@ class WechatAuth
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $path)
     {
         $appID          = config('wechat.appID');
         $appSecret      = config('wechat.appSecret');
-        $redirectUri    = config('wechat.redirectUri');
+        $redirectUri    = config('wechat.redirectUri').$path;
 
         //dd($request->input('code') && $request->session()->get('openid'));
         $openid = session('openid') ? session('openid') : null;

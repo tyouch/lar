@@ -22,7 +22,7 @@ class PayController extends Controller
 
     public function __construct()
     {
-        $this->middleware('wechatAuth');
+        $this->middleware('wechatAuth:pay/jsapi');
         //$this->openid = session('openid');
 
         $this->appId = config('wechat.appID');

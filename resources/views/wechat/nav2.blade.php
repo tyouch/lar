@@ -20,7 +20,7 @@
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">商店</a>
                     </h4>
                 </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                     <ul class="list-group">
                         <a href="javascritp:;" class="list-group-item list-group-item-info">商品分类</a>
                         <a href="javascritp:;" class="list-group-item list-group-item-info">商品管理</a>
@@ -35,7 +35,7 @@
                 <div class="panel-heading" role="tab" id="headingTwo">
                     <h4 class="panel-title">
                         <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                            Collapsible Group Item #2
+                            其他模块 #2
                         </a>
                     </h4>
                 </div>
@@ -51,18 +51,16 @@
                 <div class="panel-heading" role="tab" id="headingThree">
                     <h4 class="panel-title">
                         <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                            Collapsible Group Item #3
+                            其他模块 #3
                         </a>
                     </h4>
                 </div>
                 <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                    <div class="panel-body">
-                        <ul class="list-group">
-                            <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
-                            <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
-                            <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
-                        </ul>
-                    </div>
+                    <ul class="list-group">
+                        <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
+                        <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
+                        <a href="javascritp:;" class="list-group-item list-group-item-info">xxx</a>
+                    </ul>
                 </div>
             </div>
         </div>

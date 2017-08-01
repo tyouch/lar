@@ -11,6 +11,7 @@ use App\Models\Wechats;
 use App\Models\Rule;
 use App\Models\RuleKeyword;
 use App\Models\BasicReply;
+use App\Models\NewsReply;
 
 
 class AccountController extends Controller
@@ -21,7 +22,7 @@ class AccountController extends Controller
     private $menuCreateUrl;
     private $redirectUri;
 
-    public function __construct()
+    public function __construct(Request $request)
     {
         $this->middleware('auth');
         $this->tokenUrl     = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&';
@@ -29,6 +30,13 @@ class AccountController extends Controller
         $this->menuQueryUrl = 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token=';
         $this->menuCreateUrl = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=';
         $this->redirectUri = config('wechat.redirectUri');
+
+        //
+        /*$weid = $request->input('weid');
+        $account = Wechats::where(['weid'=>$weid])->first();
+        $payment = iunserializer($account->payment);
+        $this->appId = $payment['wechat']['appid'];
+        $this->mchID = $payment['wechat']['mchid'];*/
     }
 
     /**
@@ -115,8 +123,9 @@ class AccountController extends Controller
     }
 
     /**
+     * 展示和编辑规则 -----------------------------------------
      * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View-----------------------------------------
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public function manageRule(Request $request)
     {
@@ -127,7 +136,73 @@ class AccountController extends Controller
 
 
         if (isset($_token) && $_token == csrf_token()) {
-            if ($module == 'basic') {
+
+            $this->validate($request, [
+                'name'          => 'required|max:20',
+                'keyword'       => 'required',
+                'reply'         => 'required',
+                'status'        => 'required',
+                'displayOrder'  => 'required',
+            ]);
+
+            if ($module == 'news') {
+                $this->validate($request, [
+                    'title'         => 'required',
+                    'description'   => 'required',
+                    //'thumb'         => 'required',
+                    'url'           => 'url'
+                ]);
+            }
+
+            $rid = $request->input('id');
+            //dd($request->input('id'));
+
+            if (empty($rid)) {
+                $rule           = new Rule();
+                $keyword        = new RuleKeyword();
+                ($module == 'basic')    && $reply = new BasicReply();
+                ($module == 'news')     && $reply = new NewsReply();
+            } else {
+                $rule = Rule::with('keyword', 'basicReply')->where([
+                    'weid'      => $weid,
+                    'module'    => $module,
+                    'id'        => $rid])->first();
+                $keyword        = RuleKeyword::where(['rid'=>$rid])->first();
+                ($module == 'basic')    && $reply = BasicReply::where(['rid'=>$rid])->first();
+                ($module == 'news')     && $reply = NewsReply::where(['rid'=>$rid])->first();
+            }
+
+            $rule->name         = $request->input('name');
+            $rule->weid         = $weid;
+            $rule->status       = $request->input('status');
+            $rule->displayorder = $request->input('displayOrder');
+            ($module == 'basic')    && $rule->module = 'basic';
+            ($module == 'news')     && $rule->module = 'news';
+            $rule->save();
+            $rid = $rule->id;
+
+            $keyword->rid       = $rid;
+            $keyword->content   = $request->input('keyword');
+            $keyword->weid      = $weid;
+            ($module == 'basic')    && $keyword->module = 'basic';
+            ($module == 'news')     && $keyword->module = 'news';
+            $keyword->save();
+
+            $reply->rid         = $rid;
+            $reply->content     = $request->input('reply');
+            if ($module == 'news') {
+                $thumb = $request->file('thumb') ? $this->uploadFile($request->file('thumb'), random(10), 'imgs/uploads/images/'.date('Y').'/'.date('m').'/') : null;
+                $reply->title       = $request->input('title');
+                $reply->description = $request->input('description');
+                !empty($thumb)      && $reply->thumb = $thumb;
+                $reply->url         = $request->input('url');
+            }
+            $reply->save();
+
+            return redirect()->route('account.rule', ['weid'=>$weid, 'module'=>$module]);
+
+
+            /*if ($module == 'basic') {
                 $this->validate($request, [
                     'name'          => 'required|max:20',
                     'keyword'       => 'required',
@@ -165,19 +240,23 @@ class AccountController extends Controller
                 $basicReply->save();
 
                 return redirect()->route('account.rule', ['weid'=>$weid, 'module'=>'basic']);
-            }
+            }*/
 
-            if ($module == 'news') {
-
-            }
         }
 
         switch ($module) {
             case 'basic':
-                $rules = Rule::with('keyword', 'basicReply')->where(['weid' => $weid, 'module' => 'basic'])->get();
+                $rules = Rule::with('keyword', 'basicReply')
+                    ->where(['weid' => $weid, 'module' => 'basic'])
+                    ->orderBy('displayorder', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->get();
                 break;
             case 'news':
-                $rules = Rule::with('keyword', 'newsReply')->where(['weid' => $weid, 'module' => 'news'])->get();
+                $rules = Rule::with('keyword', 'newsReply')->where(['weid' => $weid, 'module' => 'news'])
+                    ->orderBy('displayorder', 'desc')
+                    ->orderBy('id', 'desc')
+                    ->get();
                 break;
             case 'image':
                 break;
@@ -275,7 +354,46 @@ class AccountController extends Controller
         return view('wechat.menu', [
             'pass'      => $end - $begin,
             'weid'      => $weid,
-            'button'    => $menuSet['menu']['button']
+            'button'    => $menuSet['menu']['button'],
+            'module'    => 'menu'
+        ]);
+    }
+
+    /**
+     * 支付参数
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function payment(Request $request)
+    {
+        $begin  = microtime(true);
+        $weid   = $request->input('weid');
+        $_token = $request->input('_token');
+
+        $account = Wechats::where(['weid'=>$weid])->first();
+        $payment = iunserializer($account->payment); //dd($payment);
+
+        if(isset($_token) && $_token == csrf_token()) {
+
+            $wechat = $request->input('wechat');
+            $this->validate($request, [
+                'wechat.appid' => 'required',
+                'wechat.secret' => 'required',
+                'wechat.mchid' => 'required',
+                'wechat.signkey' => 'required',
+                'wechat.switch' => 'required'
+            ]);
+            $account->payment = serialize(['wechat'=>$wechat]);
+            $account->save();
+            return redirect()->route('account.payment', ['weid'=>$weid]);
+        }
+
+        $end    = microtime(true);
+        return view('wechat.payment', [
+            'pass'      => $end - $begin,
+            'weid'      => $weid,
+            'module'    => 'payment',
+            'wechat'    => @$payment['wechat']
         ]);
     }
 
@@ -359,10 +477,11 @@ class AccountController extends Controller
         $id = $account->weid;
         //dd($account->weid);
         $request->file('qrcode') &&
-            $this->uploadFile($request->file('qrcode'), 'qrcode_'.$id);
+            $this->uploadFile($request->file('qrcode'), 'qrcode_'.$id, 'imgs/uploads/');
 
         $request->file('headimg') &&
-            $this->uploadFile($request->file('headimg'), 'headimg_'.$id);
+            $this->uploadFile($request->file('headimg'), 'headimg_'.$id, 'imgs/uploads/');
+
         return redirect('account');
     }
 
@@ -372,7 +491,7 @@ class AccountController extends Controller
      * @param $name
      * @return string
      */
-    public function uploadFile($file, $name){
+    public function uploadFile($file, $name, $destPath){
 
         /*$data = [
             'fileName'      => $file->getClientOriginalName(),
@@ -384,12 +503,10 @@ class AccountController extends Controller
         ];*/
         //dd($data);
         //Move Uploaded File
-        $destPath = 'imgs/uploads/';
+        //$destPath = 'imgs/uploads/';
         $fileName = $name.'.jpg';
-        !file_exists($destPath) &&
-            mkdir($destPath,0755,true);
-        file_exists($fileName) &&
-            unlink($fileName);
+        !file_exists($destPath) && mkdir($destPath,0755,true);
+        file_exists($fileName)  && unlink($fileName);
         $file->move($destPath, $fileName); // $file->getClientOriginalName()
         //$file->store($destPath, $name.'.'.$file->getClientOriginalExtension());
         //dd($destPath);

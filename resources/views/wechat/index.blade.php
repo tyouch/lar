@@ -195,8 +195,8 @@
         $img.attr("src",$src)
     }
 
-    $("#file1").bind('change', {'img': $("#img1"), 'file': $("#file1")}, chUpladBg);
-    $("#file2").bind('change', {'img': $("#img2"), 'file': $("#file2")}, chUpladBg);
+    $("#file1").on('change', {'img': $("#img1"), 'file': $("#file1")}, chUpladBg);
+    $("#file2").on('change', {'img': $("#img2"), 'file': $("#file2")}, chUpladBg);
 
     // edit
     $("input[name=edit]").click(function (e) {

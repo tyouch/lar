@@ -22,10 +22,13 @@ class ShopController extends Controller
     private $notifyUrl;
     private $shorturl;
 
+    private $weid;
 
-    public function __construct()
+
+    public function __construct(Request $request)
     {
-        $this->middleware('wechatAuth');
+        $this->weid = $request->input('weid');
+        $this->middleware('wechatAuth:mobile/shop/index?weid='.$this->weid);
 
         $this->appId = config('wechat.appID');
         $this->appSecret = config('wechat.appSecret');
@@ -92,7 +95,7 @@ class ShopController extends Controller
         QrCode::format('png')->size(120)->merge('/public/imgs/headimg.jpg', .15)->margin(0)->generate($url2, public_path('imgs/wx_pay_qrcode2.png'));
 
 
-        $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index');
+        $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index?weid='.$this->weid);
         return view('mobile.shop.index', [
             'signPackage'       => $signPackage,
             'package'           => $package,

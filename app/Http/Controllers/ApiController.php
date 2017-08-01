@@ -10,8 +10,11 @@ use App\Models\RuleKeyword;
 
 class ApiController extends Controller
 {
+    private $redirectUri;
+
     public function __construct()
     {
+        $this->redirectUri = config('wechat.redirectUri');
     }
 
     public function index(Request $request)
@@ -38,37 +41,49 @@ class ApiController extends Controller
             Log::info('接收的内容：' . PHP_EOL . $xml . PHP_EOL);
             $recMsg     = xmlToArray($xml);
             $acctount   = Wechats::where(['original'=>$recMsg['ToUserName']])->first();
+            $ruleK      = RuleKeyword::where(['weid' => $acctount['weid'], 'content'=>$recMsg['Content']])
+                //->where('content', 'like', '%你好%')
+                ->first();
+            $ruleR = Rule::where(['id' => $ruleK['rid']])->where('status', '>', 0)->first();
 
-            if ($recMsg['MsgType'] == 'text') {
+            if($recMsg['Content'] == $ruleK['content']){
 
-                $ruleK = RuleKeyword::where(['weid' => $acctount['weid']])
-                    ->where('content', 'like', '%你好%')
-                    ->first();
-                $ruleR = Rule::where(['id' => $ruleK['rid']])->first()->reply;
-
-                switch($recMsg['Content']){
-                    case $ruleK['content']:
-                        foreach ($ruleR as $reply) {
-                            $sendMsgs[] = [
+                switch ($ruleK['module']) { //$recMsg['MsgType']
+                    case 'basic':
+                        $ruleR = $ruleR->basicReply; // Rule::where(['id' => $ruleK['rid']])->first()
+                        //foreach ($ruleR as $reply) {
+                            $sendMsgs = [ //[]
                                 'ToUserName'    => $recMsg['FromUserName'],
                                 'FromUserName'  => $recMsg['ToUserName'],
                                 'CreateTime'    => time(),
                                 'MsgType'       => 'text',
-                                'Content'       => $reply['content'],
+                                'Content'       => $ruleR[0]['content'],//$reply
                             ];
-                        }
-                        //$msg = $ruleR[0]['content']; break;
-                    default:
+                        //}
+                        break;
+                    case 'news':
+                        $ruleR = $ruleR->newsReply;
+                        $sendMsgs = [ //[]
+                            'ToUserName'    => $recMsg['FromUserName'],
+                            'FromUserName'  => $recMsg['ToUserName'],
+                            'CreateTime'    => time(),
+                            'MsgType'       => 'news', //'Content' => $ruleR[0]['content'],
+                            'ArticleCount'  => 1,
+                            'Articles'      => [
+                                'item'  =>[
+                                    'Title'         => $ruleR[0]['title'],
+                                    'Description'   => $ruleR[0]['description'],
+                                    'PicUrl'        => $this->redirectUri.$ruleR[0]['thumb'],
+                                    'Url'           => $ruleR[0]['url']
+                                ]
+                            ]
+                        ];
+                        break;
                 }
-
-
-                //foreach ($sendMsgs as $sendMsg) {
-                    Log::info('接收的内容：' . PHP_EOL . json_encode($sendMsgs[2], JSON_UNESCAPED_UNICODE) . PHP_EOL);
-                    echo array2xml($sendMsgs[2]);
-                //}
-
+                $xmlReply = array2xml($sendMsgs);//[2]
+                Log::info('回复的内容：' . PHP_EOL . xmlFormatting($xmlReply) . PHP_EOL);//[2]
+                echo $xmlReply;
             }
-
         }
     }
 

@@ -39,8 +39,8 @@
                     </div>
                     <input type="submit" class="btn btn-success btn-lg" name="submit" style="width: 100%; margin: 20px 0;" value="微信支付">
                 </form>
-                <img src="imgs/wx_pay_qrcode1.png">
-                <img src="imgs/wx_pay_qrcode2.png">
+                <img src="{{ url('imgs/wx_pay_qrcode1.png') }}">
+                <img src="{{ url('imgs/wx_pay_qrcode2.png') }}">
             </div>
         </div>
     </div>
