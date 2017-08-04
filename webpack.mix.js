@@ -23,12 +23,17 @@ mix.js('resources/assets/js/app.js', 'public/js').extract(['vue'])
    .js('resources/assets/js/bootstrap-treeview.min.js', 'public/js')
    //.scripts(['resources/assets/js/echarts.min.js'], 'public/js')
    //.babel(['resources/assets/js/echarts.min.js'], 'public/js')
+    //.js('resources/assets/js/daterangepicker.js', 'public/js')
    .sass('resources/assets/sass/app.scss', 'public/css');
 
 mix.copy('resources/assets/imgs/nav_bg.png', 'public/imgs');
 mix.copy('resources/assets/imgs/up_pic_bg.jpg', 'public/imgs');
 mix.copy('resources/assets/imgs/headimg.jpg', 'public/imgs');
 mix.copy('resources/assets/imgs/qrcode.jpg', 'public/imgs');
+
+mix.copy('resources/assets/css/daterangepicker-bs3.css', 'public/css');
+mix.copy('resources/assets/js/moment.js', 'public/js');
+mix.copy('resources/assets/js/daterangepicker.js', 'public/js');
 
 
 mix.browserSync({

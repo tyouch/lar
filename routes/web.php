@@ -57,6 +57,16 @@ Auth::routes();
         Route::any('payment', 'AccountController@payment')->name('account.payment');
     });
 
+    // shop admin
+    Route::group(['prefix'=>'shop'], function (){
+        Route::get('index', 'ShopController@index')->name('shop.index');
+        Route::any('category', 'ShopController@category')->name('shop.category');
+        Route::any('goods', 'ShopController@goods')->name('shop.goods');
+        Route::any('order', 'ShopController@order')->name('shop.order');
+        Route::any('distribution', 'ShopController@distribution')->name('shop.distribution');
+        Route::any('service', 'ShopController@service')->name('shop.service');
+        Route::any('slide', 'ShopController@slide')->name('shop.slide');
+    });
 
     //---------------------------------------------
     // 导航

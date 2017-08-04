@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     {{--<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{{ url('css/app.css') }}">--}}
+    <link rel="stylesheet" href="{{ url('css/daterangepicker-bs3.css') }}">
     <link rel="stylesheet" href="{{ url('css/style.css') }}">
 </head>
 <body>
@@ -77,14 +78,13 @@
 
 
     @yield('content')
-
     <script src="{{ asset('/js/manifest.js') }}"></script>
     <script src="{{ asset('/js/vendor.js') }}"></script>
     <script src="{{ asset('/js/app.js') }}"></script>
     {{--<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>--}}
     <script>
-        $('[data-toggle="tooltip"]').tooltip();
+        //$('[data-toggle="tooltip"]').tooltip();
         //$(".js-popover").popover(); //init弹出框
     </script>
     @stack('scripts')

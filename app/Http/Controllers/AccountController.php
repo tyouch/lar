@@ -54,7 +54,7 @@ class AccountController extends Controller
         //dd($account);
 
         $end    = microtime(true);
-        return view('wechat.index', [
+        return view('web.index', [
             'pass'      => $end - $begin,
             'account'   => $account
         ]);
@@ -104,7 +104,6 @@ class AccountController extends Controller
         $info = [
             'token'     => session('token'),
             'apiUrl'    => $account['hash'],
-
         ];
 
         $this->ipListUrl .= session('token');
@@ -113,7 +112,7 @@ class AccountController extends Controller
         //$res = HttpRequest::content($this->menuQueryUrl); dump(session('token'), $res);
 
         $end    = microtime(true);
-        return view('wechat.manage', [
+        return view('web.manage', [
             'pass'      => $end - $begin,
             'weid'      => $weid,
             'account'   => $account,
@@ -269,7 +268,7 @@ class AccountController extends Controller
 
 
         $end    = microtime(true);
-        return view('wechat.rule', [
+        return view('web.rule', [
             'pass'      => $end - $begin,
             'weid'      => $weid,
             'rules'     => $rules,
@@ -290,10 +289,14 @@ class AccountController extends Controller
         //dd($account['menuset']);
         $_token = $request->input('_token'); //dd($_token);
 
-        if(empty($account['menuset'])) { // db menuset is null or request flush
+        $menuSet1 = unserialize(base64_decode($account['menuset'])); //dd($menuSet1);
+
+        if(empty($account['menuset']) || time()-$menuSet1['menu']['createtime']>7200) { // db menuset is null or request flush
             $this->menuQueryUrl .= session('token');//$tokenArr['token'];
             $menuSet = HttpRequest::toArray($this->menuQueryUrl); //dump(session('token'), $menuSet);
-            //dd($menuSet);
+            $menuSet['menu']['createtime'] = time();
+            $menuSet1 = $menuSet;
+            dump($menuSet);
             $account['menuset'] = base64_encode(serialize($menuSet));
             $account->save();
 
@@ -330,7 +333,6 @@ class AccountController extends Controller
         }
 
         //调取渲染
-        $menuSet1 = unserialize(base64_decode($account['menuset'])); //dump($menuSet1);
         $menuSet = []; $i=0;
         foreach ($menuSet1['menu']['button'] as $btn) {
             $menuSet['menu']['button'][$i]['name'] = urldecode($btn['name']);
@@ -351,7 +353,7 @@ class AccountController extends Controller
 
 
         $end    = microtime(true);
-        return view('wechat.menu', [
+        return view('web.menu', [
             'pass'      => $end - $begin,
             'weid'      => $weid,
             'button'    => $menuSet['menu']['button'],
@@ -389,7 +391,7 @@ class AccountController extends Controller
         }
 
         $end    = microtime(true);
-        return view('wechat.payment', [
+        return view('web.payment', [
             'pass'      => $end - $begin,
             'weid'      => $weid,
             'module'    => 'payment',

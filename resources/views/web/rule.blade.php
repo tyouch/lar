@@ -21,8 +21,8 @@
     <div class="container">
         <div class="row assets">
             <div class="col-md-3">
-                @includeIf('wechat.nav', [])
-                @includeIf('wechat.nav2', [])
+                @includeIf('web.nav', [])
+                @includeIf('web.nav2', [])
             </div>
 
             <div class="col-md-9">
@@ -208,7 +208,6 @@
 
 @push('scripts')
 <script>
-
     $("#thumb").on('change', function (e) {
         $src = window.URL.createObjectURL(this.files[0]); //alert($src);
         $("#thumb-preview").attr("src", $src);

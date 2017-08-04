@@ -70,7 +70,7 @@ class WetestController extends Controller
         $signPackage = $this->getSignPackage();
         dump($signPackage);
 
-        return view('wechat.wetest', [
+        return view('web.wetest', [
             'wOpt'          => $wOpt,
             'signPackage'   => $signPackage,
         ]);

@@ -20,14 +20,14 @@
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">商店</a>
                     </h4>
                 </div>
-                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                <div id="collapseOne" class="panel-collapse collapse @if(@substr($module, 0, 4) == 'shop'){{ 'in' }}@endif" role="tabpanel" aria-labelledby="headingOne">
                     <ul class="list-group">
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">商品分类</a>
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">商品管理</a>
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">订单管理</a>
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">物流管理</a>
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">售后管理</a>
-                        <a href="javascritp:;" class="list-group-item list-group-item-info">幻灯片管理</a>
+                        <a href="{{ route('shop.category', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopCategory'){{ 'active' }}@endif">商品分类</a>
+                        <a href="{{ route('shop.goods', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopGoods'){{ 'active' }}@endif">商品管理</a>
+                        <a href="{{ route('shop.order') }}" class="list-group-item list-group-item-info">订单管理</a>
+                        <a href="{{ route('shop.distribution') }}" class="list-group-item list-group-item-info">物流管理</a>
+                        <a href="{{ route('shop.service') }}" class="list-group-item list-group-item-info">售后管理</a>
+                        <a href="{{ route('shop.slide') }}" class="list-group-item list-group-item-info">幻灯片管理</a>
                     </ul>
                 </div>
             </div>
