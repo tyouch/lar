@@ -12,6 +12,7 @@
 
 
 @section('content')
+    <link rel="stylesheet" href="{{ url('css/fileinput.css') }}">
     <style>
         .table1 {
             table-layout: fixed;
@@ -22,12 +23,21 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
-        .assets input, .assets select, .daterangepicker .calendar-date{
-            color: #fff;
+        .assets input, .assets select, .daterangepicker .calendar-date,
+        .daterangepicker.ltr .calendar-table, .daterangepicker .input-mini, .calendar-time {
+            color: white;
             background: #323c48;
+            border-radius: 5px;
         }
-        .daterangepicker td.in-range{
+        .daterangepicker td.in-range, .daterangepicker select{
             background: #5bc0de;
+        }
+        .daterangepicker td.off,
+        .daterangepicker td.off.in-range,
+        .daterangepicker td.off.start-date,
+        .daterangepicker td.off.end-date ,
+        .file-preview {
+            background: #555;
         }
         .assets .input-group-addon{
             color: #fff;
@@ -84,7 +94,7 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group has-feedback">
-                                            <select name="pcate" class="form-control" style="color: #999;">
+                                            <select name="pcate" class="form-control pcate" style="color: #999;">
                                                 <option value="" readonly>请选择一级分类</option>
                                                 @foreach($category1 as $cate)
                                                     <option value="{{ $cate['id'] }}" @if(@$pagePram['pcate']==$cate['id'])selected="selected"@endif>{{ $cate['name'] }}</option>
@@ -93,12 +103,14 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <select name="ccate" class="form-control" style="color: #999;">
-                                            <option value="" readonly>请选择二级分类</option>
-                                            @foreach($category2 as $cate)
-                                                <option value="{{ $cate['id'] }}" @if(@$pagePram['ccate']==$cate['id'])selected="selected"@endif>{{ $cate['name'] }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="form-group has-feedback">
+                                            <select name="ccate" class="form-control ccate" style="color: #999;">
+                                                <option value="" readonly>请选择二级分类</option>
+                                                @foreach($category2 as $cate)
+                                                    <option value="{{ $cate['id'] }}" @if(@$pagePram['ccate']==$cate['id'])selected="selected"@endif>{{ $cate['name'] }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-4">
                                         <input type="hidden" name="weid" value="{{ $weid }}">
@@ -169,7 +181,7 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-md-9">
-                                                <input type="text" name="goods[title]" class="form-control" maxlength="40">
+                                                <input type="text" name="goods[title]" class="form-control" maxlength="60">
                                                 <input type="hidden" name="goods[id]" value="" class="form-control">
                                             </div>
                                             <div class="col-md-3">
@@ -186,7 +198,7 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-md-9">
-                                                <input type="text" name="goods[sub_title]" class="form-control" maxlength="40">
+                                                <input type="text" name="goods[sub_title]" class="form-control" maxlength="60">
                                             </div>
                                             <div class="col-md-3">
                                                 <div class="input-group">
@@ -202,16 +214,16 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isrecommand]" value="">首页</label>
-                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isnew]" value="">新品</label>
-                                                <label class="checkbox-inline"><input type="checkbox" name="goods[ishot]" value="">热卖</label>
-                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isdiscount]" value="">折扣</label>
-                                                <label class="checkbox-inline"><input type="checkbox" name="goods[istime]" value="">限时</label>
+                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isrecommand]" value="1">首页</label>
+                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isnew]" value="1">新品</label>
+                                                <label class="checkbox-inline"><input type="checkbox" name="goods[ishot]" value="1">热卖</label>
+                                                <label class="checkbox-inline"><input type="checkbox" name="goods[isdiscount]" value="1">折扣</label>
+                                                <label class="checkbox-inline"><input type="checkbox" name="goods[istime]" value="1">限时</label>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
-                                                    <input type="text" readonly name="reservation" id="reservation" class="form-control" value="{{ $stime }} - {{ $etime }}" />
+                                                    <input type="text" name="goods[timestart]" id="reservation" class="form-control" value="">
                                                 </div>
                                             </div>
                                         </div>
@@ -222,7 +234,7 @@
                                     <td>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <select name="goods[pcate]" class="form-control" style="color: #999;">
+                                                <select name="goods[pcate]" class="form-control pcate" style="color: #999;">
                                                     <option value="0" readonly>请选择一级分类</option>
                                                     @foreach($category1 as $cate)
                                                         <option value="{{ $cate['id'] }}">{{ $cate['name'] }}</option>
@@ -230,7 +242,7 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
-                                                <select name="goods[ccate]" class="form-control" style="color: #999;">
+                                                <select name="goods[ccate]" class="form-control ccate" style="color: #999;">
                                                     <option value="0" readonly>请选择二级分类</option>
                                                     @foreach($category2 as $cate)
                                                         <option value="{{ $cate['id'] }}">{{ $cate['name'] }}</option>
@@ -272,24 +284,25 @@
                                 <tr>
                                     <th>图片</th>
                                     <td>
-                                        <div class="row">
-                                            <div class="col-md-4" style="position: relative; margin-bottom: 15px;">
+                                        <div class="row" style="margin-bottom: 15px;">
+                                            <div class="col-md-4" style="position: relative;">
                                                 <div class="input-group" style="position: absolute; width: 88%;">
                                                     <input type="text" id="txt-preview" class="form-control" placeholder="商品图" readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-open"></span></span>
                                                 </div>
                                                 <input type="file" id="thumb" name="goods[thumb]" class="form-control" style="position: absolute; width: 88%; opacity: 0">
                                             </div>&nbsp;
+                                            <div class="col-md-4">
+                                                <img id="thumb-preview" src="" class="img-thumbnail">
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th class="sr-only1">幻灯片</th>
                                     <td>
-                                        <div class="row">
-                                            <div class="col-md-4"></div>
-                                            <div class="col-md-4"></div>
-                                            <div class="col-md-4"><img id="thumb-preview" src="" class="img-thumbnail"></div>
+                                        <div class="form-group has-feedback">
+                                            <input id="thumb_url" name="thumb_url[]" type="file" multiple>
                                         </div>
                                     </td>
                                 </tr>
@@ -411,10 +424,20 @@
 <script src="{{ asset('/js/daterangepicker.js') }}"></script>
 <script>
     // 日期插件 必须放在前面
-    $('#reservation').daterangepicker(null, function(start, end, label) {
+    $('#reservation').daterangepicker({
+        "autoApply": true,
+        "timePicker": true,
+        "timePicker24Hour": true,
+        "timePickerSeconds": true,
+        "opens": "left",
+        "locale": {
+            "format": "YYYY-MM-DD HH:mm",
+        }
+    }, function(start, end, label) {
         console.log(start.toISOString(), end.toISOString(), label);
     });
-
+</script>
+<script>
     // title tip
     $('[data-toggle="tooltip"]').tooltip();
 
@@ -422,6 +445,30 @@
         $src = window.URL.createObjectURL(this.files[0]); //alert($src);
         $("#thumb-preview").attr("src", $src);
         $("#txt-preview").attr("placeholder", $src);
+    });
+
+    $(".pcate").on('change', function (e) {
+        $.ajax({
+            url         : '{{ route('shop.goods', ['weid'=>$weid]) }}',
+            Type        : 'POST',
+            dataType    : 'JSON',
+            data        : {
+                _token  : '{{ csrf_token() }}',
+                op      : 'ccate',
+                id      : $(this).val()
+            },
+            headers     : {
+                'X-CSRF-TOKEN'  : $('meta[name="csrf-token"]').attr('content')
+            },
+            success     : function (d, s) {
+                console.log(d, s);
+                el = '<option value="" readonly>请选择二级分类</option>';
+                $.each(d, function(i, o) {
+                    el += '<option value="' + o.id + '">' + o.name + '</option>';
+                    $(".ccate").html(el);
+                });
+            }
+        });
     });
 
     $(".edit").on('click', function (e) {
@@ -461,8 +508,31 @@
                 $("input[name='goods[sales]']").val(d.sales);
                 $("textarea[name='goods[description]']").val(d.description);
 
+                $("input[name='goods[timestart]']").val(d.timestart);
             }
         });
     });
+</script>
+<script src="{{ asset('/js/fileinput.js') }}"></script>
+<script src="{{ asset('/js/fileinput_zh.js') }}"></script>
+<script>
+    $('#thumb_url').fileinput({
+        language: 'zh',
+        uploadUrl: '#',
+        allowedFileExtensions : ['jpg', 'png','gif'],
+        uploadUrl: '{{ route('shop.goods', ['weid'=>$weid]) }}',
+        uploadExtraData: {
+            _token  : '{{ csrf_token() }}',
+            op      : 'fileinput',
+        }
+    }).on("filebatchselected", function(event, files) {
+        //$(this).fileinput("upload");
+        //console.log(event, files);
+    }).on("fileuploaded", function(event, data, previewId, index) {
+        console.log(data, previewId, index);
+            if(data.response){
+                //alert('处理成功');
+            }
+        });
 </script>
 @endpush

@@ -41,7 +41,7 @@ class ShopController extends Controller
     {
         $begin = microtime(true);
         $_token = $request->input('_token');
-
+        //dd($_token, csrf_token());
         if (isset($_token) && $_token == csrf_token()) {
 
             $this->validate($request, [
@@ -106,16 +106,60 @@ class ShopController extends Controller
         $_token = $request->input('_token');
         if (isset($_token) && $_token == csrf_token()) {
 
-            if($request->input('op') == 'modalFill') {
-                $goods = ShoppingGoods::where(['id'=>$request->input('id')])->first();
+            // 编辑回填模态框 [ajax]
+            if ($request->input('op') == 'modalFill') {
+                $goods = ShoppingGoods::where(['id' => $request->input('id')])->first();
+                $goods->timestart = date('Y-m-d H:i', $goods->timestart);
+                $goods->timeend = date('Y-m-d H:i', $goods->timeend);
+                $goods->timestart .= ' - ' . $goods->timeend;
                 return response()->json($goods);
             }
 
+            // 自动选择二级分类 [ajax]
+            if ($request->input('op') == 'ccate') {
+                $id = $request->input('id');
+                $category2 = ShoppingCategory::where(['weid'=>$this->weid, 'parentid'=>$id])->get();
+                return response()->json($category2);
+            }
+
+            // 处理批量上传 [ajax]
+            if($request->input('op') == 'fileinput'){
+                $file       = $request->file('thumb_url');
+                $desPath    = 'imgs/uploads/images/'.date('Y').'/'.date('m').'/';
+                $thumb      = $file ? $this->uploadFile($file, random(10), $desPath) : null;
+
+                return response()->json(['a'=>$request->file(),'b'=>$thumb]);
+            }
+
+
+            /*$this->validate($request, [
+                //'name'          => 'required|max:20',
+                //'description'   => 'required',
+                //'displayorder'  => 'required',
+                //'isrecommand'   => 'required'
+            ]);*/
+
+
             $post = $request->input('goods');
+            //dd($post['timestart'],$post['istime']);
             $post['weid'] = $this->weid;
             $post['createtime'] = time();
             $post['content'] = 'test';
-            $post['spec'] = '1';
+            $post['spec'] = '';
+            $post['isrecommand']    = empty($post['isrecommand']) ? 0 : 1;
+            $post['isnew']          = empty($post['isnew']) ? 0 : 1;
+            $post['ishot']          = empty($post['ishot']) ? 0 : 1;
+            $post['istime']         = empty($post['istime']) ? 0 : 1;
+
+            if ($post['istime'] == 1) {
+                $temp = explode(' - ', $post['timestart']);
+                $post['timestart'] = strtotime($temp[0]);
+                $post['timeend'] = strtotime($temp[1]);
+            } else {
+                unset($post['timestart']);
+                unset($post['timeend']);
+            }
+            //dump(date('Y-m-d H:i:s', $post['timeend']));
             //dd($post);
 
             $goods = ShoppingGoods::updateOrCreate(['id'=>$post['id']], $post);
@@ -131,7 +175,7 @@ class ShopController extends Controller
         $goods = $goods->paginate(10); //toSql();//
 
         $category1 = ShoppingCategory::where(['weid'=>$this->weid, 'parentid'=>0])->get();
-        $category2 = ShoppingCategory::where(['weid'=>$this->weid])->where('parentid', '<>', 0)->get();
+        $category2 = ShoppingCategory::where(['weid'=>$this->weid, 'parentid'=>$request->input('pcate')])->get();
         //dd($goods);
 
 

@@ -13,11 +13,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title')</title>
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="{{ url('favicon.ico') }}">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     {{--<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{{ url('css/app.css') }}">--}}
-    <link rel="stylesheet" href="{{ url('css/daterangepicker-bs3.css') }}">
+    <link rel="stylesheet" href="{{ url('css/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ url('css/style.css') }}">
 </head>
 <body>
