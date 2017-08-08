@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+//use Stevenyangecho\UEditor\UEditorServiceProvider as UEditor;
 
+use Storage;
 use App\Models\ShoppingCategory;
 use App\Models\ShoppingGoods;
 
@@ -100,6 +102,7 @@ class ShopController extends Controller
     {
         $begin = microtime(true);
         parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+        $desPath    = 'imgs/uploads/images/'.date('Y').'/'.date('m').'/';
 
 
         // 添加和编辑
@@ -108,10 +111,21 @@ class ShopController extends Controller
 
             // 编辑回填模态框 [ajax]
             if ($request->input('op') == 'modalFill') {
-                $goods = ShoppingGoods::where(['id' => $request->input('id')])->first();
+                $goods = ShoppingGoods::with('category')->where(['id'=>$request->input('id')])->first();
+
                 $goods->timestart = date('Y-m-d H:i', $goods->timestart);
                 $goods->timeend = date('Y-m-d H:i', $goods->timeend);
                 $goods->timestart .= ' - ' . $goods->timeend;
+
+                //$cate = ShoppingGoods::where(['id'=>$request->input('id')])->first()->category;
+                //$goods->cateName = $cate->name;
+
+                return response()->json($goods);
+            }
+
+            // 删除记录
+            if($request->input('op') == 'delete') {
+                $goods = ShoppingGoods::where(['id'=>$request->input('id')])->update(['deleted'=>1]);
                 return response()->json($goods);
             }
 
@@ -124,11 +138,30 @@ class ShopController extends Controller
 
             // 处理批量上传 [ajax]
             if($request->input('op') == 'fileinput'){
-                $file       = $request->file('thumb_url');
-                $desPath    = 'imgs/uploads/images/'.date('Y').'/'.date('m').'/';
-                $thumb      = $file ? $this->uploadFile($file, random(10), $desPath) : null;
 
-                return response()->json(['a'=>$request->file(),'b'=>$thumb]);
+                //$fileName   = random(10).'.jpg';
+                //$fileFullName = $desPath.$fileName;
+
+                //$thumb      = $file ? $this->uploadFile($file, random(10), $desPath) : null;
+                //$thumb = $_FILES;
+                //$file       = $request->file('thumb_url');
+                //foreach ($request->file() as $file) {
+                    //$thumb[]  = $file ? $this->uploadFile($file, random(10), $desPath) : null;
+                //}
+                //foreach($_FILES['thumb_url']['tmp_name'] as $k=>$v)
+                //{
+
+                //}
+                $thumb = '';
+                foreach ($_FILES['fileinput']['tmp_name'] as $key => $val) {
+
+                        $fileName = random(10).'.jpg';
+                        move_uploaded_file($val, $desPath.$fileName);
+                        $thumb = $desPath.$fileName;
+
+                }
+
+                return response()->json(['ajax'=>$request->ajax(), 'thumb_url'=>$thumb, 'FILES'=>$_FILES,]);
             }
 
 
@@ -140,16 +173,27 @@ class ShopController extends Controller
             ]);*/
 
 
-            $post = $request->input('goods');
-            //dd($post['timestart'],$post['istime']);
+            $post = $request->input('goods'); //dd($post);
             $post['weid'] = $this->weid;
             $post['createtime'] = time();
-            $post['content'] = 'test';
+            //$post['content'] = 'test';
             $post['spec'] = '';
             $post['isrecommand']    = empty($post['isrecommand']) ? 0 : 1;
             $post['isnew']          = empty($post['isnew']) ? 0 : 1;
             $post['ishot']          = empty($post['ishot']) ? 0 : 1;
             $post['istime']         = empty($post['istime']) ? 0 : 1;
+
+            //dd($request->file());
+
+            $request->file('goods.thumb') && $post['thumb'] = $this->uploadFile($request->file('goods.thumb'), random(10), $desPath);
+            /*$file = $request->file('goods.thumb');
+            $realPath = $file->getRealPath();
+            $ext = $file->getClientOriginalExtension();
+            $filename = date('Y-m-d-H-i-S').'-'.uniqid().'-'.$ext;
+            $bool = Storage::disk('uploads')->put($filename, file_get_contents($realPath));*/
+
+
+            !empty($post['thumb_url'])  && $post['thumb_url'] = serialize($post['thumb_url']);
 
             if ($post['istime'] == 1) {
                 $temp = explode(' - ', $post['timestart']);
@@ -163,10 +207,13 @@ class ShopController extends Controller
             //dd($post);
 
             $goods = ShoppingGoods::updateOrCreate(['id'=>$post['id']], $post);
+
+            //dd($pagePram);
+            return redirect()->route('shop.goods', $pagePram);
         }
 
 
-        $goods = ShoppingGoods::with('category')->where(['weid'=>$this->weid]);
+        $goods = ShoppingGoods::with('category')->where(['weid'=>$this->weid, 'deleted'=>0]);
         !empty($request->input('gid'))      && $goods = $goods->where(['id'=>$request->input('gid')]);
         !empty($request->input('status'))   && $goods = $goods->where(['status'=>$request->input('status')]);
         !empty($request->input('pcate'))    && $goods = $goods->where(['pcate'=>$request->input('pcate')]);
@@ -192,8 +239,6 @@ class ShopController extends Controller
             'etime'     => date('Y-m-d H:i:s', strtotime("+1 month")),
         ]);
     }
-
-
 
 
 

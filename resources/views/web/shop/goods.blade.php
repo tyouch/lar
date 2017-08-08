@@ -169,7 +169,7 @@
         <div class="modal fade example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
-                    <form action="{{ route('shop.goods', ['weid'=>$weid]) }}" method="post" enctype="multipart/form-data">
+                    <form action="{{ route('shop.goods', $pagePram) }}" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             <h4 class="modal-title" id="myModalLabel">添加商品</h4>
@@ -235,7 +235,7 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <select name="goods[pcate]" class="form-control pcate" style="color: #999;">
-                                                    <option value="0" readonly>请选择一级分类</option>
+                                                    <option value="0" selected readonly>请选择一级分类</option>
                                                     @foreach($category1 as $cate)
                                                         <option value="{{ $cate['id'] }}">{{ $cate['name'] }}</option>
                                                     @endforeach
@@ -243,7 +243,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <select name="goods[ccate]" class="form-control ccate" style="color: #999;">
-                                                    <option value="0" readonly>请选择二级分类</option>
+                                                    <option value="0" selected readonly>请选择二级分类</option>
                                                     @foreach($category2 as $cate)
                                                         <option value="{{ $cate['id'] }}">{{ $cate['name'] }}</option>
                                                     @endforeach
@@ -293,7 +293,7 @@
                                                 <input type="file" id="thumb" name="goods[thumb]" class="form-control" style="position: absolute; width: 88%; opacity: 0">
                                             </div>&nbsp;
                                             <div class="col-md-4">
-                                                <img id="thumb-preview" src="" class="img-thumbnail">
+                                                <img id="thumb-preview" src="" data-id="{{ url('') }}" class="img-thumbnail">
                                             </div>
                                         </div>
                                     </td>
@@ -301,8 +301,8 @@
                                 <tr>
                                     <th class="sr-only1">幻灯片</th>
                                     <td>
-                                        <div class="form-group has-feedback">
-                                            <input id="thumb_url" name="thumb_url[]" type="file" multiple>
+                                        <div class="form-group has-feedback thumb_url">
+                                            <input id="thumb_url" name="fileinput[]" type="file" multiple>
                                         </div>
                                     </td>
                                 </tr>
@@ -378,13 +378,6 @@
                                 <tr>
                                     <th></th>
                                     <td>
-
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <th></th>
-                                    <td>
                                         <span class="label label-info">库存</span>
                                         <label class="radio-inline"><input type="radio" name="goods[totalcnf]" value="0">拍下减</label>
                                         <label class="radio-inline"><input type="radio" name="goods[totalcnf]" value="1" checked="checked">付款减</label>
@@ -403,11 +396,18 @@
                                     <th>商品详情</th>
                                     <td><textarea rows="3" name="goods[description]" class="form-control" placeholder="改造编辑器"></textarea></td>
                                 </tr>
+                                <tr>
+                                    <th></th>
+                                    <td>
+                                        @include('UEditor::head')
+                                        <script id="ueditor" class="ueditorRet" name="goods[content]" type="text/plain"></script>
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                         <div class="modal-footer">
                             {{ csrf_field() }}
-                            <input type="submit" class="btn btn-primary" value="保存分类">
+                            <input type="submit" class="btn btn-primary" value="保存商品">
                         </div>
                     </form>
                 </div>
@@ -437,6 +437,7 @@
         console.log(start.toISOString(), end.toISOString(), label);
     });
 </script>
+
 <script>
     // title tip
     $('[data-toggle="tooltip"]').tooltip();
@@ -471,6 +472,42 @@
         });
     });
 
+    $(".add").on('click', function (e) {
+        $("input[type=text]").val("");
+        $("select option").removeAttr("selected");
+        $("#thumb-preview").attr("src", "");
+        $("textarea").html("");
+        ue.ready(function() {
+            ue.setContent("");
+        });
+    });
+
+    $(".del").on('click', function (e) {
+        id = $(this).attr('data-id');
+        if (confirm("确认要删除这条规则吗？【rid:" + id + "】")) {
+            $.ajax({
+                url         : '{{ route('shop.goods', ['weid'=>$weid]) }}',
+                Type        : 'POST',
+                dataType    : 'JSON',
+                data        : {
+                    _token  : '{{ csrf_token() }}',
+                    op      : 'delete',
+                    id      : id
+                },
+                headers     : {
+                    'X-CSRF-TOKEN'  : $('meta[name="csrf-token"]').attr('content')
+                },
+                success   : function (d, s) {
+                    console.log(d, s);
+                    alert('删除[' + s +']');
+                    window.location.reload();
+                }
+            });
+        } else {
+            alert('放弃删除...');
+        }
+    });
+
     $(".edit").on('click', function (e) {
         $.ajax({
             url         : '{{ route('shop.goods', ['weid'=>$weid]) }}',
@@ -491,48 +528,81 @@
                 $("input[name='goods[unit]']").val(d.unit);
                 $("input[name='goods[sub_title]']").val(d.sub_title);
                 $("input[name='goods[weight]']").val(d.weight);
-                $("select[name='goods[pcate]']").val(d.pcate);
-                $("select[name='goods[ccate]']").val(d.ccate);
                 $("input[name='goods[brand]']").val(d.brand);
                 $("input[name='goods[productprice]']").val(d.productprice);
                 $("input[name='goods[marketprice]']").val(d.marketprice);
                 $("input[name='goods[costprice]']").val(d.costprice);
-
-                $("input[name='goods[style]']").val(d.style);
                 $("input[name='goods[total]']").val(d.total);
-                $("input[name='goods[thumb]']").val(d.thumb);
-
                 $("input[name='goods[goodssn]']").val(d.goodssn);
                 $("input[name='goods[productsn]']").val(d.productsn);
                 $("input[name='goods[maxbuy]']").val(d.maxbuy);
                 $("input[name='goods[sales]']").val(d.sales);
-                $("textarea[name='goods[description]']").val(d.description);
+                $("textarea[name='goods[description]']").html(d.description);
 
                 $("input[name='goods[timestart]']").val(d.timestart);
+                //$("input[name='goods[thumb]']").val(d.thumb);
+                $("#thumb-preview").attr("src", $("#thumb-preview").attr("data-id")+'/'+d.thumb);
+
+                ue.ready(function() {
+                    ue.setContent(d.content);
+                });
+
+                $("select[name='goods[pcate]'] option").removeAttr("selected");
+                $("select[name='goods[pcate]'] option[value=" + d.pcate + "]").attr("selected", true);
+
+                el = '<option value="'+d.ccate+'" selected>'+d.category.name+'</option>';
+                $("select[name='goods[ccate]']").append(el);
+
+                //$("select[name='goods[ccate]']").val(d.ccate);
+                //$(".modal-content").find("input[name=isrecommand]").removeAttr("checked"); //
+                //$(".modal-content").find("input[name=isrecommand][value=" + isrecommand + "]").attr("checked", true); //
+
             }
         });
     });
 </script>
+
 <script src="{{ asset('/js/fileinput.js') }}"></script>
 <script src="{{ asset('/js/fileinput_zh.js') }}"></script>
 <script>
+    i = 0;
     $('#thumb_url').fileinput({
         language: 'zh',
-        uploadUrl: '#',
         allowedFileExtensions : ['jpg', 'png','gif'],
+        //uploadAsync: false,
         uploadUrl: '{{ route('shop.goods', ['weid'=>$weid]) }}',
         uploadExtraData: {
             _token  : '{{ csrf_token() }}',
             op      : 'fileinput',
         }
-    }).on("filebatchselected", function(event, files) {
+    }).on("filebatchselected", function(event, files, previewId, index) {
         //$(this).fileinput("upload");
-        //console.log(event, files);
+        //console.log(files);
     }).on("fileuploaded", function(event, data, previewId, index) {
-        console.log(data, previewId, index);
+        console.log(event, data, previewId, index);
             if(data.response){
-                //alert('处理成功');
+                el = '<input type="hidden" name="goods[thumb_url]['+(i++)+']" value="'+data.response.thumb_url+'">';
+                $(".thumb_url").append(el);
             }
         });
+</script>
+
+
+<script>
+    var ue = UE.getEditor("ueditor",{
+        toolbars: [
+            ['fullscreen', 'source', 'undo', 'redo'],
+            ['bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript', 'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc']
+        ],
+        autoHeightEnabled: true,
+        autoFloatEnabled: true,
+        initialFrameWidth: '715px',
+        initialFrameHeight: '400px'
+    });
+    ue.ready(function(){
+        //因为Laravel有防csrf防伪造攻击的处理所以加上此行
+        ue.execCommand('serverparam', '_token', '{{ csrf_token() }}');
+    });
+    $("#edui1").css('width','715px');
 </script>
 @endpush

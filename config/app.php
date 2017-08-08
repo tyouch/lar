@@ -194,6 +194,11 @@ return [
          */
         Laravel\Passport\PassportServiceProvider::class,
 
+        /*
+         * UEditor
+         */
+        Stevenyangecho\UEditor\UEditorServiceProvider::class
+
     ],
 
     /*
@@ -244,6 +249,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
+        'UEditor' => Stevenyangecho\UEditor\UEditorServiceProvider::class
     ],
 
 ];
