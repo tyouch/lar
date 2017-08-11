@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 //use Stevenyangecho\UEditor\UEditorServiceProvider as UEditor;
 
-use Storage;
+use App\Lib\Wechat\HttpRequest;
 use App\Models\ShoppingCategory;
 use App\Models\ShoppingGoods;
+use App\Models\ShoppingOrder;
+use App\Models\ShoppingOrderGoods;
 
 
 class ShopController extends Controller
@@ -109,14 +111,17 @@ class ShopController extends Controller
         $_token = $request->input('_token');
         if (isset($_token) && $_token == csrf_token()) {
 
+            $id = $request->input('id');
+
             // 编辑回填模态框 [ajax]
             if ($request->input('op') == 'modalFill') {
-                $goods = ShoppingGoods::with('category')->where(['id'=>$request->input('id')])->first();
+                $goods = ShoppingGoods::with('category')->where(['id'=>$id])->first();
 
                 $goods->timestart = date('Y-m-d H:i', $goods->timestart);
                 $goods->timeend = date('Y-m-d H:i', $goods->timeend);
                 $goods->timestart .= ' - ' . $goods->timeend;
 
+                $goods->thumb_url = iunserializer($goods->thumb_url);
                 //$cate = ShoppingGoods::where(['id'=>$request->input('id')])->first()->category;
                 //$goods->cateName = $cate->name;
 
@@ -125,13 +130,13 @@ class ShopController extends Controller
 
             // 删除记录
             if($request->input('op') == 'delete') {
-                $goods = ShoppingGoods::where(['id'=>$request->input('id')])->update(['deleted'=>1]);
+                $goods = ShoppingGoods::where(['id'=>$id])->update(['deleted'=>1]);
                 return response()->json($goods);
             }
 
             // 自动选择二级分类 [ajax]
             if ($request->input('op') == 'ccate') {
-                $id = $request->input('id');
+                //$id = $request->input('id');
                 $category2 = ShoppingCategory::where(['weid'=>$this->weid, 'parentid'=>$id])->get();
                 return response()->json($category2);
             }
@@ -139,19 +144,6 @@ class ShopController extends Controller
             // 处理批量上传 [ajax]
             if($request->input('op') == 'fileinput'){
 
-                //$fileName   = random(10).'.jpg';
-                //$fileFullName = $desPath.$fileName;
-
-                //$thumb      = $file ? $this->uploadFile($file, random(10), $desPath) : null;
-                //$thumb = $_FILES;
-                //$file       = $request->file('thumb_url');
-                //foreach ($request->file() as $file) {
-                    //$thumb[]  = $file ? $this->uploadFile($file, random(10), $desPath) : null;
-                //}
-                //foreach($_FILES['thumb_url']['tmp_name'] as $k=>$v)
-                //{
-
-                //}
                 $thumb = '';
                 foreach ($_FILES['fileinput']['tmp_name'] as $key => $val) {
 
@@ -160,17 +152,23 @@ class ShopController extends Controller
                         $thumb = $desPath.$fileName;
 
                 }
-
                 return response()->json(['ajax'=>$request->ajax(), 'thumb_url'=>$thumb, 'FILES'=>$_FILES,]);
             }
 
+            // 删除批量中的单个
+            if($request->input('op') == 'fileinput-del') {
+                $goods = ShoppingGoods::where(['id'=>$id])->first();
+                $thumb_url = $goods['thumb_url'];
+                return response()->json(['ajax'=>$request->ajax(), 'thumb_url'=>$thumb_url]);
+            }
 
-            /*$this->validate($request, [
-                //'name'          => 'required|max:20',
-                //'description'   => 'required',
-                //'displayorder'  => 'required',
-                //'isrecommand'   => 'required'
-            ]);*/
+
+                /*$this->validate($request, [
+                    //'name'          => 'required|max:20',
+                    //'description'   => 'required',
+                    //'displayorder'  => 'required',
+                    //'isrecommand'   => 'required'
+                ]);*/
 
 
             $post = $request->input('goods'); //dd($post);
@@ -242,9 +240,40 @@ class ShopController extends Controller
 
 
 
-    public function order()
+    public function orders(Request $request)
     {
-        dd('shop.order');
+        $begin  = microtime(true);
+        parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+        $status = $request->input('status');
+        $ordersn = $request->input('ordersn');
+
+
+        $orders = ShoppingOrder::with('orderGoods','fans')->where(['weid'=>$this->weid]);
+        !empty($status)     && $orders = $orders->where(['status'=>$status]);
+        !empty($ordersn)    && $orders = $orders->where(['ordersn'=>$ordersn]);
+
+        if(!empty($request->input('createtime'))){
+            $cteatetime = explode(' - ', $request->input('createtime')); // 2017-08-14 00:00 - 2017-09-15 23:59
+            $beginTs    = strtotime($cteatetime[0].':00');
+            $endTs      = strtotime($cteatetime[1].':59');
+            //dump($cteatetime, $beginTs, $endTs);
+
+            (substr($cteatetime[0], 0, 10)<>substr($cteatetime[1], 0, 10)) &&
+                $orders = $orders->where('createtime', '>', $beginTs)->where('createtime', '<', $endTs);
+        }
+
+        $orders = $orders->orderBy('createtime', 'desc')->paginate(10);
+        //dd($this->weid, $pagePram, $orders);
+
+        $end    = microtime(true);
+        return view('web.shop.order', [
+            'pass'      => $end - $begin,
+            'weid'      => $this->weid,
+            'module'    => 'shopOrders',
+            'orders'    => $orders,
+            'pagePram'  => $pagePram,
+            'status'    => $status
+        ]);
     }
 
     public function uploadFile($file, $name, $destPath){
@@ -269,4 +298,70 @@ class ShopController extends Controller
         return $destPath.$fileName;
     }
 
+    public function test()
+    {
+        //$url = 'http://p.beyondh.com/Home/NeedInputCaptcha?UserName=%E4%B9%9D%E5%A4%A9%E9%85%92%E5%BA%97&_=1502418097300';
+        //$res = HttpRequest::origin($url);
+        //dd($res);
+
+        // 登陆请求
+        $url = 'http://p.beyondh.com/Home/Login';
+        $post = [
+            'ID'            =>'九天酒店',//
+            'Password'      =>'jt123456',
+            'Shift'         => 0,
+            'MacAddress'    =>'',
+            'GeetestChallenge'  =>'',
+            'GeetestValidate'   =>'',
+            'GeetestSeccod'     =>'',
+            'NewPassword'   =>'',
+            'Sign'          =>'',
+            'Timespan'      =>'',
+        ];
+        $cookie_jar = public_path('beyondh.cookie');
+        $extra = array(
+            'CURLOPT_COOKIEJAR'     => $cookie_jar,
+            'CURLOPT_COOKIEFILE'    => $cookie_jar
+        );
+
+        $res = HttpRequest::content($url, $post, $extra); //content //origin
+        $key = random(20);
+        //echo "<script>window.localStorage.setItem('{$key}', '{$res}');</script>";
+        //dd($url, $cookie_jar, $res);
+
+        // 在线培训
+        $url = 'http://tutorial.beyondh.com/inspire/app/index.html?r=p.beyondh.com';
+        $res = HttpRequest::origin($url, null, $extra);
+        dd($url, $res);
+
+
+        // 收集地址
+        $url = 'http://tutorial.beyondh.com/inspire/app/help.html';
+        $res = HttpRequest::content($url, null, $extra);
+
+        $rule = '#<td>>_.*?<a href="(.*?)" target="_blank">#i';
+        if (preg_match_all($rule, $res, $matches)){
+
+            //dd($matches);
+
+            $urls = [];
+            foreach ($matches[1] as $path) {
+                $url1 = 'http://tutorial.beyondh.com/inspire/app/'.$path;
+                $urls[] = $url1;
+
+                // 下层请求
+                $res1 = HttpRequest::content($url1, null, $extra);
+                $ruleTitle = '##i';
+                dd($url1, $res1);
+            }
+
+            dd($urls);
+        }
+
+        return view('test', [
+            'judge' => 'jt',
+            'urls'  => $urls,
+            'age'   => 1
+        ]);
+    }
 }

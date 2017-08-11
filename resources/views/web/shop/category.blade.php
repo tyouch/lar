@@ -8,7 +8,7 @@
 ?>
 
 @extends('layouts.app')
-@section('title', '商店管理')
+@section('title', '商品分类管理')
 
 
 @section('content')

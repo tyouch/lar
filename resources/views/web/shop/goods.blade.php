@@ -8,42 +8,11 @@
 ?>
 
 @extends('layouts.app')
-@section('title', '公众号管理')
+@section('title', '商品管理')
 
 
 @section('content')
     <link rel="stylesheet" href="{{ url('css/fileinput.css') }}">
-    <style>
-        .table1 {
-            table-layout: fixed;
-        }
-
-        .table1 tr td {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-        .assets input, .assets select, .daterangepicker .calendar-date,
-        .daterangepicker.ltr .calendar-table, .daterangepicker .input-mini, .calendar-time {
-            color: white;
-            background: #323c48;
-            border-radius: 5px;
-        }
-        .daterangepicker td.in-range, .daterangepicker select{
-            background: #5bc0de;
-        }
-        .daterangepicker td.off,
-        .daterangepicker td.off.in-range,
-        .daterangepicker td.off.start-date,
-        .daterangepicker td.off.end-date ,
-        .file-preview {
-            background: #555;
-        }
-        .assets .input-group-addon{
-            color: #fff;
-            background: #5bc0de;
-        }
-    </style>
 
     <div class="container">
         <div class="row assets">
@@ -59,7 +28,7 @@
                         <div class="panel-heading">
                             商品管理
                             <span class="pull-right">
-                            <input type="button" class="btn btn-success btn-xs add" data-id="0" data-toggle="modal" data-target=".example-modal" value="添加商品">
+                            <input type="button" class="btn btn-success btn-xs add" data-id="0" value="添加商品">
                         </span>
                         </div>
                         <div class="panel-body">
@@ -148,7 +117,7 @@
                                             </td>
                                             <td>
                                                 <input type="button" class="btn btn-danger btn-xs del" data-id="{{ $good['id'] }}" value="删除">
-                                                <input type="button" class="btn btn-success btn-xs edit" data-id="{{ $good['id'] }}" data-toggle="modal" data-target=".example-modal" value="编辑">
+                                                <input type="button" class="btn btn-success btn-xs edit" data-id="{{ $good['id'] }}" value="编辑">
                                             </td>
                                         </tr>
                                     @endforeach
@@ -301,9 +270,10 @@
                                 <tr>
                                     <th class="sr-only1">幻灯片</th>
                                     <td>
-                                        <div class="form-group has-feedback thumb_url">
+                                        <div class="form-group has-feedback">
                                             <input id="thumb_url" name="fileinput[]" type="file" multiple>
                                         </div>
+                                        <div class="thumb_url"></div>
                                     </td>
                                 </tr>
 
@@ -439,15 +409,17 @@
 </script>
 
 <script>
-    // title tip
+    // title 提示
     $('[data-toggle="tooltip"]').tooltip();
 
+    // 图像预览
     $("#thumb").on('change', function (e) {
         $src = window.URL.createObjectURL(this.files[0]); //alert($src);
         $("#thumb-preview").attr("src", $src);
         $("#txt-preview").attr("placeholder", $src);
     });
 
+    // 选择一级分类 自动选择二级分类
     $(".pcate").on('change', function (e) {
         $.ajax({
             url         : '{{ route('shop.goods', ['weid'=>$weid]) }}',
@@ -463,25 +435,35 @@
             },
             success     : function (d, s) {
                 console.log(d, s);
-                el = '<option value="" readonly>请选择二级分类</option>';
+                $(".ccate").html('<option value="" readonly>请选择二级分类</option>');
                 $.each(d, function(i, o) {
-                    el += '<option value="' + o.id + '">' + o.name + '</option>';
-                    $(".ccate").html(el);
+                    $(".ccate").append('<option value="' + o.id + '">' + o.name + '</option>');
                 });
             }
         });
     });
 
+    // 添加商品
     $(".add").on('click', function (e) {
+        //window.location.reload();
+        $('.example-modal').modal('show');
         $("input[type=text]").val("");
         $("select option").removeAttr("selected");
+        $("input[type=checkbox]").removeAttr("checked");
         $("#thumb-preview").attr("src", "");
         $("textarea").html("");
+
+        // 清除批量上传编辑回填
+        $(".thumb_url").html("");
+        $('#thumb_url').fileinput('clear');
+
+        // 清除内容
         ue.ready(function() {
             ue.setContent("");
         });
     });
 
+    // 删除商品
     $(".del").on('click', function (e) {
         id = $(this).attr('data-id');
         if (confirm("确认要删除这条规则吗？【rid:" + id + "】")) {
@@ -508,7 +490,16 @@
         }
     });
 
-    $(".edit").on('click', function (e) {
+    //...
+    $("button").on('click', function (e) {
+        //alert('del.ing');
+    });
+
+    // 编辑回填
+    $(".edit").on('click', function (e) { //alert(parseInt($(".thumb_url").children().length));
+        $('.example-modal').modal('show');
+        id = $(this).attr('data-id');
+        baseUrl = $("#thumb-preview").attr("data-id")+'/';
         $.ajax({
             url         : '{{ route('shop.goods', ['weid'=>$weid]) }}',
             Type        : 'POST',
@@ -516,7 +507,7 @@
             data        : {
                 _token  : '{{ csrf_token() }}',
                 op      : 'modalFill',
-                id      : $(this).attr('data-id')
+                id      : id
             },
             headers     : {
                 'X-CSRF-TOKEN'  : $('meta[name="csrf-token"]').attr('content')
@@ -539,19 +530,68 @@
                 $("input[name='goods[sales]']").val(d.sales);
                 $("textarea[name='goods[description]']").html(d.description);
 
-                $("input[name='goods[timestart]']").val(d.timestart);
-                //$("input[name='goods[thumb]']").val(d.thumb);
-                $("#thumb-preview").attr("src", $("#thumb-preview").attr("data-id")+'/'+d.thumb);
+                // 回填商品属性
+                if(d.isrecommand == 1) {
+                    $("input[name='goods[isrecommand]']").attr("checked", true);
+                }
+                if(d.isnew == 1) {
+                    $("input[name='goods[isnew]']").attr("checked", true);
+                }
+                if(d.ishot == 1) {
+                    $("input[name='goods[ishot]']").attr("checked", true);
+                }
+                if(d.istime == 1) {
+                    $("input[name='goods[istime]']").attr("checked", true);
+                }
 
+                // 回填日期范围
+                $("input[name='goods[timestart]']").val(d.timestart);
+
+                // 回填分类
+                $("select[name='goods[pcate]'] option").removeAttr("selected");
+                $("select[name='goods[pcate]'] option[value=" + d.pcate + "]").attr("selected", true);
+
+                $(".ccate").html('<option value="" readonly>请选择二级分类</option>');
+                $(".ccate").append('<option value="'+d.ccate+'" selected>'+d.category.name+'</option>');
+
+                // 回填预览图
+                //$("input[name='goods[thumb]']").val(d.thumb);
+                $("#thumb-preview").attr("src", baseUrl + '/' + d.thumb);
+
+                // 回填幻灯片图
+                var Preview = [];
+                var PreviewConfig = []; 
+                $.each(d.thumb_url, function (i, o) {
+                    Preview[i] ='<img src="' + baseUrl + o + '" class="file-preview-image" style="width:auto;height:160px;">';
+                    el = '<input type="hidden" name="goods[thumb_url][' + i + ']" value="'+ o +'">';
+                    $(".thumb_url").append(el);
+
+                    PreviewConfig[i] = {
+                        caption : o,//.split("/")[5]
+                        width   : '160px',
+                        url     : '{{ route('shop.goods', ['weid'=>$weid]) }}', // server delete action
+                        key     : id,
+                        extra   : {
+                            _token  : '{{ csrf_token() }}',
+                            op      : 'fileinput-del',
+                            id      : id
+                        }
+                    }
+                });
+
+                console.log(Preview, PreviewConfig);
+                $(".thumb_url").html("");
+                $('#thumb_url').fileinput('clear');
+                $('#thumb_url').fileinput('refresh', {
+                    initialPreview: Preview, //预览图片的设置
+                    initialPreviewConfig: PreviewConfig,
+                });
+
+                // 回填富文本内容
                 ue.ready(function() {
                     ue.setContent(d.content);
                 });
 
-                $("select[name='goods[pcate]'] option").removeAttr("selected");
-                $("select[name='goods[pcate]'] option[value=" + d.pcate + "]").attr("selected", true);
-
-                el = '<option value="'+d.ccate+'" selected>'+d.category.name+'</option>';
-                $("select[name='goods[ccate]']").append(el);
 
                 //$("select[name='goods[ccate]']").val(d.ccate);
                 //$(".modal-content").find("input[name=isrecommand]").removeAttr("checked"); //
@@ -565,30 +605,35 @@
 <script src="{{ asset('/js/fileinput.js') }}"></script>
 <script src="{{ asset('/js/fileinput_zh.js') }}"></script>
 <script>
-    i = 0;
+    // 批量上传幻灯片
     $('#thumb_url').fileinput({
         language: 'zh',
         allowedFileExtensions : ['jpg', 'png','gif'],
+        maxFileCount: 6,
         //uploadAsync: false,
         uploadUrl: '{{ route('shop.goods', ['weid'=>$weid]) }}',
         uploadExtraData: {
             _token  : '{{ csrf_token() }}',
             op      : 'fileinput',
+        },
+        initialPreview: []
+
+    }).on("fileuploaded", function(event, data, previewId, index, jqXHR) {
+        console.log(event, data, previewId, index, jqXHR);
+
+        i = parseInt($(".thumb_url").children("input").length);
+        if(data.response){
+            el = '<input type="hidden" name="goods[thumb_url]['+(i++)+']" value="'+data.response.thumb_url+'">';
+            $(".thumb_url").append(el);
         }
-    }).on("filebatchselected", function(event, files, previewId, index) {
-        //$(this).fileinput("upload");
-        //console.log(files);
-    }).on("fileuploaded", function(event, data, previewId, index) {
-        console.log(event, data, previewId, index);
-            if(data.response){
-                el = '<input type="hidden" name="goods[thumb_url]['+(i++)+']" value="'+data.response.thumb_url+'">';
-                $(".thumb_url").append(el);
-            }
-        });
+    }).on('filecleared', function(event, data) {
+        console.log('del:', data);
+    });
 </script>
 
 
 <script>
+    // ueditor富文本编辑器
     var ue = UE.getEditor("ueditor",{
         toolbars: [
             ['fullscreen', 'source', 'undo', 'redo'],

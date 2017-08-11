@@ -24,10 +24,10 @@
                     <ul class="list-group">
                         <a href="{{ route('shop.category', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopCategory'){{ 'active' }}@endif">商品分类</a>
                         <a href="{{ route('shop.goods', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopGoods'){{ 'active' }}@endif">商品管理</a>
-                        <a href="{{ route('shop.order') }}" class="list-group-item list-group-item-info">订单管理</a>
-                        <a href="{{ route('shop.distribution') }}" class="list-group-item list-group-item-info">物流管理</a>
-                        <a href="{{ route('shop.service') }}" class="list-group-item list-group-item-info">售后管理</a>
-                        <a href="{{ route('shop.slide') }}" class="list-group-item list-group-item-info">幻灯片管理</a>
+                        <a href="{{ route('shop.orders', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopOrders'){{ 'active' }}@endif">订单管理</a>
+                        <a href="{{ route('shop.distribution', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info">物流管理</a>
+                        <a href="{{ route('shop.service', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info">售后管理</a>
+                        <a href="{{ route('shop.slide', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info">幻灯片管理</a>
                     </ul>
                 </div>
             </div>

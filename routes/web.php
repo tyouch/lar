@@ -62,10 +62,11 @@ Auth::routes();
         Route::get('index', 'ShopController@index')->name('shop.index');
         Route::any('category', 'ShopController@category')->name('shop.category');
         Route::any('goods', 'ShopController@goods')->name('shop.goods');
-        Route::any('order', 'ShopController@order')->name('shop.order');
+        Route::any('orders', 'ShopController@orders')->name('shop.orders');
         Route::any('distribution', 'ShopController@distribution')->name('shop.distribution');
         Route::any('service', 'ShopController@service')->name('shop.service');
         Route::any('slide', 'ShopController@slide')->name('shop.slide');
+        Route::any('test', 'ShopController@test')->name('shop.test');
     });
 
     //---------------------------------------------

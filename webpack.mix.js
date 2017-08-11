@@ -39,7 +39,7 @@ mix.copy('resources/assets/imgs/qrcode.jpg', 'public/imgs');
 mix.copy('resources/assets/imgs/loading.gif', 'public/imgs');
 mix.copy('resources/assets/imgs/loading-sm.gif', 'public/imgs');
 
-//mix.copy('resources/assets/css/daterangepicker-bs3.css', 'public/css');
+mix.copy('resources/assets/css/style.css', 'public/css');
 mix.copy('resources/assets/js/moment.js', 'public/js');
 mix.copy('resources/assets/js/daterangepicker.js', 'public/js');
 
