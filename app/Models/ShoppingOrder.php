@@ -18,10 +18,22 @@ class ShoppingOrder extends Model
     public function orderGoods()
     {
         return $this->hasMany('App\Models\ShoppingOrderGoods', 'orderid', 'id');
+        //return $this->morphMany('App\Models\ShoppingOrderGoods', 'ogs');
     }
 
-    public function fans()
+    public function address()
     {
-        return $this->belongsTo('App\Models\Fans', 'from_user', 'from_user');
+        return $this->hasOne('App\Models\ShoppingAddress', 'id', 'addressid');
     }
+
+    public function invoice()
+    {
+        return $this->hasOne('App\Models\ShoppingInvoice', 'id', 'invoice');
+    }
+
+    public function goods()
+    {
+        //return $this->hasManyThrough('App\Models\ShoppingGoods', 'App\Models\ShoppingOrderGoods', 'orderid', 'id', 'id');
+    }
+
 }

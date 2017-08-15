@@ -19,4 +19,15 @@ class ShoppingOrderGoods extends Model
     {
         return $this->belongsTo('App\Models\ShoppingOrder','orderid','id');
     }
+
+    public function goods()
+    {
+        return $this->belongsTo('App\Models\ShoppingGoods', 'goodsid', 'id');
+    }
+
+    public function ogs()
+    {
+        //return $this->morphTo();
+    }
+
 }

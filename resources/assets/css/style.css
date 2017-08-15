@@ -110,6 +110,10 @@ footer .text {font-size: 1.4rem; margin-top: 2px;}
     background: #5bc0de;
 }
 
+/*.pagination-sm>li>a, .pagination-sm>li>span, .pagination>.disabled>span,
+.pagination-sm>li:last-child>a, .pagination-sm>li:last-child>span{
+    background-color: #323c48;
+}*/
 
 
 

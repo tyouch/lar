@@ -19,5 +19,11 @@ class ShoppingGoods extends Model
     {
         return $this->belongsTo('App\Models\ShoppingCategory','ccate','id');
     }
+
+    public function orderGoods()
+    {
+        return $this->hasMany('App\Models\ShoppingOrderGoods', 'goodsid', 'id');
+        //return $this->morphMany('App\Models\ShoppingOrderGoods', 'ogs');
+    }
 }
 

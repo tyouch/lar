@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 //use Stevenyangecho\UEditor\UEditorServiceProvider as UEditor;
@@ -239,30 +240,90 @@ class ShopController extends Controller
     }
 
 
-
+    /**
+     * 订单管理
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function orders(Request $request)
     {
         $begin  = microtime(true);
         parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
         $status = $request->input('status');
         $ordersn = $request->input('ordersn');
+        $createtime = $request->input('createtime');
+
+        // ajax
+        if($request->ajax() && $request->input('op') == 'detail') {
+            $id = $request->input('id');
+
+            /*$orders = DB::table('shopping_order')
+                ->select('shopping_order_goods.*', 'shopping_goods.title', 'fans.realname', 'fans.mobile')
+                ->leftJoin('fans', 'shopping_order.from_user', '=', 'fans.from_user')
+                ->leftJoin('shopping_order_goods', 'shopping_order.id', '=', 'shopping_order_goods.orderid')
+                ->leftJoin('shopping_goods', 'shopping_order_goods.goodsid', '=', 'shopping_goods.id')
+                ->where(['shopping_order.weid'=>$this->weid, 'shopping_order.id'=>$id])->get();*/
+
+            $orders = ShoppingOrder::with('orderGoods', 'address', 'invoice')->where(['weid'=>$this->weid, 'id'=>$id])->first();
+            for($i=0; $i<count($orders['orderGoods']); $i++) {
+                $ogs = ShoppingGoods::select('id', 'title')->where(['id'=>$orders['orderGoods'][$i]['goodsid']])->first();
+                $orders['orderGoods'][$i] = array_merge(json_decode(json_encode($orders['orderGoods'][$i]), true), json_decode(json_encode($ogs), true));
+            }
+            $orders['createtime2'] = date('Y-m-d H:i:s', $orders['createtime']);
+            return response()->json($orders);
+        }
+
+        // post
+        $_token = $request->input('_token');
+        if (isset($_token) && $_token == csrf_token()) {
+            //dd($request->input());
+            $id         = $request->input('id');
+            $expresscom = $request->input('expresscom');
+            $expresssn  = $request->input('expresssn');
+            $remark     = $request->input('remark');
+
+            $this->validate($request, [
+                'id'            => 'required',
+                'expresscom'    => 'required',
+                'expresssn'     => 'required|max:16',
+                'remark'        => 'required|max:200'
+            ]);
+
+            switch($request->input('submit')) {
+                case '确认发货':
+                    ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])
+                        ->update(['status'=>3, 'updatetime'=>time(), 'remark'=>$remark, 'expresscom'=>$expresscom, 'expresssn'=>$expresssn]);
+                    $pagePram['status'] = 3;
+                    break;
+                case '关闭订单':
+                    ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])
+                        ->update(['status'=>5, 'updatetime'=>time(), 'remark'=>$remark]);
+                    $pagePram['status'] = 5;
+                    break;
+                default:
+            }
+
+            return redirect()->route('shop.orders', $pagePram);
+        }
 
 
-        $orders = ShoppingOrder::with('orderGoods','fans')->where(['weid'=>$this->weid]);
+        $orders = ShoppingOrder::with('orderGoods', 'address', 'invoice')->where(['weid'=>$this->weid]);
         !empty($status)     && $orders = $orders->where(['status'=>$status]);
         !empty($ordersn)    && $orders = $orders->where(['ordersn'=>$ordersn]);
 
-        if(!empty($request->input('createtime'))){
-            $cteatetime = explode(' - ', $request->input('createtime')); // 2017-08-14 00:00 - 2017-09-15 23:59
-            $beginTs    = strtotime($cteatetime[0].':00');
-            $endTs      = strtotime($cteatetime[1].':59');
-            //dump($cteatetime, $beginTs, $endTs);
-
-            (substr($cteatetime[0], 0, 10)<>substr($cteatetime[1], 0, 10)) &&
-                $orders = $orders->where('createtime', '>', $beginTs)->where('createtime', '<', $endTs);
+        if(!empty($createtime)){
+            $createtime = explode(' - ', $createtime); // 2017-08-14 00:00 - 2017-09-15 23:59
+            $beginTs    = strtotime($createtime[0].':00');//$createtime[0]; //
+            $endTs      = strtotime($createtime[1].':59');//$createtime[1]; //
+            //dump($createtime, $beginTs, $endTs);
+            //(substr($cteatetime[0], 0, 10)<>substr($cteatetime[1], 0, 10)) &&
+            $orders = $orders->where('createtime', '>', $beginTs)->where('createtime', '<', $endTs);
         }
 
-        $orders = $orders->orderBy('createtime', 'desc')->paginate(10);
+        $orders = $orders
+            ->orderBy('updatetime', 'desc')
+            ->orderBy('createtime', 'desc')
+            ->paginate(10);
         //dd($this->weid, $pagePram, $orders);
 
         $end    = microtime(true);
@@ -276,6 +337,12 @@ class ShopController extends Controller
         ]);
     }
 
+    /**
+     * @param $file
+     * @param $name
+     * @param $destPath
+     * @return string
+     */
     public function uploadFile($file, $name, $destPath){
 
         $data = [
