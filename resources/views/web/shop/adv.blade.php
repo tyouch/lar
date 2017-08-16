@@ -8,7 +8,7 @@
 ?>
 
 @extends('layouts.app')
-@section('title', '商品分类管理')
+@section('title', '商品幻灯片管理')
 
 
 @section('content')
@@ -22,9 +22,9 @@
             <div class="col-md-9">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        管理分类
+                        管理商品幻灯片
                         <span class="pull-right">
-                            <a class="btn btn-primary btn-xs add" data-oid="-1">添加分类</a>
+                            <a class="btn btn-primary btn-xs add">添加幻灯片</a>
                         </span>
                     </div>
                     <div class="panel-body">
@@ -41,35 +41,28 @@
                         <div class="well">
                             <table class="table">
                                 <tr>
-                                    <th style="width: 3%"></th>
+                                    <th style="width: 3%">ID</th>
                                     <th style="width: 9%">排序</th>
-                                    <th style="width: 40%">名称</th>
-                                    <th style="width: 20%">图片</th>
-                                    <th style="width: 28%">操作</th>
+                                    <th style="width: 28%">标题</th>
+                                    <th style="width: 45%">链接</th>
+                                    <th style="width: 15%">操作</th>
                                 </tr>
-                                @foreach($category as $cate)
+                                @foreach($advs as $adv)
                                     <tr>
+                                        <td>{{ $adv->id }}</td>
+                                        <td>{{ $adv->displayorder }}</td>
+                                        <td>{{ $adv->advname }}</td>
+                                        <td>{{ $adv->link }}</td>
                                         <td>
-                                            @if($cate['parentid'] == 0)
-                                                <span class="glyphicon glyphicon-menu-down"></span>
-                                            @endif
-                                        </td>
-                                        <td style="text-align: center;">{{ $cate['displayorder'] }}</td>
-                                        <td>{{ $cate['name'] }}</td>
-                                        <td><img src="{{ url($cate['thumb']) }}" class="img-circle" style="width: 30px;"></td>
-                                        <td>
-                                            <a class="btn btn-danger btn-xs del" data-id="{{ $cate['id'] }}" data-pid="{{ $cate['parentid'] }}">删除</a>
-                                            <a class="btn btn-success btn-xs edit" data-id="{{ $cate['id'] }}">编辑</a>
-                                            @if($cate['parentid'] == 0)
-                                                <a class="btn btn-info btn-xs add" data-pid="{{ $cate['id'] }}" data-oid="{{ $cate['displayorder'] }}">添加子分类</a>
-                                            @endif
+                                            <a class="btn btn-danger btn-xs del" data-id="{{ $adv->id }}">删除</a>
+                                            <a class="btn btn-success btn-xs edit" data-id="{{ $adv->id }}">编辑</a>
                                         </td>
                                     </tr>
                                 @endforeach
                             </table>
 
                             <div style="text-align: center;">
-                                {!! $category->appends(['weid'=>$weid])->links() !!}
+                                {!! $advs->appends($pagePram)->links() !!}
                             </div>
                         </div>
 
@@ -82,19 +75,18 @@
         <div class="modal fade example-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form action="{{ route('shop.category', ['weid'=>$weid]) }}" method="post" enctype="multipart/form-data">
+                    <form action="{{ route('shop.adv', ['weid'=>$weid]) }}" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">添加分类</h4>
+                            <h4 class="modal-title" id="myModalLabel">添加幻灯片</h4>
                         </div>
                         <div class="modal-body">
                             <table class="table">
                                 <tr>
-                                    <th style="width: 16%">名称</th>
+                                    <th style="width: 16%">幻灯片标题</th>
                                     <td>
-                                        <input type="text" name="name" class="form-control" maxlength="20">
+                                        <input type="text" name="advname" class="form-control" maxlength="20">
                                         <input type="hidden" name="id" value="" class="form-control">
-                                        <input type="hidden" name="parentid" value="" class="form-control">
                                     </td>
                                 </tr>
                                 <tr>
@@ -116,8 +108,8 @@
                                     <td><img id="thumb-preview" src="" class="img-thumbnail"></td>
                                 </tr>
                                 <tr>
-                                    <th>描述</th>
-                                    <td><textarea rows="3" name="description" class="form-control"></textarea></td>
+                                    <th>链接</th>
+                                    <td><input name="link" class="form-control"></td>
                                 </tr>
                                 <tr>
                                     <th style="width: 16%">排序</th>
@@ -126,24 +118,17 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>首页推荐</th>
-                                    <td>
-                                        <label class="radio-inline"><input type="radio" name="isrecommand" value="1" checked="checked">是</label>
-                                        <label class="radio-inline"><input type="radio" name="isrecommand" value="0">否</label>
-                                    </td>
-                                </tr>
-                                <tr>
                                     <th>是否显示</th>
                                     <td>
-                                        <label class="radio-inline"><input type="radio" name="enabled" value="1">是</label>
-                                        <label class="radio-inline"><input type="radio" name="enabled" value="0" checked="checked">否</label>
+                                        <label class="radio-inline"><input type="radio" name="enabled" value="1" checked="checked">是</label>
+                                        <label class="radio-inline"><input type="radio" name="enabled" value="0">否</label>
                                     </td>
                                 </tr>
                             </table>
                         </div>
                         <div class="modal-footer">
                             {{ csrf_field() }}
-                            <input type="submit" class="btn btn-primary" value="保存分类">
+                            <input type="submit" class="btn btn-primary" value="保存幻灯片">
                         </div>
                     </form>
                 </div>
@@ -167,39 +152,33 @@
     $(".add").on('click', function (e) {
         $('.example-modal').modal('show');
         //$('.example-modal').css("z-index", 99999);
-        pid = $(this).attr("data-pid");
-        oid = $(this).attr("data-oid");
         $("input[name=id]").val("");
-        $("input[name=parentid]").val(pid);
-        $("input[name=name]").val("");
-        $("input[name=displayorder]").val(parseInt(oid)+1);
-        $("textarea[name=description]").val("描述");
+        $("input[name=advname]").val("");
+        $("input[name=link]").val("");
+        $("input[name=displayorder]").val(0);
         $("#thumb-preview").attr("src", "");
-        $("#txt-preview").val("");
     });
 
     $(".del").on('click', function (e) {
         id = $(this).attr("data-id");
-        pid = $(this).attr("data-pid");
         if (confirm("确认要删除这条规则吗？【rid:" + id + "】")) {
             $.ajax({
-                url     : '{{ route('shop.category', ['weid'=>$weid]) }}',
-                Type    : 'POST',
+                url: '{{ route('shop.adv', ['weid'=>$weid]) }}',
+                Type: 'POST',
                 dataType: 'JSON',
-                data    : {
-                    _token  : '{{ csrf_token() }}',
-                    op      : 'del',
-                    id      : id,
-                    pid     : pid
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    op: 'del',
+                    id: id
                 },
-                headers : {
+                headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 success: function (d, s) {
                     console.log(d, s);
-                    //if(d.code == 1){
-                    window.location.reload();
-                    //}
+                    if(d.code == 1){
+                        window.location.reload();
+                    }
                 }
             });
         } else {
@@ -214,33 +193,29 @@
         baseUrl = "{{ url('') }}";
 
         $.ajax({
-            url     : '{{ route('shop.category', ['weid'=>$weid]) }}',
-            Type    : 'POST',
+            url: '{{ route('shop.adv', ['weid'=>$weid]) }}',
+            Type: 'POST',
             dataType: 'JSON',
-            data    : {
-                _token  : '{{ csrf_token() }}',
-                op      : 'edit',
-                id      : id
+            data: {
+                _token: '{{ csrf_token() }}',
+                op: 'edit',
+                id: id
             },
-            headers : {
+            headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function (d, s) {
                 console.log(d, s);
                 $("input[name=id]").val(d.id);
-                $("input[name=parentid]").val(d.parentid);
-                $("input[name=name]").val(d.name);
-                $("textarea[name=description]").val(d.description);
+                $("input[name=advname]").val(d.advname);
+                $("input[name=link]").val(d.link);
                 $("input[name=displayorder]").val(d.displayorder);
                 $("#thumb-preview").attr("src", baseUrl + '/' + d.thumb);
 
-                $("input[name=isrecommand]").removeAttr("checked"); //
-                $("input[name=isrecommand][value=" + d.isrecommand + "]").attr("checked", true); //
                 $("input[name=enabled]").removeAttr("checked"); //
                 $("input[name=enabled][value=" + d.enabled + "]").attr("checked", true); //
             }
         });
-
     });
 </script>
 @endpush

@@ -12,17 +12,22 @@ use App\Lib\Wechat\HttpRequest;
 use App\Models\ShoppingCategory;
 use App\Models\ShoppingGoods;
 use App\Models\ShoppingOrder;
+use App\Models\ShoppingAdv;
 use App\Models\ShoppingOrderGoods;
 
 
 class ShopController extends Controller
 {
     private $weid;
+    private $fileName;
+    private $destPath;
 
     public function __construct(Request $request)
     {
         $this->middleware('auth');
         $this->weid = $request->input('weid');
+        $this->fileName = random(10);
+        $this->destPath = 'images/uploads/'.date('Y').'/'.date('m').'/';
     }
 
     public function index()
@@ -45,28 +50,49 @@ class ShopController extends Controller
     public function category(Request $request)
     {
         $begin = microtime(true);
-        $_token = $request->input('_token');
-        //dd($_token, csrf_token());
+        parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+
+        $_token = $request->input('_token'); //dump($_token, csrf_token());
         if (isset($_token) && $_token == csrf_token()) {
 
+            $id = $request->input('id');
+            $category = ShoppingCategory::where(['weid' => $this->weid, 'id' => $id])->first();
+
+            if($request->ajax()){
+
+                // 编辑回填
+                if($request->input('op') == 'edit'){
+                    return response()->json($category);
+                }
+
+                // 删除
+                if($request->input('op') == 'del'){
+                    $code1 = $code2 = 0;
+                    if ($request->input('pid') == 0) {
+                        $code1 = ShoppingCategory::where(['weid' => $this->weid, 'parentid' => $id])->delete();
+                    }
+                    //$code2 = ShoppingCategory::where(['weid' => $this->weid, 'id' => $id])->delete();
+                    $code2 = $category->delete();
+                    return response()->json(['code1' => $code1, 'code2' => $code2]);
+                }
+
+            }
+
+            // 验证输入
             $this->validate($request, [
                 'name'          => 'required|max:20',
                 'description'   => 'required',
                 'displayorder'  => 'required',
-                'enabled'        => 'required',
+                'enabled'       => 'required',
                 'isrecommand'   => 'required'
             ]);
 
-            $id = $request->input('id');
-
-            if (empty($id)) {
+            // 添加
+            if (empty($category)) {
                 $category = new ShoppingCategory();
-            } else {
-                $category = ShoppingCategory::where(['weid' => $this->weid, 'id' => $id])->first();
             }
 
-            $thumb = $request->file('thumb') ?
-                $this->uploadFile($request->file('thumb'), random(10), 'imgs/uploads/images/'.date('Y').'/'.date('m').'/') : null;
+            $thumb = $request->file('thumb') ? $this->uploadFile($request->file('thumb'), $this->fileName, $this->destPath) : null;
             $parentid = $request->input('parentid');
 
             $category->weid         = $this->weid;
@@ -79,7 +105,7 @@ class ShopController extends Controller
             !empty($parentid)       && $category->parentid = $parentid;
             $category->save();
 
-            return redirect()->route('shop.category', ['weid'=>$this->weid]);
+            return redirect()->route('shop.category', $pagePram);
         }
 
         // 渲染
@@ -249,63 +275,71 @@ class ShopController extends Controller
     {
         $begin  = microtime(true);
         parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
-        $status = $request->input('status');
-        $ordersn = $request->input('ordersn');
-        $createtime = $request->input('createtime');
 
-        // ajax
-        if($request->ajax() && $request->input('op') == 'detail') {
-            $id = $request->input('id');
-
-            /*$orders = DB::table('shopping_order')
-                ->select('shopping_order_goods.*', 'shopping_goods.title', 'fans.realname', 'fans.mobile')
-                ->leftJoin('fans', 'shopping_order.from_user', '=', 'fans.from_user')
-                ->leftJoin('shopping_order_goods', 'shopping_order.id', '=', 'shopping_order_goods.orderid')
-                ->leftJoin('shopping_goods', 'shopping_order_goods.goodsid', '=', 'shopping_goods.id')
-                ->where(['shopping_order.weid'=>$this->weid, 'shopping_order.id'=>$id])->get();*/
-
-            $orders = ShoppingOrder::with('orderGoods', 'address', 'invoice')->where(['weid'=>$this->weid, 'id'=>$id])->first();
-            for($i=0; $i<count($orders['orderGoods']); $i++) {
-                $ogs = ShoppingGoods::select('id', 'title')->where(['id'=>$orders['orderGoods'][$i]['goodsid']])->first();
-                $orders['orderGoods'][$i] = array_merge(json_decode(json_encode($orders['orderGoods'][$i]), true), json_decode(json_encode($ogs), true));
-            }
-            $orders['createtime2'] = date('Y-m-d H:i:s', $orders['createtime']);
-            return response()->json($orders);
-        }
-
-        // post
+        // POST
         $_token = $request->input('_token');
         if (isset($_token) && $_token == csrf_token()) {
-            //dd($request->input());
-            $id         = $request->input('id');
-            $expresscom = $request->input('expresscom');
-            $expresssn  = $request->input('expresssn');
-            $remark     = $request->input('remark');
 
+            $id = $request->input('id');
+            $orders = ShoppingOrder::with('orderGoods', 'address', 'invoice')->where(['weid'=>$this->weid, 'id'=>$id])->first();
+
+            // ajax
+            if($request->ajax() && $request->input('op') == 'detail') {
+
+                /*$orders = DB::table('shopping_order')
+                    ->select('shopping_order_goods.*', 'shopping_goods.title', 'fans.realname', 'fans.mobile')
+                    ->leftJoin('fans', 'shopping_order.from_user', '=', 'fans.from_user')
+                    ->leftJoin('shopping_order_goods', 'shopping_order.id', '=', 'shopping_order_goods.orderid')
+                    ->leftJoin('shopping_goods', 'shopping_order_goods.goodsid', '=', 'shopping_goods.id')
+                    ->where(['shopping_order.weid'=>$this->weid, 'shopping_order.id'=>$id])->get();*/
+
+                // 查看详情回填数据
+                for($i=0; $i<count($orders['orderGoods']); $i++) {
+                    $ogs = ShoppingGoods::select('id', 'title')->where(['id'=>$orders['orderGoods'][$i]['goodsid']])->first();
+                    $orders['orderGoods'][$i] = array_merge(json_decode(json_encode($orders['orderGoods'][$i]), true), json_decode(json_encode($ogs), true));
+                }
+                $orders['createtime2'] = date('Y-m-d H:i:s', $orders['createtime']);
+                return response()->json($orders);
+            }
+
+            // 验证输入
             $this->validate($request, [
-                'id'            => 'required',
-                'expresscom'    => 'required',
-                'expresssn'     => 'required|max:16',
                 'remark'        => 'required|max:200'
             ]);
 
+            // 判定更新
             switch($request->input('submit')) {
                 case '确认发货':
-                    ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])
-                        ->update(['status'=>3, 'updatetime'=>time(), 'remark'=>$remark, 'expresscom'=>$expresscom, 'expresssn'=>$expresssn]);
+                    // 验证输入
+                    $this->validate($request, [
+                        'expresscom'    => 'required',
+                        'expresssn'     => 'required|max:16',
+                    ]);
+
+                    $orders->status     = 3;
+                    $orders->expresscom = $request->input('expresscom');
+                    $orders->expresssn  = $request->input('expresssn');
+                    //ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])->update(['status'=>3, 'updatetime'=>time(), 'remark'=>$remark, 'expresscom'=>$expresscom, 'expresssn'=>$expresssn]);
                     $pagePram['status'] = 3;
                     break;
                 case '关闭订单':
-                    ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])
-                        ->update(['status'=>5, 'updatetime'=>time(), 'remark'=>$remark]);
+                    $orders->status     = 5;
+                    //ShoppingOrder::where(['weid'=>$this->weid, 'id'=>$id])->update(['status'=>5, 'updatetime'=>time(), 'remark'=>$remark]);
                     $pagePram['status'] = 5;
                     break;
                 default:
             }
+            $orders->updatetime = time();
+            $orders->remark     = $request->input('remark');
+            $orders->save();
 
             return redirect()->route('shop.orders', $pagePram);
         }
 
+        // 筛选渲染
+        $status = $request->input('status');
+        $ordersn = $request->input('ordersn');
+        $createtime = $request->input('createtime');
 
         $orders = ShoppingOrder::with('orderGoods', 'address', 'invoice')->where(['weid'=>$this->weid]);
         !empty($status)     && $orders = $orders->where(['status'=>$status]);
@@ -336,6 +370,81 @@ class ShopController extends Controller
             'status'    => $status
         ]);
     }
+
+    /**
+     * 商品幻灯片管理
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function adv(Request $request)
+    {
+        $begin  = microtime(true);
+        parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+
+        // POST
+        $_token = $request->input('_token');
+        if (isset($_token) && $_token == csrf_token()) {
+
+            $id     = $request->input('id');
+            $adv    = ShoppingAdv::where(['weid'=>$this->weid, 'id'=>$id])->first();
+
+            if ($request->ajax()) {
+
+                // 编辑回填
+                if($request->input('op') == 'edit'){
+                    return response()->json($adv);
+                }
+
+                // 删除
+                if($request->input('op') == 'del'){
+                    $code = $adv->delete();
+                    return response()->json(['code'=>$code]);
+                }
+
+            } //dd($request->input());
+
+            // 验证输入
+            $this->validate($request, [
+                'advname'       => 'required',
+                'link'          => 'required',
+                'displayorder'  => 'required',
+                'enabled'       => 'required',
+            ]);
+
+            // 添加
+            if(empty($adv)){
+                $adv = new ShoppingAdv();
+            }
+
+            // 上传图片
+            $thumb = $request->file('thumb') ? $this->uploadFile($request->file('thumb'), $this->fileName, $this->destPath) : null;
+
+            // 更新
+            $adv->weid          = $this->weid;
+            $adv->advname       = $request->input('advname');
+            $adv->link          = $request->input('link');
+            $adv->displayorder  = $request->input('displayorder');
+            $adv->enabled       = $request->input('enabled');
+            !empty($thumb)      && $adv->thumb = $thumb;
+            $adv->save();
+
+            return redirect()->route('shop.adv', $pagePram);
+        }
+
+        $advs = ShoppingAdv::where(['weid'=>$this->weid])
+            ->orderBy('displayorder')->orderBy('id')
+            ->paginate(10);; //dump($advs);
+
+        $end    = microtime(true);
+        return view('web.shop.adv', [
+            'pass'      => $end - $begin,
+            'weid'      => $this->weid,
+            'module'    => 'shopAdv',
+            'pagePram'  => $pagePram,
+            'advs'      => $advs
+        ]);
+    }
+
 
     /**
      * @param $file

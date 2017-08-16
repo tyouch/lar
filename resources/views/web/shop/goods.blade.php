@@ -112,12 +112,11 @@
                                             </td>
                                             <td>
                                                 @if($good['status']==1)<span class="label label-info">上架</span>@endif
-                                                    @if($good['status']==2)<span class="label label-default">下架</span>@endif
-
+                                                @if($good['status']==2)<span class="label label-default">下架</span>@endif
                                             </td>
                                             <td>
-                                                <input type="button" class="btn btn-danger btn-xs del" data-id="{{ $good['id'] }}" value="删除">
-                                                <input type="button" class="btn btn-success btn-xs edit" data-id="{{ $good['id'] }}" value="编辑">
+                                                <a class="btn btn-danger btn-xs del" data-id="{{ $good['id'] }}">删除</a>
+                                                <a class="btn btn-success btn-xs edit" data-id="{{ $good['id'] }}">编辑</a>
                                             </td>
                                         </tr>
                                     @endforeach

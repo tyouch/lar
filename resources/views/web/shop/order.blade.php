@@ -124,12 +124,12 @@
                                                 @if($order->status == 1)<span class="label label-info">待付款</span>
                                                 @elseif($order->status == 2)<span class="label label-primary">待发货</span>
                                                 @elseif($order->status == 3)<span class="label label-warning">待收货</span>
-                                                @elseif($order->status == 4)<span class="label label-success">已完成</span>
-                                                @elseif($order->status == 5)<span class="label label-danger">已关闭</span>
+                                                @elseif($order->status == 4)<span class="label label-danger">已完成</span>
+                                                @elseif($order->status == 5)<span class="label label-default">已关闭</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <input type="button" class="btn btn-success btn-xs detail" data-id="{{ $order['id'] }}" value="详情">
+                                                <a class="btn btn-success btn-xs detail" data-id="{{ $order['id'] }}">详情</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -328,10 +328,10 @@
                         break;
                     case 3: $status='<span class="label label-warning">待收获</span>';
                         break;
-                    case 4: $status='<span class="label label-success">已完成</span>';
+                    case 4: $status='<span class="label label-danger">已完成</span>';
                         $("input[value=关闭订单]").hide();
                         break;
-                    case 5: $status='<span class="label label-danger">已关闭/span>';
+                    case 5: $status='<span class="label label-default">已关闭</span>';
                         $("input[value=关闭订单]").hide();
                         break;
                 }
