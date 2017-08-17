@@ -39,7 +39,7 @@
                         @endif
 
                         <div class="well">
-                            <table class="table">
+                            <table class="table table1">
                                 <tr>
                                     <th style="width: 3%">ID</th>
                                     <th style="width: 9%">排序</th>

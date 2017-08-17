@@ -32,16 +32,17 @@ mix.js('resources/assets/js/app.js', 'public/js').extract(['vue'])
    .sass('resources/assets/sass/fileinput.scss', 'public/css')
    .sass('resources/assets/sass/app.scss', 'public/css');
 
-mix.copy('resources/assets/imgs/nav_bg.png', 'public/imgs');
-mix.copy('resources/assets/imgs/up_pic_bg.jpg', 'public/imgs');
-mix.copy('resources/assets/imgs/headimg.jpg', 'public/imgs');
-mix.copy('resources/assets/imgs/qrcode.jpg', 'public/imgs');
-mix.copy('resources/assets/imgs/loading.gif', 'public/imgs');
-mix.copy('resources/assets/imgs/loading-sm.gif', 'public/imgs');
+mix.copy('resources/assets/images/nav_bg.png', 'public/images');
+mix.copy('resources/assets/images/up_pic_bg.jpg', 'public/images');
+mix.copy('resources/assets/images/headimg.jpg', 'public/images');
+mix.copy('resources/assets/images/qrcode.jpg', 'public/images');
+mix.copy('resources/assets/images/loading.gif', 'public/images');
+mix.copy('resources/assets/images/loading-sm.gif', 'public/images');
 
 mix.copy('resources/assets/css/style.css', 'public/css');
 mix.copy('resources/assets/js/moment.js', 'public/js');
 mix.copy('resources/assets/js/daterangepicker.js', 'public/js');
+mix.copy('resources/assets/js/toucher.js', 'public/js');
 
 
 mix.browserSync({

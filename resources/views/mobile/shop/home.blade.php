@@ -13,16 +13,15 @@
 
 @section('content')
     <style>
-        body{padding: 10px 0 70px 0;}
+
         .profile{float:left; height: 85px; margin-right: 20px;}
         .headimg{width: 85px;}
         .nickname{width: 50%;}
     </style>
-    <div class="container">
+    <div class="container container-mobile">
         <div class="row assets">
-            <div class="col-md-12">
+            <div class="col-xs-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading">我的</div>
                     <div class="panel-body">
                         <div class="well" style="height: 120px;">
                             <div class="profile headimg">
@@ -34,6 +33,22 @@
                                 <p id="loc"></p>
                             </div>
                         </div>
+
+
+                        <ul class="nav nav-pills" role="tablist">
+                            <li @if($status == 1)class="active"@endif>
+                                <a href="{{ route('mobile.shop.home', ['weid'=>$weid, 'status'=>1]) }}">待付款</a>
+                            </li>
+                            <li @if($status == 3)class="active"@endif>
+                                <a href="{{ route('mobile.shop.home', ['weid'=>$weid, 'status'=>3]) }}">待收货</a>
+                            </li>
+                            <li @if($status == 4)class="active"@endif>
+                                <a href="{{ route('mobile.shop.home', ['weid'=>$weid, 'status'=>4]) }}">待评价</a>
+                            </li>
+                            <li @if(!$status)class="active"@endif>
+                                <a href="{{ route('mobile.shop.home', ['weid'=>$weid]) }}">我的订单</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>

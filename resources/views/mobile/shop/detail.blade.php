@@ -8,14 +8,14 @@
 ?>
 
 @extends('layouts.mobile.shop')
-@section('title', '商品分类')
+@section('title', '商品详情')
 
 
 @section('content')
     <div class="container container-mobile">
         <div class="row assets">
             <div class="col-xs-12">
-                category
+                商品详情 {{ $url['link'] }}
             </div>
         </div>
     </div>

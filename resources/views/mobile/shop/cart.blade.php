@@ -13,9 +13,9 @@
 
 
 @section('content')
-    <div class="container">
+    <div class="container container-mobile">
         <div class="row assets">
-            <div class="col-md-12">
+            <div class="col-xs-12">
                 cart
             </div>
         </div>

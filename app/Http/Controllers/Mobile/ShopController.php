@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Mobile;
 
+use App\Models\ShoppingGoods;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -10,6 +11,8 @@ use App\Lib\Wechat\Jssdk;
 use App\Lib\Wechat\Pay;
 use App\Lib\Wechat\HttpRequest;
 use App\Models\Fans;
+use App\Models\ShoppingAdv;
+
 
 class ShopController extends Controller
 {
@@ -42,8 +45,11 @@ class ShopController extends Controller
         $this->apiKey = config('wechat.apiKey');
     }
 
-
-    public function index()
+    /**
+     * 主页备份
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index2()
     {
         //模式一
         $pkg1 = [
@@ -96,52 +102,167 @@ class ShopController extends Controller
 
 
         $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/index?weid='.$this->weid);
-        return view('mobile.shop.index', [
+        return view('mobile.shop.index2', [
+            'weid'              => $this->weid,
             'signPackage'       => $signPackage,
             'package'           => $package,
             'navActive'         => 'index'
         ]);
     }
 
+    /**
+     * 分类
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function category()
     {
-        $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/category');
+
+        $url = $this->buildUrl('category', ['weid'=>$this->weid]);
+        $signPackage = $this->getSignPackage($url['link']);
         return view('mobile.shop.category', [
+            'weid'              => $this->weid,
             'signPackage'       => $signPackage,
-            'navActive'         => 'category'
+            'navActive'         => 'category',
+            'url'               => $url
         ]);
     }
 
+    /**
+     * 购物车
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function cart()
     {
-        $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/cart');
+
+        $url = $this->buildUrl('cart', ['weid'=>$this->weid]);
+        $signPackage = $this->getSignPackage($url['link']);
         return view('mobile.shop.cart', [
+            'weid'              => $this->weid,
             'signPackage'       => $signPackage,
-            'navActive'         => 'cart'
+            'navActive'         => 'cart',
+            'url'               => $url
         ]);
     }
 
-    public function home()
+    /**
+     * 我的
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function home(Request $request)
     {
-        $this->openid = session('openid');
-        //dd($this->openid);
-        $fans = Fans::where(['from_user'=>$this->openid])->first();
-        //dd($fans);
+        $this->openid = session('openid'); //dd($this->openid);
+        $fans = Fans::where(['from_user'=>$this->openid])->first(); //dd($fans);
 
-        $signPackage = $this->getSignPackage($this->redirectUri.'mobile/shop/home');
+        $status = $request->input('status');
+
+
+        $url = $this->buildUrl('home', ['weid'=>$this->weid, 'status'=>$status]);
+        $signPackage = $this->getSignPackage($url['link']);
         return view('mobile.shop.home', [
+            'weid'              => $this->weid,
             'signPackage'       => $signPackage,
             'fans'              => $fans,
-            'navActive'         => 'home'
+            'navActive'         => 'home',
+            'url'               => $url,
+            'status'            => $status
         ]);
     }
 
-    public function getSignPackage($url)
+    /**
+     * 详情页
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function detail(Request $request)
+    {
+        $id = $request->input('id');
+
+
+
+        $url = $this->buildUrl('detail', ['weid'=>$this->weid, 'id'=>$id]);
+        $signPackage = $this->getSignPackage($url['link']);
+        return view('mobile.shop.detail', [
+            'weid'              => $this->weid,
+            'signPackage'       => $signPackage,
+            'navActive'         => 'home',
+            'url'               => $url,
+        ]);
+    }
+
+    /**
+     * 主页
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function index()
+    {
+
+        $advs = ShoppingAdv::where(['weid'=>$this->weid])->get(); //dd($advs);
+        $goods = ShoppingGoods::where(['weid'=>$this->weid, 'isrecommand'=>1])->get(); //dd($goods);
+
+
+        $url = $this->buildUrl('index', ['weid'=>$this->weid]);
+        $signPackage = $this->getSignPackage($url['link']);
+        return view('mobile.shop.index', [
+            'weid'              => $this->weid,
+            'signPackage'       => $signPackage,
+            'advs'              => $advs,
+            'goods'             => $goods,
+            'navActive'         => 'index',
+            'url'               => $url
+        ]);
+    }
+
+    /**
+     * 构建 link
+     * @param $path
+     * @param null $qs
+     * @param string $img
+     * @return array
+     */
+    public function buildUrl($path, $qs = null, $img = 'imgs/headimg.jpg')
+    {
+
+        $path = 'mobile/shop/'.$path;
+
+        if(!empty($qs) && is_array($qs)) {
+            $string = '?';
+            foreach ($qs as $k=>$v) {
+                !empty($v) && $string .= $k.'='.$v.'&';
+            }
+            $string = rtrim($string, '&');
+        }
+
+        $url = [
+            'host'  => $this->redirectUri,
+            'link'  => $this->redirectUri.$path.$string,
+            'img'   => $this->redirectUri.$img
+        ];
+
+        return $url;
+    }
+
+
+    /**
+     * @param $url
+     * @return array
+     */
+    public function getSignPackage($url, $qs = null)
     {
         $params = [
             'appid'     => $this->appId,
             'appsecret' => $this->appSecret,
         ];
+
+        if(!empty($qs) && is_array($qs)) {
+            $string = '?';
+            foreach ($qs as $k=>$v) {
+                $string .= $k.'='.$v.'&';
+            }
+            $string = rtrim($string, '&');
+            $url .= $string;
+        }
+
         $jssdk = new Jssdk($params);
         return $jssdk->getSignPackage($url);
     }

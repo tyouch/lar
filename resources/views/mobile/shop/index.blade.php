@@ -12,48 +12,70 @@
 
 
 @section('content')
-    <div class="container">
-        <div class="row assets">
-            <div class="col-md-12" style="text-align: center;">
-                @if($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+    <style>
+        .good-box{background-color: wheat; height: 150px; position: relative; padding: 0;}
+        .good-box .good-span{position: absolute; padding: 5px; background-color: rgba(0,0,0,.5);}
+        .good-box .good-price{left: 0px; top: 15px; z-index: 1;}
+        .good-box .good-title{right: 0px; bottom: 15px; z-index: 1;}
+        .good-box .good-img{height: 150px; z-index: 0;}
+    </style>
+    <div class="container container-mobile">
+        <div class="row">
+            <div class="col-xs-12" style="text-align: center;">
+                {{--轮播图广告--}}
+                <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" style="margin: -5px;">
+                    <!-- Indicators -->
+                    <ol class="carousel-indicators">
+                        @foreach($advs as $adv)
+                        <li data-target="#carousel-example-generic" data-slide-to="{{ $loop->index }}" class="@if($loop->index===0){{ 'active' }}@endif"></li>
+                        @endforeach
+                    </ol>
+
+                    <!-- Wrapper for slides -->
+                    <div class="carousel-inner" role="listbox">
+                        @foreach($advs as $adv)
+                        <div class="item @if($loop->index===0){{ 'active' }}@endif">
+                            <a href="{{ $adv->link }}"><img src="{{ url($adv->thumb) }}" alt="{{ $adv->advname }}"></a>
+                            <div class="carousel-caption">{{ $adv->advname }}</div>
+                        </div>
+                        @endforeach
                     </div>
-                @endif
-                <form action="{{ route('pay.jsapi') }}" method="post">
-                    <input type="hidden" name="appid" value="{{ $package['appid'] }}">
-                    <input type="hidden" name="mch_id" value="{{ $package['mch_id'] }}">
-                    <input type="hidden" name="nonce_str" value="{{ $package['nonce_str'] }}">
-                    <input type="hidden" name="body" value="{{ $package['body'] }}">
-                    <input type="hidden" name="spbill_create_ip" value="{{ $package['spbill_create_ip'] }}">
-                    <input type="hidden" name="notify_url" value="{{ $package['notify_url'] }}">
-                    <input type="hidden" name="trade_type" value="JSAPI">
-                    {{ csrf_field() }}
-                    <div class="input-group input-group-lg">
-                        <span class="input-group-addon" id="sizing-addon1">打赏金额</span>
-                        <input type="text" class="form-control" name="total_fee" value="0.01">
-                    </div>
-                    <input type="submit" class="btn btn-success btn-lg" name="submit" style="width: 100%; margin: 20px 0;" value="微信支付">
-                </form>
-                <img src="{{ url('imgs/wx_pay_qrcode1.png') }}">
-                <img src="{{ url('imgs/wx_pay_qrcode2.png') }}">
+
+                    <!-- Controls <-  ->  -->
+                    <a id="carleft" class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">
+                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a id="carright" class="right carousel-control" href="#carousel-example-generic" role="button" data-slide="next">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
             </div>
         </div>
+
+        @foreach($goods as $good)
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-xs-12 good-box">
+                <span class="good-span good-price">￥{{ $good->productprice }}</span>
+                <span class="good-span good-title">{{ $good->title }}</span>
+                <a href="{{ route('mobile.shop.detail', ['weid'=>$weid, 'id'=>$good->id]) }}" class="good-img"><img src="" alt="{{ $good['title'] }}"></a>
+            </div>
+        </div>
+        @endforeach
     </div>
 @endsection
 
 
 @push('scripts')
+<script src="{{ asset('/js/toucher.js') }}"></script>
 <script>
-    $("input[name=submit]").touchend(function (e) {
-        $val = $("input[name=total_fee]").val();
-        if(!isNaN($val) && $val>0 && $val<=37) {
-            alert("请输入正确的金额！");
-        }
-    })
+    /*轮播拖动*/
+    var myTouch = util.toucher(document.getElementById('carousel-example-generic'));
+    myTouch.on('swipeLeft',function(e){
+        $('#carright').click();
+    }).on('swipeRight',function(e){
+        $('#carleft').click();
+    });
 </script>
 @endpush

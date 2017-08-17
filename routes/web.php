@@ -57,7 +57,8 @@ Auth::routes();
         Route::any('payment', 'AccountController@payment')->name('account.payment');
     });
 
-    // shop admin
+    //---------------------------------------------
+    // 商品 web
     Route::group(['prefix'=>'shop'], function (){
         Route::get('index', 'ShopController@index')->name('shop.index');
         Route::any('category', 'ShopController@category')->name('shop.category');
@@ -69,14 +70,14 @@ Auth::routes();
         Route::any('test', 'ShopController@test')->name('shop.test');
     });
 
-    //---------------------------------------------
-    // 导航
+    // 商品 mobile
     Route::group(['prefix'=>'mobile'], function (){
         Route::group(['prefix'=>'shop'], function (){
             Route::get('index', 'Mobile\ShopController@index')->name('mobile.shop.index');
             Route::get('category', 'Mobile\ShopController@category')->name('mobile.shop.category');
             Route::get('cart', 'Mobile\ShopController@cart')->name('mobile.shop.cart');
             Route::get('home', 'Mobile\ShopController@home')->name('mobile.shop.home');
+            Route::get('detail', 'Mobile\ShopController@detail')->name('mobile.shop.detail');
         });
     });
 
