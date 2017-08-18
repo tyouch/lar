@@ -43,6 +43,8 @@ mix.copy('resources/assets/css/style.css', 'public/css');
 mix.copy('resources/assets/js/moment.js', 'public/js');
 mix.copy('resources/assets/js/daterangepicker.js', 'public/js');
 mix.copy('resources/assets/js/toucher.js', 'public/js');
+mix.copy('resources/assets/js/jquery.touchwipe.js', 'public/js');
+mix.copy('resources/assets/js/swipe.js', 'public/js');
 
 
 mix.browserSync({

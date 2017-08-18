@@ -171,15 +171,12 @@ class ShopController extends Controller
             // 处理批量上传 [ajax]
             if($request->input('op') == 'fileinput'){
 
-                $thumb = '';
+                $thumb = [];
                 foreach ($_FILES['fileinput']['tmp_name'] as $key => $val) {
-
-                        $fileName = random(10).'.jpg';
-                        move_uploaded_file($val, $desPath.$fileName);
-                        $thumb = $desPath.$fileName;
-
+                    $fileFullName = $this->destPath.$this->fileName.'.jpg';
+                    move_uploaded_file($val, $fileFullName);
                 }
-                return response()->json(['ajax'=>$request->ajax(), 'thumb_url'=>$thumb, 'FILES'=>$_FILES,]);
+                return response()->json(['ajax'=>$request->ajax(), 'thumb_url'=>$fileFullName, 'FILES'=>$_FILES]);
             }
 
             // 删除批量中的单个
@@ -210,7 +207,7 @@ class ShopController extends Controller
 
             //dd($request->file());
 
-            $request->file('goods.thumb') && $post['thumb'] = $this->uploadFile($request->file('goods.thumb'), random(10), $desPath);
+            $request->file('goods.thumb') && $post['thumb'] = $this->uploadFile($request->file('goods.thumb'), $this->fileName, $this->destPath);
             /*$file = $request->file('goods.thumb');
             $realPath = $file->getRealPath();
             $ext = $file->getClientOriginalExtension();
@@ -442,6 +439,58 @@ class ShopController extends Controller
             'module'    => 'shopAdv',
             'pagePram'  => $pagePram,
             'advs'      => $advs
+        ]);
+    }
+
+
+    /**
+     * 物流管理
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function express(Request $request)
+    {
+        $begin  = microtime(true);
+        parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+
+
+        if ($request->ajax()) {
+            // 处理批量上传 [ajax]
+            if ($request->input('op') == 'fileinput') {
+
+                foreach ($_FILES['fileinput']['tmp_name'] as $key => $val) {
+                    $fileFullName = $this->destPath . $this->fileName . '.jpg';
+                    move_uploaded_file($val, $fileFullName);
+                }
+                return response()->json(['ajax' => $request->ajax(), 'thumb_url' => $fileFullName, 'FILES' => $_FILES]);
+            }
+        }
+
+
+        // POST
+        $_token = $request->input('_token');
+        if (isset($_token) && $_token == csrf_token()) {
+
+            $post = $request->input('goods');
+            $post['thumb_url'] && $thumb_url = serialize($post['thumb_url']);
+            ShoppingGoods::where(['id'=>222])->update(['thumb_url'=>$thumb_url]);
+
+            return redirect()->route('shop.express', $pagePram);
+        }
+
+        $good = ShoppingGoods::where(['id'=>222])->first();
+        $good['advs'] = iunserializer($good['thumb_url']);
+        //dd($good);
+
+
+        $end    = microtime(true);
+        return view('web.shop.express', [
+            'pass'      => $end - $begin,
+            'weid'      => $this->weid,
+            'module'    => 'shopExpress',
+            'pagePram'  => $pagePram,
+            'good'      => $good,
+            'thumbJson' => json_encode($good['advs']),
         ]);
     }
 

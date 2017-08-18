@@ -77,6 +77,27 @@ footer .text {font-size: 1.4rem; margin-top: 2px;}
 .lend-title-color-new{background-color: #fe6458; background-image: url(../images/lend-title-new.png);}
 .lend-title-color-right{background-color: #72a7d9; background-image: url(../images/lend-title-right.png);}*/
 
+/*轮播图*/
+.box_swipe {overflow: hidden; position: relative; margin: -5px;}
+.box_swipe ul {overflow: hidden; position: relative; margin:0; padding:0;}
+.box_swipe ul > li {float:left; width:100%; position: relative;}
+.box_swipe ul > li a{color:#FFF; text-decoration:none;}
+.box_swipe ul > li .title{
+    position: absolute; bottom: 0px; display: block; z-index:100;
+    width: 70%; height:20px; padding:0 10px;
+    text-overflow: ellipsis; color: orangered;
+    white-space: nowrap; overflow: hidden;
+}
+.box_swipe>ol{
+    height:20px; text-align:right; padding-right:15px;
+    position: relative; z-index:10;
+    margin-top:-20px; background-color:rgba(0,0,0,0.3);
+}
+.box_swipe>ol>li{
+    display:inline-block; margin-bottom:1px;border-radius: 8px;
+    width:8px; height:8px; background-color:#757575;
+}
+.box_swipe>ol>li.on{background-color:#ffffff;}
 
 
 /**/

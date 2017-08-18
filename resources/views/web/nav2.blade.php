@@ -26,8 +26,8 @@
                         <a href="{{ route('shop.goods', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopGoods'){{ 'active' }}@endif">商品管理</a>
                         <a href="{{ route('shop.orders', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopOrders'){{ 'active' }}@endif">订单管理</a>
                         <a href="{{ route('shop.adv', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopAdv'){{ 'active' }}@endif">幻灯片管理</a>
-                        <a href="{{ route('shop.distribution', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info">物流管理</a>
-                        <a href="{{ route('shop.service', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info">售后管理</a>
+                        <a href="{{ route('shop.express', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopExpress'){{ 'active' }}@endif">物流管理</a>
+                        <a href="{{ route('shop.service', ['weid'=>$weid]) }}" class="list-group-item list-group-item-info @if(@$module=='shopService'){{ 'active' }}@endif">售后管理</a>
                     </ul>
                 </div>
             </div>

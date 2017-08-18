@@ -177,8 +177,10 @@ class ShopController extends Controller
     public function detail(Request $request)
     {
         $id = $request->input('id');
-
-
+        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
+        $good['advs'] = iunserializer($good['thumb_url']);
+        $advs = ShoppingAdv::where(['weid'=>$this->weid])->get();
+        dd($good, $advs);
 
         $url = $this->buildUrl('detail', ['weid'=>$this->weid, 'id'=>$id]);
         $signPackage = $this->getSignPackage($url['link']);
@@ -187,6 +189,8 @@ class ShopController extends Controller
             'signPackage'       => $signPackage,
             'navActive'         => 'home',
             'url'               => $url,
+            'good'              => $good,
+            'advs'              => $advs,
         ]);
     }
 

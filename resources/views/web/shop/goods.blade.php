@@ -561,12 +561,12 @@
                 var Preview = [];
                 var PreviewConfig = []; 
                 $.each(d.thumb_url, function (i, o) {
-                    Preview[i] ='<img src="' + baseUrl + o + '" class="file-preview-image" style="width:auto;height:160px;">';
-                    el = '<input type="hidden" name="goods[thumb_url][' + i + ']" value="'+ o +'">';
+                    Preview[i] ='<img src="' + baseUrl + o.thumb + '" class="file-preview-image" style="width:auto; height:160px;">';
+                    el = '<input type="hidden" name="goods[thumb_url][' + i + '][thumb]" value="'+ o.thumb +'">';
                     $(".thumb_url").append(el);
 
                     PreviewConfig[i] = {
-                        caption : o,//.split("/")[5]
+                        caption : o.thumb,//.split("/")[5]
                         width   : '160px',
                         url     : '{{ route('shop.goods', ['weid'=>$weid]) }}', // server delete action
                         key     : id,
@@ -576,6 +576,7 @@
                             id      : id
                         }
                     }
+
                 });
 
                 console.log(Preview, PreviewConfig);
@@ -622,7 +623,7 @@
 
         i = parseInt($(".thumb_url").children("input").length);
         if(data.response){
-            el = '<input type="hidden" name="goods[thumb_url]['+(i++)+']" value="'+data.response.thumb_url+'">';
+            el = '<input type="hidden" name="goods[thumb_url]['+(i++)+'][thumb]" value="'+data.response.thumb_url+'">';
             $(".thumb_url").append(el);
         }
     }).on('filecleared', function(event, data) {

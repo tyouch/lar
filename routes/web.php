@@ -65,7 +65,7 @@ Auth::routes();
         Route::any('goods', 'ShopController@goods')->name('shop.goods');
         Route::any('orders', 'ShopController@orders')->name('shop.orders');
         Route::any('adv', 'ShopController@adv')->name('shop.adv');
-        Route::any('distribution', 'ShopController@distribution')->name('shop.distribution');
+        Route::any('express', 'ShopController@express')->name('shop.express');
         Route::any('service', 'ShopController@service')->name('shop.service');
         Route::any('test', 'ShopController@test')->name('shop.test');
     });

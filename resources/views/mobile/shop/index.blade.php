@@ -22,8 +22,30 @@
     <div class="container container-mobile">
         <div class="row">
             <div class="col-xs-12" style="text-align: center;">
+
                 {{--轮播图广告--}}
-                <div id="carousel-example-generic" class="carousel slide" data-ride="carousel" style="margin: -5px;">
+                <div id="banner_box" class="box_swipe">
+                    <ul>
+                        @foreach($advs as $adv)
+                            <li>
+                                <a href="@if (empty($adv->link)){{ '#' }}@else{{ $adv->link }}@endif">
+                                    <img src="{{ url($adv->thumb) }}" alt="" width='100%' height='100%'/>
+                                </a>
+                                <span class="title">{{ $adv->advname }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <ol>
+                        @foreach($advs as $adv)
+                            <li @if ($loop->index === 0)class="on"@endif></li>
+                        @endforeach
+                    </ol>
+                </div>
+
+
+                {{--轮播图广告 bootstrap--}}
+                <div id="carousel-example-generic" class="carousel slide sr-only" data-ride="carousel" style="margin: -5px;">
                     <!-- Indicators -->
                     <ol class="carousel-indicators">
                         @foreach($advs as $adv)
@@ -51,31 +73,49 @@
                         <span class="sr-only">Next</span>
                     </a>
                 </div>
+
             </div>
         </div>
 
+        {{--首页商品展示--}}
         @foreach($goods as $good)
-        <div class="row" style="margin-top: 10px;">
-            <div class="col-xs-12 good-box">
-                <span class="good-span good-price">￥{{ $good->productprice }}</span>
-                <span class="good-span good-title">{{ $good->title }}</span>
-                <a href="{{ route('mobile.shop.detail', ['weid'=>$weid, 'id'=>$good->id]) }}" class="good-img"><img src="" alt="{{ $good['title'] }}"></a>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-12 good-box">
+                    <span class="good-span good-price">￥{{ $good->productprice }}</span>
+                    <span class="good-span good-title">{{ $good->title }}</span>
+                    <a href="{{ route('mobile.shop.detail', ['weid'=>$weid, 'id'=>$good->id]) }}" class="good-img"><img src="" alt="{{ $good['title'] }}"></a>
+                </div>
             </div>
-        </div>
         @endforeach
     </div>
 @endsection
 
 
 @push('scripts')
-<script src="{{ asset('/js/toucher.js') }}"></script>
-<script>
-    /*轮播拖动*/
-    var myTouch = util.toucher(document.getElementById('carousel-example-generic'));
-    myTouch.on('swipeLeft',function(e){
-        $('#carright').click();
-    }).on('swipeRight',function(e){
-        $('#carleft').click();
-    });
-</script>
+    <script>
+        /*轮播拖动 bootstrap // { asset('/js/toucher.js') }}
+        var myTouch = util.toucher(document.getElementById('carousel-example-generic'));
+        myTouch.on('swipeLeft',function(e){
+            $('#carright').click();
+        }).on('swipeRight',function(e){
+            $('#carleft').click();
+        });*/
+    </script>
+
+
+    <script src="{{ asset('/js/jquery.touchwipe.js') }}"></script>
+    <script src="{{ asset('/js/swipe.js') }}"></script>
+    <script>
+        //轮播拖动
+        $(function () {
+            new Swipe($('#banner_box')[0], {
+                speed: 500,
+                auto: 3000,
+                callback: function () {
+                    var lis = $(this.element).next("ol").children();
+                    lis.removeClass("on").eq(this.index).addClass("on");
+                }
+            });
+        });
+    </script>
 @endpush
