@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 //use Stevenyangecho\UEditor\UEditorServiceProvider as UEditor;
 
+use GuzzleHttp\Client;
 use App\Lib\Wechat\HttpRequest;
 use App\Models\ShoppingCategory;
 use App\Models\ShoppingGoods;
@@ -24,7 +25,7 @@ class ShopController extends Controller
 
     public function __construct(Request $request)
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
         $this->weid = $request->input('weid');
         $this->fileName = random(10);
         $this->destPath = 'images/uploads/'.date('Y').'/'.date('m').'/';
@@ -491,6 +492,75 @@ class ShopController extends Controller
             'pagePram'  => $pagePram,
             'good'      => $good,
             'thumbJson' => json_encode($good['advs']),
+        ]);
+    }
+
+
+    public function service(Request $request)
+    {
+        $begin  = microtime(true);
+        parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+
+        /*if(empty($request->input('code'))){
+            $query = http_build_query([
+                'client_id' => 3,
+                'redirect_uri' => 'http://local.tyoupub.com/lar/public/shop/service?weid=12',
+                'response_type' => 'code',
+                'scope' => 'conference'
+            ]);
+
+            // Redirect the user to the OAuth authorization page
+            return redirect('http://local.tyoupub.com/lar/public/oauth/authorize?' . $query);
+        }
+
+
+        $http = new Client();
+        $response = $http->post('http://local.tyoupub.com/lar/public/oauth/token', [
+            'form_params' => [
+                'grant_type' => 'authorization_code',
+                'client_id' => 3, // from admin panel above
+                'client_secret' => 'GUMW2u2EsAE50P4UroxgaxEBN8pE4mKEN7yHgyRp', // from admin panel above
+                'redirect_uri' => 'http://local.tyoupub.com/lar/public/shop/service?weid=12',
+                'code' => $request->input('code') // Get code from the
+            ]
+        ]);
+        */
+
+        $http = new Client();
+        $response = $http->post('http://local.tyoupub.com/lar/public/oauth/token', [
+            'form_params' => [
+                'grant_type' => 'password',
+                'client_id' => '2',
+                'client_secret' => 'xqLnZjO8y2RT3B18iKa1y0QRj0oLTTsTI9gVuCm8',
+                'username' => 'admin',//'you.ch@hotmail.com',
+                'password' => 'admin123',
+                'scope' => '*',
+            ],
+        ]);
+        $accessToken = json_decode((string) $response->getBody(), true)['access_token'];
+
+        $adds = $http->get('http://local.tyoupub.com/lar/public/api/shop/index/adds', [
+        //$adds = $http->get('http://local.tyoupub.com/lar/public/api/foo', [
+            'headers' => [
+                'Accept'        => 'application/json',
+                'Authorization' => 'Bearer '.$accessToken
+            ],
+            'query' => [
+                'weid' => 12
+            ]
+        ]);
+        //$adds = HttpRequest::content('http://local.tyoupub.com/lar/public/api/shop/index/adds?weid=12');
+        $adds_arr = json_decode((string) $adds->getBody(), true);
+        dd($accessToken, $adds, $adds_arr, (string) $adds->getBody());
+
+
+        return json_decode((string) $response->getBody(), true);
+        $end    = microtime(true);
+        return view('web.shop.service', [
+            'pass'      => $end - $begin,
+            'weid'      => $this->weid,
+            'module'    => 'shopExpress',
+            'pagePram'  => $pagePram,
         ]);
     }
 

@@ -14,6 +14,11 @@
     <div id="app">
         <div :class="msg"></div>
         <example></example>
+        <div class="container">
+            <passport-clients></passport-clients>
+            <passport-authorized-clients></passport-authorized-clients>
+            <passport-personal-access-tokens></passport-personal-access-tokens>
+        </div>
     </div>
 
     <div class="container">

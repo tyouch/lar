@@ -31,8 +31,8 @@ Auth::routes();
 //Route::group(['middleware' => 'auth'], function () {
 
     Route::get('admin', 'HomeController@index')->name('home');
-    //Route::get('/', 'HomeController@index');
-    Route::get('/', 'Mobile\ShopController@index');
+    Route::get('/', 'HomeController@index');
+    //Route::get('/', 'Mobile\ShopController@index');
 
     Route::group(['prefix'=>'hosts'], function (){
         Route::get('{p}', 'HostsController@index')->name('hosts');
@@ -97,9 +97,20 @@ Auth::routes();
         Route::any('native', 'Payment\NotifyController@native')->name('notify.native');
         //Route::get('test', 'Payment\NotifyController@test')->name('notify.test');
     });
-
+    /*
     // API
-    Route::any('api', 'ApiController@index')->name('api');
+    Route::group(['prefix'=>'api'], function (){
+        Route::group(['prefix'=>'shop'], function (){
+            Route::group(['prefix'=>'index'], function (){
+                Route::any('adds', 'Api\ShopController@getIndexAdds')->name('api.shop.index.adds');//->middleware('auth:api');
+                Route::any('goods', 'Api\ShopController@getIndexGoods')->name('api.shop.index.goods');//->middleware('auth:api');
+            });
+            Route::group(['prefix'=>'home'], function (){
+            });
+        });
+        Route::any('/', 'ApiController@index')->name('api');
+    });*/
+    //Route::any('api', 'ApiController@index')->name('api');
     //---------------------------------------------
 
 

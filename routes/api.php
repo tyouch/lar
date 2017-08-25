@@ -13,6 +13,33 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+/*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+    //return response()->json(['abc'=>123]);
+});*/
+
+Route::get('foo', function () { //middleware('auth:api')->
+    return response()->json(['abc'=>'Hello World']);
+})->middleware('auth:api');
+
+
+Route::any('/', 'ApiController@index')->name('api');
+
+
+Route::group(['middleware'=>'auth:api'], function (){
+    Route::group(['prefix'=>'shop'], function (){
+        Route::group(['prefix'=>'index'], function (){
+            Route::get('adds', 'Api\ShopController@getIndexAdds')->name('api.shop.index.adds');//->middleware('auth:api');
+            Route::get('goods', 'Api\ShopController@getIndexGoods')->name('api.shop.index.goods');//->middleware('auth:api');
+        });
+        Route::group(['prefix'=>'home'], function (){
+        });
+        Route::group(['prefix'=>'category'], function (){
+        });
+        Route::group(['prefix'=>'cart'], function (){
+        });
+    });
 });
+
+
+
