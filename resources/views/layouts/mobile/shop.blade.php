@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     {{--<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{{ url('css/app.css') }}">--}}
-    <link rel="stylesheet" href="{{ url('css/style.css?v=5') }}">
+    <link rel="stylesheet" href="{{ url('css/style.css?v=6') }}">
 </head>
 <body>
 

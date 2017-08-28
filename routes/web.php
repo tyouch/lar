@@ -78,6 +78,7 @@ Auth::routes();
             Route::get('cart', 'Mobile\ShopController@cart')->name('mobile.shop.cart');
             Route::get('home', 'Mobile\ShopController@home')->name('mobile.shop.home');
             Route::get('detail', 'Mobile\ShopController@detail')->name('mobile.shop.detail');
+            Route::get('confirm', 'Mobile\ShopController@confirm')->name('mobile.shop.confirm');
         });
     });
 

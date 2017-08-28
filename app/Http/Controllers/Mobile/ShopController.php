@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Mobile;
 
-use App\Models\ShoppingGoods;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -10,8 +10,12 @@ use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
 use App\Lib\Wechat\Pay;
 use App\Lib\Wechat\HttpRequest;
+
+use App\Models\Wechats;
 use App\Models\Fans;
 use App\Models\ShoppingAdv;
+use App\Models\ShoppingGoods;
+use App\Models\ShoppingAddress;
 
 
 class ShopController extends Controller
@@ -44,6 +48,7 @@ class ShopController extends Controller
         $this->mchID = config('wechat.mchID');
         $this->apiKey = config('wechat.apiKey');
     }
+
 
     /**
      * 主页备份
@@ -110,6 +115,7 @@ class ShopController extends Controller
         ]);
     }
 
+
     /**
      * 分类
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -127,6 +133,7 @@ class ShopController extends Controller
         ]);
     }
 
+
     /**
      * 购物车
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -143,6 +150,7 @@ class ShopController extends Controller
             'url'               => $url
         ]);
     }
+
 
     /**
      * 我的
@@ -169,30 +177,6 @@ class ShopController extends Controller
         ]);
     }
 
-    /**
-     * 详情页
-     * @param Request $request
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
-     */
-    public function detail(Request $request)
-    {
-        $id = $request->input('id');
-        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
-        $good['advs'] = iunserializer($good['thumb_url']);
-        $advs = ShoppingAdv::where(['weid'=>$this->weid])->get();
-        dd($good, $advs);
-
-        $url = $this->buildUrl('detail', ['weid'=>$this->weid, 'id'=>$id]);
-        $signPackage = $this->getSignPackage($url['link']);
-        return view('mobile.shop.detail', [
-            'weid'              => $this->weid,
-            'signPackage'       => $signPackage,
-            'navActive'         => 'home',
-            'url'               => $url,
-            'good'              => $good,
-            'advs'              => $advs,
-        ]);
-    }
 
     /**
      * 主页
@@ -216,6 +200,126 @@ class ShopController extends Controller
             'url'               => $url
         ]);
     }
+
+
+    /**
+     * 详情页
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function detail(Request $request)
+    {
+        $id = $request->input('id');
+        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
+        $good['advs'] = iunserializer($good['thumb_url']);
+
+
+        //$advs = ShoppingAdv::where(['weid'=>$this->weid])->get();
+        //dd($good, $advs);
+
+        $url = $this->buildUrl('detail', ['weid'=>$this->weid, 'id'=>$id]);
+        $signPackage = $this->getSignPackage($url['link']);
+        return view('mobile.shop.detail', [
+            'weid'              => $this->weid,
+            'signPackage'       => $signPackage,
+            'navActive'         => 'home',
+            'url'               => $url,
+            'good'              => $good,
+            //'advs'              => $advs,
+        ]);
+    }
+
+
+    /**
+     * 填写订单
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function confirm(Request $request)
+    {
+        $id = $request->input('id');
+        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
+        $wechat = Wechats::where(['weid'=>$this->weid])->first();
+        $payment = iunserializer($wechat['payment']);
+
+        //dd($payment, $good, $wechat);
+
+        $package = [
+            'appid'         => $payment['wechat']['appid'], // $this->appId, // test
+            'mch_id'        => $payment['wechat']['mchid'], //$this->mchID, // test
+            'nonce_str'     => random(32),
+            'body'          => $good['title'],
+            'out_trade_no'  => 'oid'.time(),
+            'total_fee'     => floatval($good['productprice']),
+            'spbill_create_ip'  => getip(),
+            'notify_url'    => $this->notifyUrl,
+            'trade_type'    => 'JSAPI',
+
+            //'time_start'    => date('YmdHis', time()+0),
+            //'time_expire'   => date('YmdHis', time() + 600),
+        ];
+        $package['sign']    = Pay::sign($package); //dd($package);
+
+
+
+        $url = $this->buildUrl('confirm', ['weid'=>$this->weid, 'id'=>$id]); //dd($url);
+        $signPackage = $this->getSignPackage($url['link']);
+        return view('mobile.shop.confirm', [
+            'weid'              => $this->weid,
+            'signPackage'       => $signPackage,
+            'navActive'         => 'home',
+            'url'               => $url,
+            'good'              => $good,
+            'package'           => $package,
+        ]);
+    }
+
+
+    /**
+     * 处理订单
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function orders(Request $request)
+    {
+        $id = $request->input('id');
+        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
+        $address = ShoppingAddress::where(['weid'=>$this->weid, 'openid'=>session('openid')])->first();
+        $wechat = Wechats::where(['weid'=>$this->weid])->first();
+        $payment = iunserializer($wechat['payment']);
+
+        //dd($payment, $good, $wechat);
+
+        $package = [
+            'appid'         => $payment['wechat']['appid'], // $this->appId, // test
+            'mch_id'        => $payment['wechat']['mchid'], //$this->mchID, // test
+            'nonce_str'     => random(32),
+            'body'          => $good['title'],
+            'out_trade_no'  => 'oid'.time(),
+            'total_fee'     => floatval($good['productprice']),
+            'spbill_create_ip'  => getip(),
+            'notify_url'    => $this->notifyUrl,
+            'trade_type'    => 'JSAPI',
+
+            //'time_start'    => date('YmdHis', time()+0),
+            //'time_expire'   => date('YmdHis', time() + 600),
+        ];
+        $package['sign']    = Pay::sign($package); //dd($package);
+
+
+
+        $url = $this->buildUrl('orders', ['weid'=>$this->weid, 'id'=>$id]); //dd($url);
+        $signPackage = $this->getSignPackage($url['link']);
+        return view('mobile.shop.confirm', [
+            'weid'              => $this->weid,
+            'signPackage'       => $signPackage,
+            'navActive'         => 'home',
+            'url'               => $url,
+            'good'              => $good,
+            'package'           => $package,
+        ]);
+    }
+
 
     /**
      * 构建 link
@@ -248,6 +352,7 @@ class ShopController extends Controller
 
 
     /**
+     * 获取签名包
      * @param $url
      * @return array
      */

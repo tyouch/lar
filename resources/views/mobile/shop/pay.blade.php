@@ -7,8 +7,8 @@
  */
 ?>
 
-@extends('layouts.mobile.shop')
-@section('title', '打赏店主')
+@extends('layouts.pay')
+@section('title', '微信支付')
 
 
 @section('content')

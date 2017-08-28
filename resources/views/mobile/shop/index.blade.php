@@ -13,11 +13,14 @@
 
 @section('content')
     <style>
-        .good-box{background-color: wheat; height: 150px; position: relative; padding: 0;}
+        .good-box{background-color: wheat; position: relative; width: 49%; padding: 0; margin-bottom: 2%;}
         .good-box .good-span{position: absolute; padding: 5px; background-color: rgba(0,0,0,.5);}
         .good-box .good-price{left: 0px; top: 15px; z-index: 1;}
         .good-box .good-title{right: 0px; bottom: 15px; z-index: 1;}
-        .good-box .good-img{height: 150px; z-index: 0;}
+        .good-box img{width: 100%; height: 100%; z-index: 0;}
+
+        .col-xs-6:nth-child(odd){margin-right: 1%; background-color: red;}
+        .col-xs-6:nth-child(even){margin-left: 1%; background-color: green;}
     </style>
     <div class="container container-mobile">
         <div class="row">
@@ -78,15 +81,17 @@
         </div>
 
         {{--首页商品展示--}}
-        @foreach($goods as $good)
-            <div class="row" style="margin-top: 10px;">
-                <div class="col-xs-12 good-box">
+        <div class="row" style="margin-top: 1%;">
+            @foreach($goods as $good)
+                <div class="col-xs-6 good-box">
                     <span class="good-span good-price">￥{{ $good->productprice }}</span>
                     <span class="good-span good-title">{{ $good->title }}</span>
-                    <a href="{{ route('mobile.shop.detail', ['weid'=>$weid, 'id'=>$good->id]) }}" class="good-img"><img src="" alt="{{ $good['title'] }}"></a>
+                    <a href="{{ route('mobile.shop.detail', ['weid'=>$weid, 'id'=>$good->id]) }}" class="good-img">
+                        <img src="{{ url($good['thumb']) }}" alt="{{ $good['title'] }}">
+                    </a>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </div>
 @endsection
 
