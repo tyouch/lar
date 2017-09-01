@@ -13,11 +13,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title')</title>
-    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="{{ url('favicon.ico') }}">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     {{--<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{{ url('css/app.css') }}">--}}
-    <link rel="stylesheet" href="{{ url('css/style.css?v=6') }}">
+    <link rel="stylesheet" href="{{ url('css/style.css?v=8') }}">
 </head>
 <body>
 
@@ -115,7 +115,7 @@
             wx.onMenuShareAppMessage({
                 title: '德英源园', // 分享标题
                 desc: '欢迎来到德英源园商店，愿在这盛夏给您带来清凉的购物体验，欢迎欢迎~', // 分享描述
-                link: '{{ $url['link'] }}', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                link: '{!! $url['link'] !!}', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
                 imgUrl: '{{ $url['img'] }}', // 分享图标
                 type: '', // 分享类型,music、video或link，不填默认为link
                 dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
@@ -132,7 +132,7 @@
             // 分享到朋友圈
             wx.onMenuShareTimeline({
                 title: '德英源园', // 分享标题
-                link: '{{ $url['link'] }}', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                link: '{!! $url['link'] !!}', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
                 imgUrl: '{{ $url['img'] }}', // 分享图标
                 success: function () {
                     // 用户确认分享后执行的回调函数

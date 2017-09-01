@@ -4,18 +4,23 @@ namespace App\Http\Controllers\Mobile;
 
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Http\Controllers\Controller;
 use App\Lib\Wechat\Jssdk;
 use App\Lib\Wechat\Pay;
 use App\Lib\Wechat\HttpRequest;
+use GuzzleHttp\Client;
 
 use App\Models\Wechats;
 use App\Models\Fans;
 use App\Models\ShoppingAdv;
 use App\Models\ShoppingGoods;
 use App\Models\ShoppingAddress;
+use App\Models\ShoppingInvoice;
+use App\Models\ShoppingOrder;
+use App\Models\ShoppingOrderGoods;
 
 
 class ShopController extends Controller
@@ -237,40 +242,51 @@ class ShopController extends Controller
      */
     public function confirm(Request $request)
     {
-        $id = $request->input('id');
-        $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
-        $wechat = Wechats::where(['weid'=>$this->weid])->first();
-        $payment = iunserializer($wechat['payment']);
+        parse_str($request->getQueryString(), $qsParam);
+        $ids        = $request->input('ids');
+        $idsArr     = explode(',', $request->input('ids'));
+        $total      = $request->input('total');
+        $totalArr   = explode(',', $request->input('total'));
 
-        //dd($payment, $good, $wechat);
+        $address    = ShoppingAddress::where(['weid'=>$this->weid, 'openid'=>session('openid'), 'isdefault'=>1])->first();
+        $invoice    = ShoppingInvoice::where(['weid'=>$this->weid, 'openid'=>session('openid'), 'isdefault'=>1])->first();
 
-        $package = [
-            'appid'         => $payment['wechat']['appid'], // $this->appId, // test
-            'mch_id'        => $payment['wechat']['mchid'], //$this->mchID, // test
-            'nonce_str'     => random(32),
-            'body'          => $good['title'],
-            'out_trade_no'  => 'oid'.time(),
-            'total_fee'     => floatval($good['productprice']),
-            'spbill_create_ip'  => getip(),
-            'notify_url'    => $this->notifyUrl,
-            'trade_type'    => 'JSAPI',
+        //$begin  = microtime(true);
+        $goods      = ShoppingGoods::where(['weid'=>$this->weid])->whereIn('id', $idsArr)
+            ->orderBy(DB::raw('field(id,'.$ids.')'))->get();
 
-            //'time_start'    => date('YmdHis', time()+0),
-            //'time_expire'   => date('YmdHis', time() + 600),
-        ];
-        $package['sign']    = Pay::sign($package); //dd($package);
+        for ($i = 0; $i < count($totalArr); $i++) {
+            $goods[$i]['num'] = $totalArr[$i];
+        }
+
+        /*for ($i = 0; $i < count($idsArr); $i++) {
+            $goods[$i]  = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$idsArr[$i]])->get();
+        }*/
+        //$end    = microtime(true);
+        //dd($idsArr, $goods, ($end-$begin)*1000);
+
+        //dd($request->input('ids'), $ids,$goods);
+        $wechat     = Wechats::where(['weid'=>$this->weid])->first();
+        $payment    = iunserializer($wechat['payment']);
+
+        //dd($payment, $goods, $wechat);
 
 
 
-        $url = $this->buildUrl('confirm', ['weid'=>$this->weid, 'id'=>$id]); //dd($url);
+
+
+        $url = $this->buildUrl('confirm', ['weid'=>$this->weid, 'ids'=>$ids]); //dd($url);
         $signPackage = $this->getSignPackage($url['link']);
         return view('mobile.shop.confirm', [
             'weid'              => $this->weid,
             'signPackage'       => $signPackage,
             'navActive'         => 'home',
             'url'               => $url,
-            'good'              => $good,
-            'package'           => $package,
+            'address'           => $address,
+            'invoice'           => $invoice,
+            'goods'             => $goods,
+            'total'             => $total,
+            'qsParam'           => $qsParam,
         ]);
     }
 
@@ -282,6 +298,58 @@ class ShopController extends Controller
      */
     public function orders(Request $request)
     {
+
+        // 下单后立即支付
+        $_token = $request->input('_token'); //dump($_token, csrf_token());
+        if (isset($_token) && $_token == csrf_token()) {
+            $goods      = $request->input('goods');
+            $goodsPrice = $dispatchPrice = 0;
+            foreach ($goods as $good) {
+                $goodsPrice += $good['productprice'];
+            }
+            $orderData = [
+                'weid'      => $this->weid,
+                'from_user' => session('openid'),
+                'addressid' => $request->input('addressid'),
+                'invoiceId' => $request->input('invoiceid'),
+                'ordersn'   => 'oady'.date('YmdHis', time()),
+                'status'    => 1,
+                'createtime'    => time(),
+                'updatetime'    => time(),
+                'goodsprice'    => $goodsPrice,
+                'dispatchprice' => $dispatchPrice,
+                'price'         => $goodsPrice + $dispatchPrice
+
+            ];
+            $order = ShoppingOrder::create($orderData);
+            $orderId = $order['id'];
+
+            foreach ($goods as $good) {
+                $orderGoodsData = [
+                    'weid'      => $this->weid,
+                    'orderid'   => $orderId,
+                    'goodsid'   => $good['id'],
+                    'total'     => $good['num'],
+                    'price'     => $good['productprice'],
+                    'createtime'    => time(),
+                ];
+                $orderGoods = ShoppingOrderGoods::create($orderGoodsData);
+            }
+            //dd(2, $orderData, $orderGoodsData, $goods, $request->input(), csrf_token()); //
+
+            // 准备数据 前往支付
+            $package    = [
+                'weid'      => $this->weid,
+                'body'          => $goods[0]['title'],
+                'out_trade_no'  => $order['ordersn'],
+                'total_fee'     => floatval($goodsPrice),
+            ];
+            return redirect()->route('pay.jsapi', $package);
+        }
+
+
+
+
         $id = $request->input('id');
         $good = ShoppingGoods::where(['weid'=>$this->weid, 'id'=>$id])->first();
         $address = ShoppingAddress::where(['weid'=>$this->weid, 'openid'=>session('openid')])->first();

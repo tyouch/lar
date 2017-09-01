@@ -38,6 +38,7 @@ mix.copy('resources/assets/images/headimg.jpg', 'public/images');
 mix.copy('resources/assets/images/qrcode.jpg', 'public/images');
 mix.copy('resources/assets/images/loading.gif', 'public/images');
 mix.copy('resources/assets/images/loading-sm.gif', 'public/images');
+mix.copy('resources/assets/images/location-border.png', 'public/images');
 
 mix.copy('resources/assets/css/style.css', 'public/css');
 mix.copy('resources/assets/js/moment.js', 'public/js');

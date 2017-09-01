@@ -13,14 +13,15 @@
 
 @section('content')
     <style>
-        .good-box{background-color: wheat; position: relative; width: 49%; padding: 0; margin-bottom: 2%;}
+        .good-box{background-color: wheat; position: relative; width: 49.7%; padding: 0; margin-bottom: 0.6%;}
         .good-box .good-span{position: absolute; padding: 5px; background-color: rgba(0,0,0,.5);}
         .good-box .good-price{left: 0px; top: 15px; z-index: 1;}
-        .good-box .good-title{right: 0px; bottom: 15px; z-index: 1;}
+        .good-box .good-title{right: 5px; bottom: 15px; z-index: 1; border-radius: 3px;
+            width: 80%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
         .good-box img{width: 100%; height: 100%; z-index: 0;}
 
-        .col-xs-6:nth-child(odd){margin-right: 1%; background-color: red;}
-        .col-xs-6:nth-child(even){margin-left: 1%; background-color: green;}
+        .col-xs-6:nth-child(odd){float: left; margin-right: 1px; background-color: white;}
+        .col-xs-6:nth-child(even){float: right; margin-left: 1px; background-color: white;}
     </style>
     <div class="container container-mobile">
         <div class="row">
@@ -81,7 +82,7 @@
         </div>
 
         {{--首页商品展示--}}
-        <div class="row" style="margin-top: 1%;">
+        <div class="row">
             @foreach($goods as $good)
                 <div class="col-xs-6 good-box">
                     <span class="good-span good-price">￥{{ $good->productprice }}</span>
