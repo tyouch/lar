@@ -25,7 +25,7 @@ class ShopController extends Controller
 
     public function __construct(Request $request)
     {
-        //$this->middleware('auth');
+        $this->middleware('auth');
         $this->weid = $request->input('weid');
         $this->fileName = random(10);
         $this->destPath = 'images/uploads/'.date('Y').'/'.date('m').'/';
@@ -500,6 +500,13 @@ class ShopController extends Controller
     {
         $begin  = microtime(true);
         parse_str($request->getQueryString(), $pagePram); //dump($pagePram);
+        //dd(random(32));
+        /*dump(date('ymdHis', time()));
+        dump(microtime(true));
+        dump(microtime());
+        dd(date('ymdHisu', time()));*/
+        //list($u, $t) = explode(' ', microtime())[0];
+        //dd($ordersn    = 'oady'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.'));
 
         /*if(empty($request->input('code'))){
             $query = http_build_query([
@@ -526,20 +533,27 @@ class ShopController extends Controller
         ]);
         */
 
-        $http = new Client();
-        $response = $http->post('http://local.tyoupub.com/lar/public/oauth/token', [
-            'form_params' => [
-                'grant_type' => 'password',
-                'client_id' => '2',
-                'client_secret' => 'xqLnZjO8y2RT3B18iKa1y0QRj0oLTTsTI9gVuCm8',
-                'username' => 'admin',//'you.ch@hotmail.com',
-                'password' => 'admin123',
-                'scope' => '*',
-            ],
-        ]);
-        $accessToken = json_decode((string) $response->getBody(), true)['access_token'];
+        //$accessToken = cookie('access_token');
 
-        $adds = $http->get('http://local.tyoupub.com/lar/public/api/shop/index/adds', [
+        //if (!$accessToken) {
+            $http = new Client();
+            //$response = $http->post('https://yuan.tyoupub.com/oauth/token', [
+            $response = $http->post('http://mftapi.tyoupub.com/oauth/token', [
+                'form_params' => [
+                    'grant_type' => 'password',
+                    'client_id' => '2',
+                    'client_secret' => '3kDg9ftDiLTLOfUNsfa056kFTq6xsDNH1zzZISmg',//'kBHofTIZ7pJJ0UJDJvQzNozge6LErViI51B4QAUX',
+                    'username' => 'you.ch@foxmail.com', //'admin',//
+                    'password' => 'admin123',
+                    'scope' => '*',
+                ],
+            ]);
+            $accessToken = json_decode((string)$response->getBody(), true)['access_token'];
+            cookie('access_token', $accessToken, 1800);
+        //}
+
+        //dd($accessToken);
+        /*$adds = $http->get('https://yuan.tyoupub.com/api/shop/index/adds', [
         //$adds = $http->get('http://local.tyoupub.com/lar/public/api/foo', [
             'headers' => [
                 'Accept'        => 'application/json',
@@ -548,10 +562,25 @@ class ShopController extends Controller
             'query' => [
                 'weid' => 12
             ]
+        ]);*/
+
+
+        //$adds = $http->get('http://local.tyoupub.com/lar/public/api/foo', [
+        //$http = new Client(); https://yuan.tyoupub.com/api/shop/detail?weid=12&id=218
+        //$res = $http->get('https://yuan.tyoupub.com/api/shop/detail', [
+        $res = $http->get('http://mftapi.tyoupub.com/api/shop/getGoods', [
+            'headers' => [
+                'Accept'        => 'application/json',
+                'Authorization' => 'Bearer '.$accessToken
+            ],
+            'query' => [
+                'weid'  => 12,
+                'id'    => $request->input('id')
+            ]
         ]);
-        //$adds = HttpRequest::content('http://local.tyoupub.com/lar/public/api/shop/index/adds?weid=12');
-        $adds_arr = json_decode((string) $adds->getBody(), true);
-        dd($accessToken, $adds, $adds_arr, (string) $adds->getBody());
+        $json = (string) $res->getBody();
+        $array = json_decode($json, true);
+        dd($accessToken, $res, $array, $json);
 
 
         return json_decode((string) $response->getBody(), true);

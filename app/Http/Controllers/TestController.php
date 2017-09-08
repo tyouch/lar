@@ -13,6 +13,9 @@ use App\Lib\Sumapay\HttpRequest;
 use App\Models\Ip;
 use Maatwebsite\Excel\Facades\Excel;
 
+use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+
 class TestController extends Controller
 {
     public function __construct()
@@ -990,4 +993,81 @@ class TestController extends Controller
         //echo json_encode($data, JSON_UNESCAPED_UNICODE);
 
     }
+
+    public function onLogin(Request $request)
+    {
+        $code = $request->input('code');
+        if(!empty($code)){
+            //wx3aed9fe20f883ac8 / d2faf1607c212876a1f123af200d501b
+            $appid  = 'wx3aed9fe20f883ac8';
+            $secret = 'd2faf1607c212876a1f123af200d501b';
+            $url    = 'https://api.weixin.qq.com/sns/jscode2session?appid='.$appid.'&secret='.$secret.'&js_code='.$code.'&grant_type=authorization_code';
+
+            $http   = new Client();
+            $response = $http->get($url);
+            $body = json_decode((string) $response->getBody(), true);
+            //dump($accessToken);
+            return response()->json(['body'=>$body]);
+        }else{
+            return response()->json(['abc'=>1]);
+        }
+    }
+
+    /*onLaunch: function () {
+        //调用API从本地缓存中获取数据
+        var logs = wx.getStorageSync('logs') || []
+        logs.unshift(Date.now())
+        wx.setStorageSync('logs', logs)
+
+        //var that = this
+        //this.store = new(jsonApi.JsonApiDataStore)
+        //this.jsonModel = jsonApi.JsonApiDataStoreModel
+        //this.globalData.code = wx.getStorageSync('code')
+        wx.request({
+            url     : 'https://yuan.tyoupub.com/oauth/token',
+            method  : 'POST',
+            data    : {
+                'grant_type'    : 'password',
+                'client_id'     : '2',
+                'client_secret' : 'kBHofTIZ7pJJ0UJDJvQzNozge6LErViI51B4QAUX',
+                'username'      : 'admin',//'you.ch@hotmail.com',
+                'password'      : 'admin123',
+                'scope'         : '*',
+            },
+            success: function(res) {
+                console.log(res.data)
+                wx.setStorageSync('oauth', res.data)
+                console.log('Bearer '+ wx.getStorageSync('oauth').access_token)
+
+
+                wx.login({
+                    success: function(res) {
+                        if (res.code) {
+                            //发起网络请求
+                            wx.request({
+                                url     : 'https://yuan.tyoupub.com/api/wxs/login',
+                                header  : {
+                                    'Accept'        : 'application/json',
+                                    'Authorization' : 'Bearer '+ wx.getStorageSync('oauth').access_token
+                                },
+                                data    : {
+                                    code: res.code
+                                },
+                                success : function(res) {
+                                    console.log(res.data)
+                                    wx.setStorageSync('logInfo', res.data.body)
+                                }
+                            })
+                        } else {
+                            console.log('获取用户登录态失败！' + res.errMsg)
+                        }
+                    }
+                });
+
+
+
+            }
+        })
+
+    },*/
 }

@@ -105,7 +105,7 @@
                             <div class="well">
                                 <table class="table">
                                     <tr>
-                                        <th style="width: 15%">订单号</th>
+                                        <th style="width: 22%">订单号</th>
                                         <th style="width: 10%;">姓名</th>
                                         <th style="width: 10%;">电话</th>
                                         <th style="width: 15%;">总价</th>

@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Lib\Wechat\HttpRequest;
 use App\Lib\Wechat\Pay;
 use App\Models\Paylog;
-use App\Models\Wechats;
+use App\Models\ShoppingOrder;
 
 class NotifyController extends Controller
 {
@@ -48,14 +48,14 @@ class NotifyController extends Controller
         if(Pay::check($xml)) {
             $get = xmlToArray($xml);
 
-            $paylog = Paylog::where(['ordersn'=>$get['out_trade_no']])->first();
+            $paylog = Paylog::where(['tid'=>$get['out_trade_no']])->first();
             if(empty($paylog)){
                 $paylog = new Paylog();
                 $paylog->type       = 'wechat';
                 $paylog->weid       = 11;
                 $paylog->openid     = $get['openid'];
-                $paylog->tid        = 0;
-                $paylog->ordersn    = $get['out_trade_no'];
+                $paylog->tid        = $get['out_trade_no'];
+                //$paylog->ordersn    = $get['out_trade_no'];
                 $paylog->fee        = $get['total_fee'] * 0.01;
                 $paylog->status     = 1;
                 $paylog->module     = 'shop';
@@ -63,6 +63,13 @@ class NotifyController extends Controller
                 $paylog->save();
                 Log::info('paylog 表插入成功：plid='.$paylog->plid.PHP_EOL);
             }
+            // 更新订单为已支付
+            $update = [
+                'status'    => 2,
+                'transid'   =>$get['transaction_id']
+            ];
+            ShoppingOrder::where(['id' => $get['out_trade_no']])->update($update);
+
             $ret = [
                 'return_code'   => 'SUCCESS',
                 'return_msg'    => 'OK'
@@ -75,7 +82,7 @@ class NotifyController extends Controller
             ];
         }
 
-        $xml = array2xml($ret);
+        $xml = arrayToXml($ret);
         Log::info('告知微信通知处理结果：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
         echo $xml;
     }
@@ -109,10 +116,10 @@ class NotifyController extends Controller
             $get['sign']                = Pay::sign($get);
 
 
-            $xml = array2xml($get);//
+            $xml = arrayToXml($get);//
             Log::info('组织统一下单的数据：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
             $unifiedorderRes = Pay::unifiedOrder($xml);
-            Log::info('接收统一下单结果：'.PHP_EOL.xmlFormatting(array2xml($unifiedorderRes)).PHP_EOL);
+            Log::info('接收统一下单结果：'.PHP_EOL.xmlFormatting(arrayToXml($unifiedorderRes)).PHP_EOL);
 
             /*$unifiedorderRes['err_code_des'] = 'OK';
             unset($unifiedorderRes['code_url']);
@@ -141,7 +148,7 @@ class NotifyController extends Controller
             Log::info('验签失败');
         }
 
-        $xml = array2xml($data);
+        $xml = arrayToXml($data);
         Log::info('结果输出：'.PHP_EOL.xmlFormatting($xml).PHP_EOL);
         echo $xml;
 
@@ -178,7 +185,7 @@ class NotifyController extends Controller
             ];
             file_put_contents($file, Pay::string1($package).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
             $package['sign']    = Pay::sign($package, null); //dd($package);
-            file_put_contents($file, array2xml($package).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
+            file_put_contents($file, arrayToXml($package).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
 
             //file_put_contents($file, json_encode($get, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
             //file_put_contents($file, json_encode($package, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
@@ -190,7 +197,7 @@ class NotifyController extends Controller
             unset($unifiedorderRes['code_url']);
             $unifiedorderRes['sign']       = Pay::sign($unifiedorderRes);
 
-            $xml = array2xml($unifiedorderRes);
+            $xml = arrayToXml($unifiedorderRes);
             file_put_contents($file, $xml.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
 
             echo $xml;
@@ -223,7 +230,7 @@ class NotifyController extends Controller
                 'return_msg'    => 'OK'
             ];
             file_put_contents($file, json_encode($ret, JSON_UNESCAPED_UNICODE).PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
-            $xml = array2xml($ret);
+            $xml = arrayToXml($ret);
             file_put_contents($file, $xml.PHP_EOL.PHP_EOL, FILE_APPEND | LOCK_EX);
             echo $xml;
             exit;
@@ -242,7 +249,7 @@ class NotifyController extends Controller
      */
     public function check($file)
     {
-        $raw_post_data = file_get_contents('php://input', 'r');
+        /*$raw_post_data = file_get_contents('php://input', 'r');
         //dump($raw_post_data, empty($raw_post_data));
 
         if(file_exists($file) && empty($raw_post_data)) {
@@ -272,7 +279,7 @@ class NotifyController extends Controller
         }
 
         $get['sign1'] = $sign;
-        return $get;
+        return $get;*/
     }
 
 

@@ -307,23 +307,26 @@ class ShopController extends Controller
             foreach ($goods as $good) {
                 $goodsPrice += $good['productprice'];
             }
-            $orderData = [
+
+            // 订单
+            $ordersn    = 'oady'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.');
+            $orderData  = [
                 'weid'      => $this->weid,
                 'from_user' => session('openid'),
                 'addressid' => $request->input('addressid'),
                 'invoiceId' => $request->input('invoiceid'),
-                'ordersn'   => 'oady'.date('YmdHis', time()),
+                'ordersn'   => $ordersn,
                 'status'    => 1,
                 'createtime'    => time(),
                 'updatetime'    => time(),
                 'goodsprice'    => $goodsPrice,
                 'dispatchprice' => $dispatchPrice,
                 'price'         => $goodsPrice + $dispatchPrice
-
             ];
             $order = ShoppingOrder::create($orderData);
             $orderId = $order['id'];
 
+            // 订单商品
             foreach ($goods as $good) {
                 $orderGoodsData = [
                     'weid'      => $this->weid,
@@ -331,7 +334,7 @@ class ShopController extends Controller
                     'goodsid'   => $good['id'],
                     'total'     => $good['num'],
                     'price'     => $good['productprice'],
-                    'createtime'    => time(),
+                    'createtime'=> time(),
                 ];
                 $orderGoods = ShoppingOrderGoods::create($orderGoodsData);
             }
@@ -341,7 +344,7 @@ class ShopController extends Controller
             $package    = [
                 'weid'      => $this->weid,
                 'body'          => $goods[0]['title'],
-                'out_trade_no'  => $order['ordersn'],
+                'out_trade_no'  => $orderId, //$order['ordersn'],
                 'total_fee'     => floatval($goodsPrice),
             ];
             return redirect()->route('pay.jsapi', $package);

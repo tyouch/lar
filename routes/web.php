@@ -85,8 +85,9 @@ Auth::routes();
 
     // 支付
     Route::group(['prefix'=>'pay'], function (){
-        Route::any('jsapi', 'Payment\PayController@jsapi')->name('pay.jsapi');
+        Route::any('jsapi', 'Payment\PayController@jsApi')->name('pay.jsapi')->middleware('wechatAuth:pay/jsapi');
         Route::any('native', 'Payment\PayController@native')->name('pay.native');
+        Route::any('wxspay', 'Payment\PayController@wxsPay')->name('pay.wxspay');
     });
 
     // 回调通知
@@ -150,4 +151,5 @@ Auth::routes();
 
 Route::get('post', 'HxCallingController@post');
 Route::get('cors', 'TestController@cors');
+Route::get('onLogin', 'TestController@onLogin');
 

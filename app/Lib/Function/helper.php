@@ -38,7 +38,7 @@ function random($length, $numeric = 0) {
  * @param int $level 节点层级, 1 为 Root.
  * @return string XML 结构的字符串
  */
-function array2xml($arr, $level = 1) {
+function arrayToXml($arr, $level = 1) {
     $s = $level == 1 ? "<xml>" : '';
     foreach($arr as $tagname => $value) {
         if (is_numeric($tagname)) {

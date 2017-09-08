@@ -32,7 +32,7 @@
                             <input id="menuAdd" type="button" class="btn btn-success btn-xs" value="添加主菜单">
                         </span>
                     </div>
-                    <form action="" method="post">
+                    <form action="{{ route('account.menu') }}" method="post">
                         <div id="menuSet" class="panel-body">
                             @if(!empty($button))
                             @foreach($button as $menu)
