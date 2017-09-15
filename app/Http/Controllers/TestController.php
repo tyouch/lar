@@ -25,6 +25,12 @@ class TestController extends Controller
 
     public function index()
     {
+        /*$key = thirdSession(128);
+        session([$key=>$key.'+'.strtotime('+1 hour')]);
+        $a = explode('+', session($key));
+        dd($a);*/
+
+
         $begin = microtime(true);
 
         $title_str = file_get_contents('../doc/title.txt');

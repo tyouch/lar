@@ -41,7 +41,11 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'cart'], function () {
         });
         Route::get('detail', 'Api\ShopController@getGoodsDetail')->name('api.shop.detail');//->middleware('auth:api');
+        Route::get('address', 'Api\ShopController@getAddress')->name('api.shop.address');//->middleware('auth:api');
+        Route::get('invoice', 'Api\ShopController@getInvoice')->name('api.shop.invoice');//->middleware('auth:api');
+        Route::post('orders', 'Api\ShopController@orders')->name('api.shop.orders');//->middleware('auth:api');
         Route::any('pay', 'Api\ShopController@pay')->name('api.shop.pay');
+        Route::any('login', 'Api\ShopController@wxLogin')->name('api.shop.login');
     });
 
 });
