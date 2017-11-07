@@ -75,7 +75,7 @@ Auth::routes();
         Route::group(['prefix'=>'shop'], function (){
             Route::get('index', 'Mobile\ShopController@index')->name('mobile.shop.index');
             Route::get('category', 'Mobile\ShopController@category')->name('mobile.shop.category');
-            Route::get('cart', 'Mobile\ShopController@cart')->name('mobile.shop.cart');
+            Route::any('cart', 'Mobile\ShopController@cart')->name('mobile.shop.cart');
             Route::get('home', 'Mobile\ShopController@home')->name('mobile.shop.home');
             Route::get('detail', 'Mobile\ShopController@detail')->name('mobile.shop.detail');
             Route::get('confirm', 'Mobile\ShopController@confirm')->name('mobile.shop.confirm');

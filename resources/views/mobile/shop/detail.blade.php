@@ -59,7 +59,7 @@
                     <h4>{{ $good['title'] }}</h4>
                     <p>
                         <span class="product-price"><e>￥</e>{{ $good['productprice'] }}</span>
-                        <span class="market-price">市场价：￥{{ $good['productprice'] }}</span>
+                        <span class="market-price">市场价：￥{{ $good['marketprice'] }}</span>
                     </p>
                     <p>
                         <h4>数量: </h4>
@@ -95,8 +95,6 @@
                         <button id="buy" class="btn btn-danger btn-lg pull-right">立即购买</button>
                         <button id="cart" class="btn btn-warning btn-lg pull-right">加入购物车</button>
                     </div>
-
-
                 </div>
 
             </div>
@@ -196,6 +194,27 @@
         // 立即购买
         $("#buy").on("click", function (e) {
             location.href = "{!! route('mobile.shop.confirm',['weid'=>$weid, 'ids'=>$good['id']]) !!}" + "&total=" + $("#total").val();
+        });
+        $("#cart").on("click", function (e) {
+            $.ajax({
+                url     : '{{ route('mobile.shop.cart') }}',
+                type    : 'POST',
+                dataType: 'JSON',
+                data    : {
+                    _token          : '{{ csrf_token() }}',
+                    'weid'          : '{{ $weid }}',
+                    'goodsid'       : '{{ $good['id'] }}',
+                    'productprice'  : '{{ $good['productprice'] }}',
+                    'marketprice'   : '{{ $good['marketprice'] }}',
+                    'total'         : $("#total").val()
+                },
+                headers : {
+                    'X-CSRF-TOKEN'  : $('meta[name="csrf-token"]').attr('content')
+                },
+                success : function (d, s) {
+                    console.log(d, s);
+                }
+            });
         });
     </script>
 @endpush

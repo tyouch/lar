@@ -21,6 +21,7 @@ use App\Models\ShoppingAddress;
 use App\Models\ShoppingInvoice;
 use App\Models\ShoppingOrder;
 use App\Models\ShoppingOrderGoods;
+use App\Models\ShoppingCart;
 
 
 class ShopController extends Controller
@@ -143,13 +144,57 @@ class ShopController extends Controller
      * 购物车
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function cart()
+    public function cart(Request $request)
     {
+        $this->openid = session('openid');
+        $_token = $request->input('_token');
+        if (isset($_token) && $_token == csrf_token()) {
+
+            $data = [
+                'weid'      => $this->weid,
+                'from_user' => $this->openid,
+                'goodsid'   => $request->input('goodsid'),
+                'total'     => $request->input('total'),
+                'productprice'  => $request->input('productprice'),
+                'marketprice'   => $request->input('marketprice'),
+            ];
+
+            $cart = ShoppingCart::where(['weid'=>$this->weid, 'from_user'=>$this->openid, 'goodsid'=>$data['goodsid']])->first();
+            //return response()->json(['abc'=>$cart, 'data'=>$data]);
+
+            if (empty($cart)) {
+                $cart = ShoppingCart::create($data);
+                return response()->json(['code'=>0, 'msg'=>'Insert success!', 'id'=>$cart['id'], 'total'=>$cart['total']]);
+            } else {
+                $total = $cart['total'] + $data['total'];
+                $updateID = ShoppingCart::where(['weid'=>$this->weid, 'from_user'=>$this->openid, 'goodsid'=>$data['goodsid']])
+                    ->update(['total'=>$total]);
+                return response()->json(['code'=>0, 'msg'=>'Update success!', 'state'=>$updateID, 'total'=>$total]);
+            }
+        }
+
+        /*$data = [
+            'weid'  => 12,
+            'from_user'=> $this->openid,
+            'goodsid'=>204,
+            'total'=>1,
+            'marketprice'=> 698.00,
+            'productprice'=> 488.00,
+        ];
+        $cart = ShoppingCart::create($data);*/
+        $carts = ShoppingCart::where(['weid'=>$this->weid, 'from_user'=>$this->openid])->get();
+        foreach ($carts as $i=>$cart) {
+            $good = ShoppingGoods::where(['id'=>$cart['goodsid']])->first();
+            $carts[$i]['good'] = $good;
+        }
+        //dd(['weid'=>$this->weid, 'from_user'=>$this->openid], $carts);
+
 
         $url = $this->buildUrl('cart', ['weid'=>$this->weid]);
         $signPackage = $this->getSignPackage($url['link']);
         return view('mobile.shop.cart', [
             'weid'              => $this->weid,
+            'carts'             => $carts,
             'signPackage'       => $signPackage,
             'navActive'         => 'cart',
             'url'               => $url
@@ -243,10 +288,11 @@ class ShopController extends Controller
     public function confirm(Request $request)
     {
         parse_str($request->getQueryString(), $qsParam);
-        $ids        = $request->input('ids');
-        $idsArr     = explode(',', $request->input('ids'));
-        $total      = $request->input('total');
-        $totalArr   = explode(',', $request->input('total'));
+        $ids        = trim($request->input('ids'), ',');
+        $idsArr     = explode(',', $ids);
+        $total      = trim($request->input('total'), ',');
+        $totalArr   = explode(',', $total);
+        //dd($ids, $total);
 
         $address    = ShoppingAddress::where(['weid'=>$this->weid, 'openid'=>session('openid'), 'isdefault'=>1])->first();
         $invoice    = ShoppingInvoice::where(['weid'=>$this->weid, 'openid'=>session('openid'), 'isdefault'=>1])->first();
