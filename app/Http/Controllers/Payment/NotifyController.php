@@ -68,7 +68,7 @@ class NotifyController extends Controller
                 'status'    => 2,
                 'transid'   =>$get['transaction_id']
             ];
-            ShoppingOrder::where(['id' => $get['out_trade_no']])->update($update);
+            ShoppingOrder::where(['ordersn' => $get['out_trade_no']])->update($update);
 
             $ret = [
                 'return_code'   => 'SUCCESS',

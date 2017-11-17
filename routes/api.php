@@ -20,11 +20,17 @@ use Illuminate\Http\Request;
 
 Route::get('foo', function () { //middleware('auth:api')->
     return response()->json(['abc' => 'Hello World']);
-})->middleware('auth:api');
+});//->middleware('auth:api');
+
+Route::group(['middleware' => ['web']], function () {
+    Route::get('index2', 'TestController@index2')->name('api.index2');
+    Route::get('index3', 'TestController@index3')->name('api.index3');
+});
 
 
 Route::any('/', 'ApiController@index')->name('api');
 Route::get('detail', 'Api\ShopController@getGoodsDetail')->name('api.shop.detail');//->middleware('auth:api');
+Route::get('cart', 'Api\ShopController@getCart')->name('api.shop.cart1');//->middleware('auth:api');
 
 
 
@@ -39,11 +45,13 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::group(['prefix' => 'category'], function () {
         });
         Route::group(['prefix' => 'cart'], function () {
+            Route::get('/', 'Api\ShopController@getCart')->name('api.shop.cart');
         });
         Route::get('detail', 'Api\ShopController@getGoodsDetail')->name('api.shop.detail');//->middleware('auth:api');
         Route::get('address', 'Api\ShopController@getAddress')->name('api.shop.address');//->middleware('auth:api');
         Route::get('invoice', 'Api\ShopController@getInvoice')->name('api.shop.invoice');//->middleware('auth:api');
-        Route::post('orders', 'Api\ShopController@orders')->name('api.shop.orders');//->middleware('auth:api');
+
+        Route::any('orders', 'Api\ShopController@doOrders')->name('api.shop.orders');
         Route::any('pay', 'Api\ShopController@pay')->name('api.shop.pay');
         Route::any('login', 'Api\ShopController@wxLogin')->name('api.shop.login');
     });

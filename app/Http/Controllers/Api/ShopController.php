@@ -14,28 +14,32 @@ use App\Models\ShoppingGoods;
 use App\Models\ShoppingAddress;
 use App\Models\ShoppingOrder;
 use App\Models\ShoppingOrderGoods;
+use App\Models\ShoppingCart;
+use App\Models\SessionWxs;
 
 class ShopController extends Controller
 {
     private $weid;
     private $appIDS;
     private $appSecretS;
+    private $openid;
 
     public function __construct(Request $request)
     {
-        $this->middleware('auth:api');
+        //$this->middleware('auth:api');
         $this->weid = $request->input('weid');
         $this->appIDS       = config('wechat.appIDS');
         $this->appSecretS   = config('wechat.appSecretS');
         //wx3aed9fe20f883ac8 / d2faf1607c212876a1f123af200d501b
     }
 
+
     /**
      * 小程序登录
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
-    public function wxLogin(Request $request)
+    public function wxLogin(Request $request, $from = null)
     {
         $code = $request->input('code');
         if(!empty($code)){
@@ -52,89 +56,31 @@ class ShopController extends Controller
                     'grant_type' => 'authorization_code',
                 ]
             ]);
-            $loginInfo = json_decode((string) $response->getBody(), true);
-            //dump($accessToken);
-            //return response()->json($loginInfo);
+            $session = json_decode((string) $response->getBody(), true);
 
             // session 存储 session_key + openid
             $key = thirdSession(128);
-            session([$key => $loginInfo['session_key'].'+'.$loginInfo['openid'].'+'.strtotime('+2 hour')]);
-            session(['abc'=>123]);
+            //session([$key => $session['session_key'].'+'.$session['openid'].'+'.strtotime('+2 hour')]);
 
-            return response()->json(['session_key'=>$key]); //, 'a'=>session($key)
-            //return redirect()->route('pay.wxspay', $package);
+            $filter = ['openid' => $session['openid']];
+            $session['session_3rd_key'] = $key;
+            $session['expires_in'] = strtotime('+2 hour');
+            //return response()->json(['session'=>$session]);
 
-        }else{
+            $sess = SessionWxs::updateOrCreate($filter, $session);
+            //return response()->json(['session_key'=>$key, 'insert'=>$sess]);/**/
+
+            if ($from == 'inside') {
+                return $session;
+            } else {
+                return response()->json(['session_key'=>$key]); // , 'session'=>$sess, 'a'=>session($key)
+            }
+
+        } else {
             return response()->json(['code'=>1, 'message'=>'Invalid code']);
         }
     }
 
-    /**
-     * 处理订单
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function orders(Request $request)
-    {
-        $key = $request->input('session_key');
-        //$sessionKey = explode('+', $sessionKey);
-        return response()->json(['session_key'=>$key, 'session_val'=>session('abc')]);
-
-
-        // 提交订单操作
-        if ($request->input('op') == 'placeAnOrder') {
-
-            $goods      = $request->input('goods');
-            $goodsPrice = $dispatchPrice = 0;
-            foreach ($goods as $good) {
-                $goodsPrice += $good['productprice'];
-            }
-
-            // 订单
-            $ordersn    = 'oadx'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.');
-            $orderData  = [
-                'weid'      => $this->weid,
-                'from_user' => 'odk8d0vQ3Oqr7UAOOPFaGxCuOG0E',
-                'addressid' => $request->input('addressid'),
-                'invoiceId' => $request->input('invoiceid'),
-                'ordersn'   => $ordersn,
-                'status'    => 1,
-                'createtime'    => time(),
-                'updatetime'    => time(),
-                'goodsprice'    => $goodsPrice,
-                'dispatchprice' => $dispatchPrice,
-                'price'         => $goodsPrice + $dispatchPrice
-            ];
-            $order = ShoppingOrder::create($orderData);
-            $orderId = $order['id'];
-            //$orderId = 'xxxxx';
-
-            // 订单商品
-            foreach ($goods as $good) {
-                $orderGoodsData = [
-                    'weid'      => $this->weid,
-                    'orderid'   => $orderId,
-                    'goodsid'   => $good['id'],
-                    'total'     => $good['num'],
-                    'price'     => $good['productprice'],
-                    'createtime'=> time(),
-                ];
-                $orderGoods = ShoppingOrderGoods::create($orderGoodsData);
-            }
-            //dd(2, $orderData, $orderGoodsData, $goods, $request->input(), csrf_token()); //
-
-            // 准备数据 前往支付
-            $package    = [
-                'weid'          => $this->weid,
-                'body'          => $goods[0]['title'],
-                'out_trade_no'  => $orderId, //$order['ordersn'],
-                'total_fee'     => floatval($goodsPrice),
-            ];
-            return redirect()->route('api.shop.pay', $package);
-            //return response()->json($package); //$request->input()
-        }
-
-    }
 
     /**
      * 微信小程序 支付接口 测试
@@ -143,41 +89,118 @@ class ShopController extends Controller
      */
     public function pay(Request $request)
     {
-        $code = $request->input('code');
-        if(!empty($code)){
+        $code       = $request->input('code');
+        $key        = $request->input('session_key');
+        $session    = SessionWxs::where(['session_3rd_key'=>$key])->first();
 
-            //$loginUrl = 'https://api.weixin.qq.com/sns/jscode2session?appid='.$appid.'&secret='.$secret.'&js_code='.$code.'&grant_type=authorization_code';
-
-            // 通过code 获取 openid
-            $http   = new Client();
-            $response = $http->get('https://api.weixin.qq.com/sns/jscode2session', [
-                'query' => [
-                    'appid'     => $this->appIDS,
-                    'secret'    => $this->appSecretS,
-                    'js_code'   => $code,
-                    'grant_type' => 'authorization_code',
-                ]
-            ]);
-            $loginInfo = json_decode((string) $response->getBody(), true);
-            //dump($accessToken);
-            //return response()->json($loginInfo);
-
-            // 组织包准备支付
-            $package = [
-                //'weid'          => $this->weid,
-                'body'          => $request->input('body'),
-                'out_trade_no'  => $request->input('out_trade_no'),
-                'total_fee'     => $request->input('total_fee'),
-                'openid'        => $loginInfo['openid']
-            ];
-            //return response()->json($package);
-            //return response()->json(['loginInfo'=>$loginInfo]);
-            return redirect()->route('pay.wxspay', $package);
-
-        }else{
+        if (empty($code)) {
             return response()->json(['code'=>1, 'message'=>'Invalid code']);
         }
+
+        if ($session['expires_in'] - time() < 0) { // 过期
+            $session = $this->wxLogin($request, 'inside');
+        }
+
+        // 下单操作 生成订单号
+        $package = $this->doOrders($request, $session['openid']);
+        return redirect()->route('pay.wxspay', $package);
+
     }
+
+
+    /**
+     * 处理订单
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function doOrders(Request $request, $openid) //
+    {
+        /*return response()->json(['abc'=>123]);
+        $key = $request->input('session_key');
+        $session = session($key);
+        //$session = SessionWxs::where(['session_3rd_key'=>$key])->first();
+        return response()->json(['session_key'=>$key, 'session_val'=>$session]);
+
+        $total = $request->input('total');
+        //$sessionKey = explode('+', $sessionKey);
+        $package    = [
+            'weid'          => $this->weid,
+            'body'          => 123,
+            'out_trade_no'  => 'oadx'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.'),
+            'total_fee'     => floatval($total),
+        ];
+        return redirect()->route('api.shop.pay', $package);
+        return response()->json(['session_key'=>$key, 'session_val'=>123]);
+
+        return ['orderId'=>$request->input('orderId')];*/
+
+        $orderId    = $request->input('orderId');
+        $goods      = $request->input('goods');
+        $goodsPrice = 0;
+        $dispatchPrice = 0;
+        foreach ($goods as $good) {
+            $goodsPrice += $good['productprice'] * $good['num'];
+        }
+        $ordersn    = 'oadx'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.');
+
+
+        if (empty($orderId)) {
+            // 提交订单操作
+            if ($request->input('op') == 'placeAnOrder') {
+
+                // 下订单
+                //$ordersn    = 'oadx'.'-'.date('ymdHis', time()).'-'.ltrim(explode(' ', microtime())[0],'0.');
+                $orderData  = [
+                    'weid'      => $this->weid,
+                    'from_user' => $openid,
+                    'addressid' => $request->input('addressid'),
+                    'invoiceId' => $request->input('invoiceid'),
+                    'ordersn'   => $ordersn,
+                    'status'    => 1,
+                    'createtime'    => time(),
+                    'updatetime'    => time(),
+                    'goodsprice'    => $goodsPrice,
+                    'dispatchprice' => $dispatchPrice,
+                    'price'         => $goodsPrice + $dispatchPrice
+                ];
+                $order = ShoppingOrder::create($orderData);
+                $orderId = $order['id'];
+                //$orderId = 'xxxxx';
+
+                // 下详单商品
+                foreach ($goods as $good) {
+                    $orderGoodsData = [
+                        'weid'      => $this->weid,
+                        'orderid'   => $orderId,
+                        'goodsid'   => $good['id'],
+                        'total'     => $good['num'],
+                        'price'     => $good['productprice'],
+                        'createtime'=> time(),
+                    ];
+                    $orderGoods = ShoppingOrderGoods::create($orderGoodsData);
+                }
+                //dd(2, $orderData, $orderGoodsData, $goods, $request->input(), csrf_token());
+                //return redirect()->route('api.shop.pay', $package);
+                //return response()->json($package); //$request->input()
+            }
+        } else {
+            // 更新支付订单号
+            ShoppingOrder::where(['id'=>$orderId])->update(['ordersn'=>$ordersn]);
+        }
+
+        // 准备数据 前往支付
+        $package    = [
+            'weid'          => $this->weid,
+            'openid'        => $openid,
+            'body'          => $goods[0]['title'],
+            'out_trade_no'  => $ordersn, //$orderId, //
+            'total_fee'     => floatval($goodsPrice+$dispatchPrice),
+        ];
+
+        return $package;
+
+    }
+
 
     /**
      * 主页广告
@@ -197,6 +220,7 @@ class ShopController extends Controller
         return response()->json($data);
     }
 
+
     /**
      * 获取收货地址
      * @param Request $request
@@ -210,6 +234,7 @@ class ShopController extends Controller
         return response()->json($address);
     }
 
+
     /**
      * 获取发票信息
      * @param Request $request
@@ -222,6 +247,25 @@ class ShopController extends Controller
 
         return response()->json($invoice);
     }
+
+
+    /**
+     * 获取购物车商品
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCart(Request $request)
+    {
+        $openId = $request->input('openid');
+        $this->openid = 'odk8d0vQ3Oqr7UAOOPFaGxCuOG0E';
+        $carts = ShoppingCart::where(['weid'=>$this->weid, 'from_user'=>$this->openid])->get(); //
+        foreach ($carts as $i=>$cart) {
+            $carts[$i]['good'] = ShoppingGoods::where(['id'=>$cart['goodsid']])->first();
+        }
+
+        return response()->json($carts);
+    }
+
 
     /**
      * 主页商品
@@ -239,8 +283,9 @@ class ShopController extends Controller
         return response()->json($goods);
     }
 
+
     /**
-     * 商品详情
+     * 商品详情  (列表详情)
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -250,6 +295,8 @@ class ShopController extends Controller
         $nums = $request->input('nums');
         $idsArr = explode(',', $ids);
         $numsArr = explode(',', $nums);
+        $total = 0;
+        //$dispatch = 0;
 
         $goods = ShoppingGoods::where(['weid'=>$this->weid]) //, 'id'=>$id
             ->whereIn('id', $idsArr)
@@ -257,22 +304,25 @@ class ShopController extends Controller
 
         for ($i = 0; $i < count($numsArr); $i++) {
             $goods[$i]['num'] = $numsArr[$i];
+            $total += $goods[$i]['productprice'] * $numsArr[$i];
+            //$dispatch += $goods[$i]['dispatch'];
         }
         //$detail['thumb_url1'] = iunserializer($detail['thumb_url']);
 
-        $i = 0;
-        foreach ($goods as $detail) {
+        //修正图片url
+        //$i = 0;
+        foreach ($goods as $i=>$detail) {
             $thumb_url[$i] = iunserializer($detail['thumb_url']);
-            $j = 0;
-            foreach ($thumb_url[$i] as $thumb) {
+            //$j = 0;
+            foreach ($thumb_url[$i] as $j=>$thumb) {
                 $thumb_url[$i][$j]['attachment'] = str_replace('/6/', '/', $thumb_url[$i][$j]['attachment']);
-                $j++;
+                //$j++;
             }
             $goods[$i]['thumb_url1'] = $thumb_url[$i];
-            $i++;
+            //$i++;
         }
 
-        return response()->json($goods);
+        return response()->json(['goods'=>$goods, 'total'=>$total]);
     }
 
 }

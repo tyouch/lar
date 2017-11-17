@@ -113,7 +113,7 @@
                     $(this).attr("checked", true);
                 }
             });
-        })
+        });
 
         function resetConfirm() {
             $("#confirm").attr("href", "javascript:;");

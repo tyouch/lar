@@ -19,6 +19,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        //\Illuminate\Session\Middleware\StartSession::class, // zhaoyao add
     ];
 
     /**
@@ -59,5 +60,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'mycheck' => \App\Http\Middleware\CheckAge::class,
         'wechatAuth' => \App\Http\Middleware\WechatAuth::class,
+        'session' => \Illuminate\Session\Middleware\StartSession::class,
     ];
 }

@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use App\Models\SessionWxs;
 
 class TestController extends Controller
 {
@@ -671,6 +672,20 @@ class TestController extends Controller
     }
 
 
+    public function index3(Request $request)
+    {
+
+        $key = thirdSession(128);
+
+        $session = [
+            'session_3rd_key'   => $key,
+            'session_key'       => 'RvwnMLTDHbB56BiiszUgbg==',
+            'openid'            => 'oHPMe0WcAgCaF-3CKQmeEspbzzng',
+            'expire_in'         => strtotime('+2 hour')
+        ];
+        $sess = SessionWxs::create($session);
+        dd($request->session());
+    }
 
 
     /**
@@ -680,6 +695,11 @@ class TestController extends Controller
      */
     public function index2(Request $request)
     {
+
+        session(['abcd'=>1234]);
+        //return response()->json(['aaa'=>session('abcd')]);
+        //dd($request->session());
+        /*exit;
         $login_url = 'http://m.istarshine.com/LoginOK!login.do';
         $post = array(
             'userid' => '清华大学',
@@ -702,7 +722,7 @@ class TestController extends Controller
         //var_dump((new HXBankApi())->bXml($data));
         $xml ='<?xml version="1.0" encoding="utf-8"?><Document><header><channelCode>P2P001</channelCode><channelFlow>OG012016045333cg1AlM</channelFlow><channelDate>20170503</channelDate><channelTime>161325</channelTime><encryptData></encryptData></header><body><TRANSCODE>OGW00019</TRANSCODE><XMLPARA>a6U4P6ZdcJRp66jZJliS5Ve2CEK2qpUeHYnSlt2kIXxQcCEZqFHpqO8QhXuL+sPAT8FdKwRRT8LroUQlbw9Ju+Bub/6/Ln3KNWBwdu9+LOKIg70kpgPLzBuTiFYaAFiA2fmE1RXZKdh+jjHN976pemX8k7RXyNhPhm0SIPb8oOE=</XMLPARA></body></Document>';
         $arr = json_decode(json_encode(simplexml_load_string($xml)), true);
-        var_dump($arr);
+        var_dump($arr);*/
     }
 
 
